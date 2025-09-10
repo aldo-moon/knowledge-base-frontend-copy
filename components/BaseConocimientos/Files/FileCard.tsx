@@ -35,8 +35,6 @@ export const FileCard: React.FC<FileCardProps> = ({
   isFavorite = false,
   onToggleFavorite
 }) => {
-    const [isLocalFavorite, setIsLocalFavorite] = useState(isFavorite);
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -75,7 +73,7 @@ export const FileCard: React.FC<FileCardProps> = ({
   };
 
   const handleCardClick = () => {
-    onFileSelect(file);  // ← Usar onFileSelect que sí existe
+    onSelect(file);
   };
 
   const handleCardDoubleClick = () => {
@@ -124,21 +122,20 @@ export const FileCard: React.FC<FileCardProps> = ({
           </div>
           
           <button 
-        className={styles.themeStarButton}
-        onClick={(e) => {
-          e.stopPropagation();
-          // Cambiar el estado local inmediatamente
-          setIsLocalFavorite(!isLocalFavorite);
-          // Ejecutar la función original
-          onToggleFavorite?.(file._id);
-        }}
-      >
-        <Star 
-          size={16} 
-          fill={isLocalFavorite ? "#fbbf24" : "none"}  // Usar estado local
-          color={isLocalFavorite ? "#fbbf24" : "#8b8d98"}  // Usar estado local
-        />
-      </button>
+            className={styles.themeStarButton}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('Star clicked, onToggleFavorite exists:', !!onToggleFavorite);
+              console.log('File ID:', file._id);
+              onToggleFavorite?.(file._id);
+            }}
+          >
+            <Star 
+              size={16} 
+              fill={isFavorite ? "#fbbf24" : "none"}
+              color={isFavorite ? "#fbbf24" : "#8b8d98"}
+            />
+          </button>
         </div>
       </div>
     </div>

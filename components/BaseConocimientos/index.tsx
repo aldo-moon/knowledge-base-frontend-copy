@@ -611,6 +611,12 @@ const handleToggleThemeFavorite = async (themeId: string) => {
 const loadUserFavorites = async () => {
   try {
     const userId = "68adc29785d92b4c84e01c5b";
+    
+    // Limpiar estados al inicio
+    setFolderFavorites(new Set());
+    setThemeFavorites(new Set());
+    setFileFavorites(new Set());
+    
     const favoritesResponse = await favoritoService.getFavoritoById(userId);
 
     if (!favoritesResponse) {
@@ -639,26 +645,22 @@ const loadUserFavorites = async () => {
     const folderFavorites = favorites.content_folder || [];
     const topicFavorites = favorites.content_topic || [];
     const fileFavorites = favorites.content_file || [];
-    console.log('🔍 content_file del servidor:', fileFavorites);
+    
+    console.log('🔍 Archivos favoritos del servidor:', fileFavorites.length);
 
-    // Actualizar estados de favoritos
-    if (folderFavorites.length > 0) {
-      const folderIds = folderFavorites.map(folder => folder._id);
-      setFolderFavorites(new Set(folderIds));
-    }
+    // Siempre actualizar estados
+    const folderIds = folderFavorites.map(folder => folder._id);
+    setFolderFavorites(new Set(folderIds));
 
-    if (topicFavorites.length > 0) {
-      const topicIds = topicFavorites.map(topic => topic._id);
-      setThemeFavorites(new Set(topicIds));
-    }
-    if (fileFavorites.length > 0) {
-  const fileIds = fileFavorites.map(file => file._id);
-  setFileFavorites(new Set(fileIds));
-}else {
-  console.log('🔍 No hay archivos favoritos, estado queda vacío');
-}
+    const topicIds = topicFavorites.map(topic => topic._id);
+    setThemeFavorites(new Set(topicIds));
 
-    // Actualizar sidebar con carpetas favoritas
+    const fileIds = fileFavorites.map(file => file._id);
+    setFileFavorites(new Set(fileIds));
+    
+    console.log('🔍 Estados actualizados con', fileIds.length, 'archivos');
+
+    // Actualizar sidebar
     const favFolders = folderFavorites.map(folder => ({
       _id: folder._id,
       folder_name: folder.folder_name || `Carpeta ${folder._id.slice(-6)}`
@@ -673,12 +675,12 @@ const loadUserFavorites = async () => {
 
   } catch (error) {
     console.error("Error loading favorites:", error);
+    setFolderFavorites(new Set());
+    setThemeFavorites(new Set());
+    setFileFavorites(new Set());
   }
 };
 
-useEffect(() => {
-  console.log('📊 Estado fileFavorites cambió:', Array.from(fileFavorites));
-}, [fileFavorites]);
 
   // Cargar favoritos al inicio
 useEffect(() => {
@@ -837,6 +839,12 @@ const loadFavoritesContent = async () => {
     const topicFavorites = favorites.content_topic || [];
     const fileFavorites = favorites.content_file || []; // Nuevo
 
+
+    console.log('🔍 loadFavoritesContent - datos del servidor:');
+    console.log('🔍 folderFavorites:', folderFavorites);
+    console.log('🔍 topicFavorites:', topicFavorites);
+    console.log('🔍 fileFavorites:', fileFavorites); 
+
     // Obtener datos completos
     const folderDetails = await Promise.all(
       folderFavorites.map(async (folder) => {
@@ -990,27 +998,15 @@ const handleToggleFileFavorite = async (fileId) => {
     const userId = "68adc29785d92b4c84e01c5b";
     const isFavorite = fileFavorites.has(fileId);
     
-    if (isFavorite) {
-      await favoritoService.removeFileFromFavorites(userId, fileId);
-      setFileFavorites(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(fileId);
-        return newSet;
-      });
-      console.log('Removed file from favorites');
-    } else {
-      await favoritoService.addFileToFavorites(userId, fileId);
+    if (!isFavorite) {
+      console.log('🔍 Intentando agregar al servidor - userId:', userId, 'fileId:', fileId);
+      const result = await favoritoService.addFileToFavorites(userId, fileId);
+      console.log('🔍 Respuesta del servidor:', result);
+      
       setFileFavorites(prev => new Set(prev).add(fileId));
       console.log('Added file to favorites');
     }
-
-    // QUITAR ESTAS LÍNEAS:
-    // await loadUserFavorites();
-    // await refreshUserData();
-
-    if (activeSection === 'Favoritos') {
-      await loadFavoritesContent();
-    }
+    // ... resto del código
   } catch (error) {
     console.error('Error toggling file favorite:', error);
   }
@@ -1060,6 +1056,7 @@ const handleToggleFileFavorite = async (fileId) => {
               error={error}
               folderFavorites={folderFavorites}
               themeFavorites={themeFavorites}
+              fileFavorites={fileFavorites} 
               navigationPath={navigationPath}
               onNavigate={handleBreadcrumbNavigate}
               isCreatingNewTopic={isCreatingTheme}
@@ -1088,8 +1085,6 @@ const handleToggleFileFavorite = async (fileId) => {
               onToggleFileFavorite={handleToggleFileFavorite} 
               onFileMenuAction={handleFileMenuAction} 
               onFileSelect={handleFileSelection} 
-
-                
             />
 
             {/* Details Panel - siempre visible, cambia contenido según el contexto */}

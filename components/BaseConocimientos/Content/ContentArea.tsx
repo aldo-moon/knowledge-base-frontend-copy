@@ -173,7 +173,8 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
 
   //  Si la vista activa es "user-content", mostrar UserContentView
   if (activeView === 'user-content') {
-
+  console.log('🏠 ContentArea - fileFavorites recibido:', fileFavorites);
+  console.log('🏠 ContentArea - tipo:', typeof fileFavorites);
     return (
       <UserContentView
         userFolders={userContent?.folders || []}
@@ -202,17 +203,20 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
         onFileMenuAction={onFileMenuAction}
         onToggleFileFavorite={onToggleFileFavorite} 
         
-        
       />
     );
   }
 
   // 🆕 Si la vista activa es "favorites", mostrar FavoritesContentView
   if (activeView === 'favorites') {
+      console.log('🔍 ContentArea - favoritesContent completo:', favoritesContent);
+  console.log('🔍 ContentArea - favoriteFiles que voy a pasar:', favoritesContent?.files || []);
+  
     return (
     <FavoritesContentView
       favoriteFolders={favoritesContent?.folders || []}
       favoriteThemes={favoritesContent?.themes || []}
+      favoriteFiles={favoritesContent?.files || []}
       loading={favoritesContentLoading}
       error={favoritesContentError}
       folderFavorites={folderFavorites}
@@ -232,6 +236,7 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
       onThemeMenuAction={onThemeMenuAction}
       onToggleThemeFavorite={onToggleThemeFavorite}
       onToggleFileFavorite={onToggleFileFavorite}
+      
     />
     );
   }
@@ -289,7 +294,6 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
           onFileDoubleClick={onFileDoubleClick}
           onFileMenuAction={onFileMenuAction}
           onToggleFileFavorite={onToggleFileFavorite} 
-          // ← Esta línea específica
         />
       </div>
     </div>

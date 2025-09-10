@@ -11,6 +11,7 @@ import {
   Calendar 
 } from 'lucide-react';
 import ThemesGrid from '../Themes/ThemesGrid';
+import FilesGrid from '../Files/FilesGrid';  
 import styles from './../../../styles/base-conocimientos.module.css';
 
 interface FilterTag {
@@ -30,6 +31,7 @@ interface FavoritesContentViewProps {
   // Datos de favoritos
   favoriteFolders: any[];
   favoriteThemes: any[];
+  favoriteFiles: any[];
   loading: boolean;
   error: string | null;
   onToggleFiltersVisibility: () => void;
@@ -44,6 +46,8 @@ interface FavoritesContentViewProps {
   // Estados de favoritos
   folderFavorites?: Set<string>;
   themeFavorites?: Set<string>;
+  fileFavorites?: Set<string>;  // ← ASEGURAR QUE ESTÉ
+
   
   // Handlers para carpetas
   onFolderSelect: (folder: any) => void;
@@ -55,11 +59,22 @@ interface FavoritesContentViewProps {
   onThemeSelect: (theme: any) => void;
   onThemeMenuAction?: (action: string, theme: any) => void;
   onToggleThemeFavorite?: (themeId: string) => void;
+
+  onFileSelect: (file: any) => void;  
+  onFileDoubleClick?: (file: any) => void;  
+  onFileMenuAction?: (action: string, file: any) => void;  
+  onToggleFileFavorite?: (fileId: string) => void;  
 }
 
 export const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
   favoriteFolders,
   favoriteThemes,
+  favoriteFiles,  
+  fileFavorites,  
+  onFileSelect,   
+  onFileDoubleClick,  
+  onFileMenuAction,   
+  onToggleFileFavorite,
   loading,
   error,
   folderFavorites,
@@ -78,6 +93,12 @@ export const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
   onThemeMenuAction,
   onToggleThemeFavorite
 }) => {
+
+    console.log('📁 FavoritesContentView recibió:');
+  console.log('📁 favoriteFolders:', favoriteFolders.length);
+  console.log('📁 favoriteThemes:', favoriteThemes.length);
+  console.log('📁 favoriteFiles:', favoriteFiles?.length || 'undefined');
+  console.log('📁 favoriteFiles contenido:', favoriteFiles);
     const filtersRef = useRef<HTMLDivElement>(null);
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
   
@@ -145,7 +166,7 @@ export const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
     );
   }
 
-  const hasContent = favoriteFolders.length > 0 || favoriteThemes.length > 0;
+  const hasContent = favoriteFolders.length > 0 || favoriteThemes.length > 0 || favoriteFiles.length > 0;
 
   if (!hasContent) {
     return (
@@ -182,6 +203,8 @@ export const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
         <div className={styles.contentStats}>
             <span>{favoriteFolders.length} carpetas</span>
             <span>{favoriteThemes.length} temas</span>
+            <span>{favoriteFiles.length} archivos</span>  
+
           </div>
       
       {/* Sección de filtros (cuando están visibles) */}
@@ -263,6 +286,22 @@ export const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
             />
           </div>
         )}
+
+          {/* Sección de Archivos Favoritos */}
+          {favoriteFiles.length > 0 && (
+            <div className={styles.userContentSection}>
+              <FilesGrid
+                files={favoriteFiles}
+                fileFavorites={fileFavorites}
+                loading={false}
+                error={null}
+                onFileSelect={onFileSelect}
+                onFileDoubleClick={onFileDoubleClick}
+                onFileMenuAction={onFileMenuAction}
+                onToggleFileFavorite={onToggleFileFavorite}
+              />
+            </div>
+          )}
       </div>
     </div>
   );

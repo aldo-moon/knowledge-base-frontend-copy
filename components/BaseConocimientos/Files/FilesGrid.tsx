@@ -60,13 +60,12 @@ export const FilesGrid: React.FC<FilesGridProps> = ({
       <h3 className={styles.sectionTitle}>Multimedia</h3>
       <div className={styles.themesGrid}>
         {files.map((file) => {
-          const isFavorite = fileFavorites.has(file._id);
           
           return (
             <FileCard
               key={file._id}
               file={file}
-              isFavorite={isFavorite}
+              isFavorite={fileFavorites.has(file._id)} 
               onSelect={onFileSelect}  
               onDoubleClick={onFileDoubleClick}
               onMenuAction={onFileMenuAction}
