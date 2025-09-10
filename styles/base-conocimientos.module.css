@@ -1,0 +1,2764 @@
+
+.baseConocimientos {
+  color: white;
+  display: flex;
+  flex-direction: column;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+
+.baseConocimientos h1,
+.baseConocimientos h2, 
+.baseConocimientos h3 {
+  font-family: inherit, sans-serif;
+}
+
+.baseConocimientos input,
+.baseConocimientos select,
+.baseConocimientos textarea {
+  font-family: Poppins ; 
+}
+
+.baseConocimientos button{
+    font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+
+}
+
+
+.baseConocimientosTitle {
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  margin: 0;
+  color: white;
+}
+
+/* Base de Conocimientos Styles - CSS Modules */
+
+
+
+.baseConocimientosHeader {
+  width: 100%;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+
+/* Main content wrapper with sidebar */
+.mainContentWrapper {
+  display: flex;
+  flex: 1;
+  padding: 0 0 0 1rem;
+
+}
+
+/* Main Navigation Sidebar */
+.mainSidebar {
+  width: 5%;
+  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  height: 53.5rem;
+}
+
+.logo {
+  margin-bottom: 2rem;
+}
+
+.logoIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.mainSidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  align-items: center;
+}
+
+.mainSidebarItem {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mainSidebarItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: translateX(2px);
+}
+
+.mainSidebarActive {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.mainSidebarItem {
+  width: 100%; 
+  height: auto;
+  padding: .5rem    .5em;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  flex-direction: column ;
+}
+
+.mainSidebarLabel {
+  font-size: 0.875rem;
+  color: white;
+}
+
+
+/* Main Content Area */
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.baseConocimientosHeader {
+  width: 100%;
+  padding: 1.5rem 0 0.5rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+
+/* Search Container */
+.searchContainer {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  position: relative;
+  min-height: 5.5rem; 
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.searchWrapper {
+  position: relative;
+  flex: 1;
+}
+
+.searchWrapper.searchExpanded {
+  position: absolute; 
+  top: 1rem; 
+  left: 18.5%; 
+  right: 15px; 
+  background: #27293d;
+  border-radius: 1.5rem;
+  padding: 0 0 1.1rem;
+  border: 1px solid #3b3f5f;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  z-index: 100; 
+  width: auto; 
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+}
+
+.searchExpanded .searchIcon {
+  left: 0.9rem; /* Mantiene posición original */
+  color: white;
+  top: 23%; /* Mantiene centrado */
+  transform: translateY(-50%);
+}
+
+.searchInput {
+  width: 100%;
+  background-color: #27293d;
+  border: 1px solid #27293d;
+  border-radius: 1.5rem;
+  padding: 0.5rem 2.5rem;
+  color: white;
+  outline: none;
+  transition: all 0.2s;
+  height: 3.5rem;
+  font-size: 1rem;
+}
+
+.searchExpanded .searchInput {
+  background-color: #1e1e2f;
+  border-color: #3b3f5f;
+  font-size: 1rem; /* Reducido de 1.1rem */
+  height: 3.5rem; /* Mantiene el mismo tamaño */
+  padding: 0.5rem 2.5rem; /* Mantiene el padding original */
+}
+
+.searchInput:focus {
+  border-color: #2563eb;
+}
+
+.searchInput::placeholder {
+  color: white;
+}
+
+.searchClearButton {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.searchCollapseButton {
+  position: absolute;
+  right: 1rem;
+  top: 23%;
+  transform: translateY(-50%);
+  color: white;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.25rem; /* Más pequeño */
+  border-radius: 0.25rem;
+}
+
+.searchCollapseButton:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.searchExpanded .searchClearButton {
+  right: 2.5rem; /* Mueve a la izquierda para dar espacio al botón X */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+
+.searchClearButton:hover {
+  color: white;
+}
+
+
+
+/* Container de filtros */
+.searchFilters {
+  margin-left: 1rem;
+  margin-top: 1.1rem; /* Reducido de 1.5rem */
+  display: flex;
+  gap: 0.75rem; /* Reducido de 1rem */
+  flex-wrap: wrap;
+}
+
+/* Grupo de filtros - más pequeño */
+.filterGroup {
+  position: relative; /* referencia para el dropdown */
+  display: inline-block; /* para que cada grupo se comporte como bloque propio */
+}
+
+
+.filterButton1 {
+  color: #6262bf;
+  border: none;
+}
+
+
+/* Botón principal del filtro - más compacto */
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem; /* más cerrado */
+  padding: 0.35rem 0.6rem; /* más pequeño */
+  background: #1e1e2f;
+  border: 1px solid #6262bf;
+  color: #6262bf;
+  border-radius: 1.5rem; /* menos redondeado */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.75rem; /* más chico */
+  font-weight: 500;
+  justify-content: space-between;
+  max-width: 8rem;
+}
+
+
+.filterButton:hover {
+  background: #30334d ;
+  transform: translateY(-1px);
+}
+
+.filterButton.filterActive {
+  background: #6262bf;
+  color: white;
+}
+
+/* Opciones de los filtros */
+.filterOptions {
+  position: absolute; 
+  top: 100%; 
+  left: 0;
+  background: #1e1e2f;
+  border: 1px solid #6262bf;
+  border-radius: 0.5rem;
+  margin-top: 0.25rem;
+  z-index: 1000; 
+  min-width: 180px;
+  padding: 0.5rem;
+  width: max-content;
+
+}
+
+@keyframes filterSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px); /* Menos movimiento */
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 200px; /* Más pequeño */
+  }
+}
+
+
+/* Opciones individuales del filtro */
+.filterOption {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reducido */
+  padding: 0.5rem 0.75rem; /* Más compacto */
+  background: transparent;
+  color: #cbd5e1;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem; /* Más pequeño */
+}
+
+.filterOption:hover {
+  background: #30334d ;
+  color: white;
+  transform: translateX(2px); /* Menos movimiento */
+}
+
+.filterOption:not(:last-child) {
+  border-bottom: 1px solid #2a2a3a;
+}
+
+/* Responsive para buscador expandido */
+@media (max-width: 768px) {
+  .searchFilters {
+    flex-direction: column;
+    gap: 0.5rem; /* Más compacto en móvil */
+  }
+  
+  .filterGroup {
+    min-width: auto;
+  }
+  
+  .searchWrapper.searchExpanded {
+    padding: 0.75rem; /* Más compacto en móvil */
+  }
+  
+  .filterButton {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .filterOption {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+
+
+/* Contenedor del botón con dropdown */
+.newButtonContainer {
+  position: relative;
+  z-index: 1001;
+  width: 17%;
+}
+
+/* Botón Nuevo con animaciones (versión actualizada) */
+.newButton {
+  background: linear-gradient(45deg, #1d8cf8, #3358f4, #1d8cf8, #3358f4);
+  background-size: 300% 300%;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  height: 3.5rem;
+  width: 100%;
+  
+  /* Animación de gradiente móvil constante */
+  animation: gradientShift 3s ease infinite;
+  
+  /* Sombra inicial */
+  box-shadow: 0 4px 15px rgba(29, 140, 248, 0.2);
+}
+
+.newButton:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(29, 140, 248, 0.4);
+}
+
+.newButton:active {
+  transform: translateY(0) scale(0.98);
+  transition: all 0.1s ease;
+}
+
+/* Animación del ícono Plus - Rota al hacer CLICK */
+.newButton svg {
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.newButton:active svg {
+  transform: rotate(180deg) scale(1.1);
+}
+
+/* Keyframe para el gradiente móvil */
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Dropdown Menu */
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  width: 100%;
+  background: #27293d;
+  border: 1px solid #3b3f5f;
+  border-radius: 1rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  overflow: hidden;
+  
+  /* Animación de entrada */
+  animation: dropdownSlideIn 0.3s ease-out;
+  transform-origin: top;
+}
+
+/* Animación de entrada del dropdown */
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scaleY(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+/* Opciones del dropdown */
+.dropdownOption {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.dropdownOption:hover {
+  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
+  transform: translateX(4px);
+}
+
+.dropdownOption:active {
+  transform: translateX(2px);
+  transition: transform 0.1s ease;
+}
+
+/* Ícono de la opción - ahora a la izquierda */
+.optionIcon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+/* Etiqueta de la opción */
+.optionLabel {
+  flex: 1;
+  text-align: left;
+}
+
+.dropdownOption:hover .optionIcon {
+  transform: translateX(2px);
+}
+
+/* Separadores entre opciones (opcional) */
+.dropdownOption:not(:last-child) {
+  border-bottom: 1px solid #3b3f5f;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dropdownMenu {
+    width: 100%;
+    left: 0;
+  }
+  
+  .dropdownOption {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Efecto adicional: pequeña flecha indicadora (opcional) */
+.dropdownMenu::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 2rem;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #3b3f5f;
+}
+
+.dropdownMenu::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 2.1rem;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #27293d;
+}
+
+/* ========================================= */
+/* Estilos para Sidebar Expandible */
+/* ========================================= */
+
+/* Wrapper para cada item del sidebar */
+.sidebarItemWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modificación al item principal del sidebar */
+.sidebarNavItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: transparent;
+  color: #cbd5e1;
+  white-space: nowrap;
+  font-size: 1rem;
+}
+
+.sidebarNavItem.active {
+  background-color: #3b3f5f;
+  color: white;
+}
+
+.sidebarNavItem:not(.active):hover {
+  background-color: #30334d;
+  color: white;
+}
+
+/* Botón de expansión */
+.expandButton {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+.expandButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+/* Lista de subcarpetas */
+.subfoldersList {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+/* Animación de entrada para subcarpetas */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 200px;
+  }
+}
+
+/* Items de subcarpetas */
+.subfolderItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: transparent;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  width: 100%;
+  text-align: left;
+
+}
+
+.subfolderItem:hover {
+  background-color: #3b3f5f;
+  color: white;
+  transform: translateX(4px);
+}
+
+.subfolderItemfoldername{
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 65%;
+  white-space: nowrap;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+.subfolderItem:active {
+  transform: translateX(2px);
+  transition: transform 0.1s ease;
+}
+
+
+/* Content Area - Ahora es un flexbox horizontal */
+.contentArea {
+  display: flex;
+  gap: 1rem;
+  padding: 0 1rem 2.5rem 1.5rem;
+  flex: 1;
+  
+}
+
+/* Sidebar - Ahora a la izquierda */
+.sidebar {
+  width: 17%;
+  height: 46.5rem;
+  background-color: #27293d;
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+
+
+
+
+.sidebarNavItem:not(.active):hover {
+  background-color: #30334d;
+  color: white;
+}
+
+/* Folders Section - En el centro */
+.foldersSection {
+  flex: 1;
+  padding: 1.5rem;
+  background: #27293d;
+  border-radius: 1.5rem;
+  width: 100%;
+}
+
+.contentHeader {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+  height: 4rem; 
+}
+
+
+.contentHeaderTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+.contentHeaderTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1rem; 
+}
+
+.contentHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12rem;
+  flex: 1; 
+}
+
+.contentHeaderSubtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  margin: 1.5rem 0 1.5rem 0;
+  margin-left: 0.5rem;
+}
+
+.contentHeaderTags {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  animation: filtersSlideIn 0.3s ease-out;
+  max-width: 26.7rem;
+  position: absolute;
+  right: 23%;
+}
+
+.contentHeaderTags1 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: -5.5rem;
+  animation: filtersSlideIn 0.3s ease-out;
+  max-width: 26.7rem;
+  position: absolute;
+  right: 23.5%;
+}
+
+/* Animación de entrada de filtros */
+@keyframes filtersSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 100px;
+  }
+}
+
+
+/* ========================================= */
+/* Estilos para Filtros de Contenido */
+/* ========================================= */
+
+
+.contentTag {
+  font-size: 0.75rem;
+  color: #6262bf;
+  background: #1e1e2f;
+  border: 1px solid #6262bf;
+  padding: 0.25rem .5rem;
+  border-radius: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.contentTag:hover {
+  background: #2a2a3a;
+  transform: translateY(-1px);
+}
+
+/* Estado activo del tag */
+.contentTagActive {
+  background: #6262bf !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(98, 98, 191, 0.3);
+}
+
+
+.filterButton:hover {
+  color: white;
+}
+
+.foldersGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .foldersGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .foldersGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.folderCard {
+  background-color: #30334d;
+  border: 1px solid #30334d;
+  border-radius: 1rem;
+  padding: 0.5rem  0 0rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.folderCard:hover {
+  background-color: #6262bf;
+}
+
+.folderCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.folderIcon {
+  color: white;
+}
+
+.folderMenuButton {
+  color: #9ca3af;
+  border: none;
+  background: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.folderCard:hover .folderMenuButton {
+  opacity: 1;
+}
+
+.folderMenuButton:hover {
+  color: white;
+}
+
+/* Header principal: divide en 2 (izquierda y derecha) */
+.folderCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem
+}
+
+/* Izquierda: ícono + texto alineados */
+.folderInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+/* Derecha: iconos en columna */
+.folderActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55rem;
+}
+
+/* Estilos de botones */
+.folderMenuButton,
+.folderStarButton {
+  color: #9ca3af;
+  border: none;
+  background: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.folderCard:hover .folderMenuButton,
+.folderCard:hover .folderStarButton {
+  opacity: 1;
+}
+
+.folderMenuButton:hover,
+.folderStarButton:hover .folderStarIcon {
+  color: white;
+}
+
+.folderStarButton:hover .folderStarIcon {
+  color: #fbbf24; /* amarillo */
+}
+
+.folderName {
+  color: white;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 133px; /* Ajusta según tu diseño */
+  min-width: 133px; /* Ajusta según tu diseño */
+}
+
+.folderStarButton {
+  border: none;
+  background: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.folderCard:hover .folderStarButton {
+  opacity: 1;
+}
+
+.folderStarIcon {
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.folderStarButton:hover .folderStarIcon {
+  color: #fbbf24;
+}
+
+/* Details Panel - A la derecha */
+.detailsPanel {
+  width: 18%;
+  padding: 1.5rem;
+  background: #27293d;
+  border-radius: 1.5rem;
+  height: 46.5rem;
+}
+
+.detailsTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.detailsPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 16rem;
+  text-align: center;
+}
+
+.detailsIcon {
+  width: 4rem;
+  height: 4rem;
+  background: linear-gradient(to bottom right, #8b5cf6, #3b82f6);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3rem;
+
+  /* Animación */
+  animation: breathe 2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1); /* Crece un 10% en el medio del ciclo */
+  }
+}
+
+.detailsMessage {
+  color: white;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mainSidebar {
+    width: 4rem;
+  }
+  
+  .logoIcon {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.875rem;
+  }
+  
+  .mainSidebarItem {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .contentArea {
+    flex-direction: column;
+    padding: 0 1rem 1rem;
+  }
+  
+  .sidebar {
+    width: 100%;
+  }
+  
+  .detailsPanel {
+    width: 100%;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para el Menú Contextual de Carpetas */
+/* ========================================= */
+
+/* Contenedor del menú - necesario para posicionamiento */
+.folderMenuContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+
+.folderMenuButton:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+/* Menú contextual desplegable */
+.folderContextMenu {
+  position: absolute;
+  top: 100%;
+  right: 1;
+  width: 12rem;
+  background: #1e1e2f;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  min-width: 160px;
+  overflow: hidden;
+  margin-top: 0.25rem;
+  
+  /* Animación de entrada */
+  animation: contextMenuSlideIn 0.2s ease-out;
+  transform-origin: top right;
+}
+
+/* Animación de entrada del menú contextual */
+@keyframes contextMenuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* Menú contextual desplegable */
+.folderContextMenu1 {
+  position: absolute;
+  width: 12rem;
+  background: #1e1e2f;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  min-width: 160px;
+  margin-top: 0.25rem;
+  overflow: hidden;
+  
+  /* Animación de entrada */
+  animation: contextMenuSlideIn 0.2s ease-out;
+  transform-origin: top right;
+}
+
+/* Animación de entrada del menú contextual */
+@keyframes contextMenuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Opciones individuales del menú contextual */
+.folderContextOption {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.folderContextOption:hover {
+  background: #30334d ;
+  color: white;
+  transform: translateX(2px);
+}
+
+.folderContextOption:active {
+  background: #4c5270;
+  transform: translateX(1px);
+  transition: all 0.1s ease;
+}
+
+/* Separador entre opciones */
+.folderContextOption:not(:last-child) {
+  border-bottom: 1px solid #2a2a3a;
+}
+
+/* Ícono de la opción */
+.contextOptionIcon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.folderContextOption:hover .contextOptionIcon {
+  transform: translateX(1px);
+}
+
+/* Etiqueta de la opción */
+.contextOptionLabel {
+  flex: 1;
+}
+
+
+/* Flecha indicadora del menú (opcional) */
+.folderContextMenu::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 1rem;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #3b3f5f;
+}
+
+.folderContextMenu::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: 1.1rem;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #1e1e2f;
+}
+
+/* Responsive para el menú contextual */
+@media (max-width: 768px) {
+  .folderContextMenu {
+    min-width: 140px;
+    right: -0.5rem;
+  }
+  
+  .folderContextOption {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+    gap: 0.625rem;
+  }
+  
+  .contextOptionIcon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Estados especiales del menú */
+.folderContextMenu.animating {
+  pointer-events: none;
+}
+
+/* Overlay sutil para cerrar el menú (opcional) */
+.folderMenuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  background: transparent;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para el Menú de Ordenar Por */
+/* ========================================= */
+
+/* Contenedor del menú de ordenar por */
+.sortMenuContainer {
+  position: relative;
+  display: inline-block;
+}
+
+/* Botón de ordenar por (hereda estilos de contentTag) */
+.sortButton {
+  position: relative;
+}
+
+/* Menú desplegable de ordenar por */
+.sortDropdownMenu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  background: #1e1e2f;
+  border: 1px solid #30334d;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  min-width: 140px;
+  overflow: hidden;
+  
+  /* Animación de entrada */
+  animation: sortDropdownSlideIn 0.2s ease-out;
+  transform-origin: top left;
+}
+
+/* Animación de entrada del menú de ordenar por */
+@keyframes sortDropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Opciones del menú de ordenar por */
+.sortDropdownOption {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.sortDropdownOption:hover {
+  background: #3b3f5f;
+  color: white;
+  transform: translateX(2px);
+}
+
+.sortDropdownOption:active {
+  background: #4c5270;
+  transform: translateX(1px);
+  transition: all 0.1s ease;
+}
+
+/* Opción activa (seleccionada actualmente) */
+.sortDropdownActive {
+  background: #30334d !important;
+  color: white !important;
+}
+
+.sortDropdownActive:hover {
+  background: #30334d !important;
+}
+
+/* Separador entre opciones */
+.sortDropdownOption:not(:last-child) {
+  border-bottom: 1px solid #2a2a3a;
+}
+
+/* Ícono de la opción de ordenar */
+.sortOptionIcon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.sortDropdownOption:hover .sortOptionIcon {
+  transform: translateX(1px);
+}
+
+/* Etiqueta de la opción de ordenar */
+.sortOptionLabel {
+  flex: 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para Filtros de Contenido */
+/* ========================================= */
+
+/* Header de contenido reorganizado */
+
+
+/* Botón para mostrar/ocultar filtros */
+.filterToggleButton {
+  background: #1e1e2f;
+  border: 1px solid #6262bf;
+  color: #6262bf;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filterToggleButton:hover {
+  background: #2a2a3a;
+}
+
+.filterToggleActive {
+  background: #6262bf !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(98, 98, 191, 0.3);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para Detalles de Carpeta */
+/* ========================================= */
+
+/* Contenedor principal de detalles de carpeta */
+.folderDetailsContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0;
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Animación de entrada */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ícono de la carpeta en detalles */
+.folderDetailsIcon {
+  width: 6rem;
+  height: 6rem;
+  background: #27293d;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+
+
+/* Nombre de la carpeta */
+.folderDetailsName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 0.5rem 0;
+}
+
+/* Número de elementos */
+.folderDetailsElements {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin: 0 0 1.5rem 0;
+}
+
+/* Contenedor de información detallada */
+.folderDetailsInfo {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Item individual de detalle */
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #3b3f5f;
+}
+
+.detailItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Etiqueta del detalle */
+.detailLabel {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Valor del detalle */
+.detailValue {
+  font-size: 0.875rem;
+  color: white;
+  font-weight: 400;
+  word-break: break-word;
+}
+
+/* Responsive para panel de detalles */
+@media (max-width: 768px) {
+  .folderDetailsContent {
+    padding: 1rem 0;
+  }
+  
+  .folderDetailsIcon {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  .folderDetailsName {
+    font-size: 1.125rem;
+  }
+}
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para Modal de Nueva Carpeta */
+/* ========================================= */
+
+/* Overlay del modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+/* Animación de entrada del modal */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Contenido del modal */
+.modalContent {
+  background: #27293d ;
+  border: 2px solid #6262bf;
+  border-radius: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: modalSlideIn 0.2s ease-out;
+}
+
+/* Animación de entrada del contenido */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Header del modal */
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.1rem;
+}
+
+/* Título del modal */
+.modalTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #facd01;
+  margin: 0;
+}
+
+
+/* Cuerpo del modal */
+.modalBody {
+  padding: 0rem 1.5rem;
+}
+
+
+
+/* Input del modal */
+.modalInput {
+  width: 100%;
+  background: #1e1e2f;
+  border: 1px solid #1e1e2f;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  color: white;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.modalInput:focus {
+  border-color: #6262bf;
+  box-shadow: 0 0 0 3px rgba(98, 98, 191, 0.1);
+}
+
+.modalInput::placeholder {
+  color: #6b7280;
+}
+
+/* Footer del modal */
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.1rem;
+}
+
+/* Botón cancelar */
+.modalCancelButton {
+  background: transparent;
+  border: transparent;
+  color: #9ca3af;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.modalCancelButton:hover {
+  background: #30334d;
+  border-color: #9ca3af;
+  color: white;
+}
+
+/* Botón crear */
+.modalCreateButton {
+  background: #30334d ;
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.modalCreateButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.modalCreateButton:disabled {
+  background: #27293d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modalContent {
+    margin: 1rem;
+    width: calc(100% - 2rem);
+  }
+  
+  .modalHeader,
+  .modalBody,
+  .modalFooter {
+    padding: 1rem;
+  }
+}
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para Editor de Temas */
+/* ========================================= */
+
+/* Sección principal del editor */
+.topicEditorSection {
+  flex: 1;
+  padding: 1.5rem;
+  background: #27293d;
+  border-radius: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header del editor */
+.topicEditorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Botón volver */
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 1px solid #3b3f5f;
+  color: #cbd5e1;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.backButton:hover {
+  background: #3b3f5f;
+  color: white;
+  transform: translateX(-2px);
+}
+
+/* Título del editor */
+.topicEditorTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+/* Contenido del editor */
+.topicEditorContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Sección del título */
+.topicTitleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Labels del formulario */
+.topicLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  padding: 0 15px;
+}
+
+/* Input del título */
+.topicTitleInput {
+  background: #1e1e2f;
+  border: 1px solid #3b3f5f;
+  color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.topicTitleInput:focus {
+  outline: none;
+  border-color: #6262bf;
+  box-shadow: 0 0 0 3px rgba(98, 98, 191, 0.1);
+}
+
+.topicTitleInput::placeholder {
+  color: #6b7280;
+}
+
+/* Sección de descripción */
+.topicDescriptionSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Editor principal */
+.topicEditor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Textarea */
+.topicTextarea {
+  flex: 1;
+  background: #1e1e2f;
+  border: none;
+  color: white;
+  padding: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: none;
+  min-height: 200px;
+  font-family: inherit;
+}
+
+.topicTextarea:focus {
+  outline: none;
+}
+
+.topicTextarea::placeholder {
+  color: #6b7280;
+}
+
+/* Toolbar del editor */
+.editorToolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #1e1e2f;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #3b3f5f;
+  flex-wrap: wrap;
+}
+
+/* Selects de fuente */
+.fontSelect,
+.sizeSelect {
+  background: #27293d;
+  border: 1px solid #3b3f5f;
+  color: #cbd5e1;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.fontSelect:focus,
+.sizeSelect:focus {
+  outline: none;
+  border-color: #6262bf;
+}
+
+/* Botones de formato */
+.formatButton {
+  background: transparent;
+  border: 1px solid #3b3f5f;
+  color: #cbd5e1;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+}
+
+.formatButton:hover {
+  background: #3b3f5f;
+  color: white;
+}
+
+.formatButton:active {
+  background: #6262bf;
+  color: white;
+}
+
+/* Divisores de la toolbar */
+.toolbarDivider {
+  width: 1px;
+  height: 20px;
+  background: #3b3f5f;
+  margin: 0 0.25rem;
+}
+
+/* Acciones del tema */
+.topicActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #3b3f5f;
+}
+
+/* Botón cancelar */
+.cancelTopicButton {
+  background: transparent;
+  border: 1px solid #6b7280;
+  color: #9ca3af;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.cancelTopicButton:hover {
+  background: rgba(107, 114, 128, 0.1);
+  border-color: #9ca3af;
+  color: white;
+}
+
+/* Botón guardar */
+.saveTopicButton {
+  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.saveTopicButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29, 140, 248, 0.3);
+}
+
+.saveTopicButton:disabled {
+  background: #4b5563;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .topicEditorSection {
+    padding: 1rem;
+  }
+  
+  .editorToolbar {
+    padding: 0.5rem;
+    gap: 0.25rem;
+  }
+  
+  .formatButton {
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.6875rem;
+  }
+  
+  .topicActions {
+    flex-direction: column-reverse;
+  }
+  
+  .cancelTopicButton,
+  .saveTopicButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para Formulario de Tema */
+/* ========================================= */
+
+
+
+.topicForm {
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+}
+
+/* Grupo de formulario */
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Labels del formulario */
+.formLabel {
+  font-size: 0.875rem;
+  color: white;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: space-between;
+  padding: 0 15px;
+}
+
+/* Tag de multimedia */
+.multimediaTag {
+  background: #6262bf;
+  color: white;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+/* Selects del formulario */
+.formSelect {
+  background: #1e1e2f;
+  border: 1px solid #3b3f5f;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.formSelect:focus {
+  outline: none;
+  border-color: #6262bf;
+  box-shadow: 0 0 0 3px rgba(98, 98, 191, 0.1);
+}
+
+.formSelect option {
+  background: #1e1e2f;
+  color: white;
+}
+
+/* Área de subida de archivos */
+.fileUploadArea {
+  background: #1e1e2f;
+  border: 2px dashed #6262bf;
+  border-radius: 0.5rem;
+  padding: .8rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fileUploadArea:hover {
+  background: rgba(98, 98, 191, 0.05);
+  border-color: #7373c4;
+}
+
+/* Ícono de upload */
+.uploadIcon {
+  color: #333362;
+}
+
+/* Texto de upload */
+.uploadText {
+  color: #6262bf;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Sugerencia de AI */
+.aiSuggestion {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+
+/* Checkbox personalizado */
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #6262bf;
+  cursor: pointer;
+}
+
+/* Label del checkbox */
+.checkboxLabel {
+  color: #6262bf;
+  font-size: 0.875rem;
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Botón crear */
+.createButton {
+  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: .5rem;
+  letter-spacing: 0.05em;
+}
+
+.createButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29, 140, 248, 0.3);
+}
+
+.createButton:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .topicFormContent {
+    padding: 0.5rem 0;
+  }
+  
+  .topicForm {
+    gap: 1rem;
+  }
+  
+  .fileUploadArea {
+    padding: 1.5rem 0.75rem;
+  }
+}
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para Modal de Multimedia */
+/* ========================================= */
+
+/* Contenido del modal multimedia */
+.multimediaModalContent {
+  background: #27293d;
+  border: 2px solid #6262bf;
+  border-radius: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: modalSlideIn 0.2s ease-out;
+}
+
+/* Header del modal multimedia */
+.multimediaModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+/* Título del modal multimedia */
+.multimediaModalTitle {
+font-size: 1rem;
+  font-weight: 600;
+  color: #facd01;
+  margin: 0;
+}
+
+/* Cuerpo del modal multimedia */
+.multimediaModalBody {
+  padding: 0rem 1.5rem;
+}
+
+/* Área de subida de multimedia */
+.multimediaUploadArea {
+  background: #1e1e2f;
+  border: 2px dashed #6262bf;
+  border-radius: 1rem;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.multimediaUploadArea:hover {
+  background: rgba(98, 98, 191, 0.05);
+  border-color: #7373c4;
+}
+
+/* Ícono de upload multimedia */
+.multimediaUploadIcon {
+  color: #333362;
+  opacity: 0.7;
+}
+
+/* Texto de upload multimedia */
+.multimediaUploadText {
+  color: #6262bf;
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Footer del modal multimedia */
+.multimediaModalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+/* Botón subir */
+.multimediaSubirButton {
+  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
+  border: none;
+  color: white;
+  padding: 0.45rem 3rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  letter-spacing: 0.05em;
+  width: 100%;
+  max-width: 250px;
+}
+
+.multimediaSubirButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(29, 140, 248, 0.4);
+}
+
+.multimediaSubirButton:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .multimediaModalContent {
+    margin: 1rem;
+    width: calc(100% - 2rem);
+  }
+  
+  .multimediaUploadArea {
+    padding: 2rem 1rem;
+  }
+  
+  .multimediaModalHeader,
+  .multimediaModalBody,
+  .multimediaModalFooter {
+    padding: 1rem;
+  }
+}
+
+
+
+
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.breadcrumbItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.breadcrumbButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.breadcrumbButton:hover {
+  color: #6262bf;
+}
+
+.breadcrumbSeparator {
+  color: #9ca3af;
+}
+
+
+
+
+
+
+.breadcrumbEllipsis {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1.4rem;
+  transition: color 0.2s;
+}
+
+.breadcrumbEllipsis:hover {
+  color: #6262bf;
+}
+
+.breadcrumbCurrent {
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 600;
+  transition: color 0.2s;
+
+}
+
+.breadcrumbCurrent:hover{
+  color: #6262bf;
+
+}
+
+
+
+
+
+
+
+
+
+/* Mensaje de confirmación */
+.deleteMessage {
+  color: #ffffff;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 2rem 0 0;
+  text-align: center;
+  font-weight: bold;
+}
+
+.deleteMessage1 {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 1rem 0 0;
+  text-align: center;
+}
+
+/* Botón eliminar */
+
+.modalDeleteButton {
+  background: #27293d ;
+  border: none;
+  color: #9ca3af;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.modalDeleteButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: #30334d ;
+  color: white;
+
+}
+
+.modalDeleteButton:disabled {
+  background: #27293d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+
+
+
+
+.themeName{
+  color: white;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;}
+
+
+
+
+
+
+
+
+
+
+
+
+  .contentSections {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.contentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionTitle {
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  margin-left: 6px;
+}
+
+.themesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 1rem;
+}
+
+
+.themeCard {
+  background: #30334d;
+  border-radius: 1rem;
+  padding: 0.3rem 0rem 0 0rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: row;
+  min-height: 150px;
+  justify-content: flex-end;
+  min-height: 180px; /* Altura mínima fija */
+  max-width: 200px; /* Ancho máximo consistente */
+  border: 2px solid #6262bf;
+}
+
+.themeCard:hover {
+  background: #3b3f5f;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.themeCardHeader {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.themeActions {
+  display: flex;
+  gap: 7.7rem;
+  flex-direction: column;
+}
+
+.themeMenuButton,
+.themeStarButton {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.themeCard:hover .themeMenuButton,
+.themeCard:hover .themeStarButton {
+  opacity: 1;
+}
+
+.themeContent {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  justify-content: center;
+  max-width: 8.9rem;
+}
+
+.fileContent {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  justify-content: center;
+  max-width: 8.9rem;
+}
+
+.themeIconContainer {
+  margin-bottom: 0.75rem;
+}
+
+
+.themeIcon {
+  width: 6rem;
+  height: 6rem;
+
+}
+
+
+.themeName {
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0 0 1rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px; /* Ajusta según el ancho de tus cards de tema */
+  text-align: center;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.filesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.fileCard {
+  background: #30334d;
+  border-radius: 1rem;
+  padding: 0.3rem 0rem 0 0rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: row;
+  min-height: 150px;
+  justify-content: flex-end;
+  min-height: 180px; /* Altura mínima fija */
+  max-width: 200px; /* Ancho máximo consistente */
+  border: 2px solid #6262bf;
+
+}
+
+.fileCard:hover {
+  background: #3b3f5f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+
+
+.fileName {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 4px 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 1.2;
+  align-self: center;
+}
+
+.fileType {
+  color: #8b8d98;
+  font-size: 12px;
+  margin: 0;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.fileMenuButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: #8b8d98;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 16px;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.fileCard:hover .fileMenuButton {
+  opacity: 1;
+}
+
+.fileMenuButton:hover {
+  background: #3a3d4a;
+  color: #ffffff;
+}
+
+
+
+
+
+/* ============================================================================ */
+/* ESTILOS ADICIONALES PARA UserContentView */
+/* Agregar estos estilos a tu archivo base-conocimientos.module.css */
+/* ============================================================================ */
+
+/* Header de la vista de usuario */
+.contentStats {
+  display: flex;
+  gap: 1rem;
+  margin-left: auto;
+  font-size: 0.875rem;
+  color: #6b7280;
+  padding: 1rem 0;
+  justify-content: flex-end;
+}
+
+.contentStats span {
+  background: #1e1e2f;
+  border: 1px solid #6262bf;
+  color: #6262bf;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  font-weight: 500;
+}
+
+/* Secciones de contenido del usuario */
+.userContentSection {
+  margin-bottom: 2rem;
+}
+
+
+
+/* Estados vacíos y de error */
+.emptyState,
+.errorContainer,
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.emptyState p,
+.errorContainer p,
+.loadingContainer p {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.errorContainer p {
+  color: #dc2626;
+}
+
+
+.sectionTitle1 {
+
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 600;
+  transition: color 0.2s;
+  margin: 0.5rem 0 0 .5rem;
+}
+
+
+
+/* Responsive para stats */
+@media (max-width: 768px) {
+  .contentStats {
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-left: 0;
+    margin-top: 1rem;
+  }
+  
+  .contentStats span {
+    text-align: center;
+  }
+}
+
+
