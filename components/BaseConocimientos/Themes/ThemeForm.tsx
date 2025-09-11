@@ -1,7 +1,9 @@
 // components/BaseConocimientos/Themes/ThemeForm.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload } from 'lucide-react';
 import styles from './../../../styles/base-conocimientos.module.css';
+import { areaService } from '../../../services/areaService';
+import { puestoService } from '../../../services/puestoService';
 
 interface ThemeFormProps {
   onSubmit?: (formData: ThemeFormData) => void;
@@ -18,10 +20,17 @@ interface ThemeFormData {
   suggestInHelpDesk: boolean;
 }
 
+
+
 export const ThemeForm: React.FC<ThemeFormProps> = ({
   onSubmit,
   onCancel
 }) => {
+
+  const [areas, setAreas] = useState([]);
+  const [puestos, setPuestos] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
+
   const [formData, setFormData] = useState<ThemeFormData>({
     priority: 'Normal',
     area: '',
@@ -32,7 +41,32 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
     suggestInHelpDesk: false
   });
 
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+useEffect(() => {
+  const loadFormData = async () => {
+    try {
+      setLoadingData(true);
+      console.log('🔍 Cargando áreas y puestos...');
+      
+      const [areasData, puestosData] = await Promise.all([
+        areaService.getAllAreas(),
+        puestoService.getAllPuestos()
+      ]);
+      
+      console.log('🔍 Áreas recibidas:', areasData);
+      console.log('🔍 Puestos recibidos:', puestosData);
+      
+      setAreas(areasData);
+      setPuestos(puestosData);
+    } catch (error) {
+      console.error('❌ Error cargando datos del formulario:', error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+  
+  loadFormData();
+}, []);
+
 
   const handleInputChange = (field: keyof ThemeFormData, value: any) => {
     setFormData(prev => ({
@@ -42,12 +76,7 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
   };
 
   const handleSubmit = () => {
-    setShowSuccessModal(true);
-    // Ocultar el modal después de 2 segundos
-    setTimeout(() => {
-      setShowSuccessModal(false);
-      onSubmit?.(formData);
-    }, 2000);
+    onSubmit?.(formData);
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,50 +84,10 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
     handleInputChange('files', files);
   };
 
+
+
   return (
     <div className={styles.topicFormContent}>
-      {/* Modal de éxito */}
-      {showSuccessModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: '#1e1e2f',
-            padding: '30px',
-            borderRadius: '10px',
-            textAlign: 'center',
-            maxWidth: '400px',
-            margin: '20px'
-          }}>
-            <h2 style={{ color: '#6262bf', marginBottom: '15px' }}>¡TEMA CREADO!</h2>
-            <p style={{ marginBottom: '20px' }}>El tema ha sido creado exitosamente</p>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              backgroundColor: '#6262bf',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto',
-              color: 'white',
-              fontSize: '20px'
-            }}>
-              ✓
-            </div>
-          </div>
-        </div>
-      )}
-
       <form className={styles.topicForm} onSubmit={(e) => e.preventDefault()}>
         {/* Prioridad */}
         <div className={styles.formGroup}>
@@ -121,28 +110,39 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
             className={styles.formSelect}
             value={formData.area}
             onChange={(e) => handleInputChange('area', e.target.value)}
+            disabled={loadingData}
           >
-            <option value="">Seleccionar...</option>
-            <option value="Marketing">Marketing</option>
-            <option value="Ventas">Ventas</option>
-            <option value="Desarrollo">Desarrollo</option>
+            <option value="">
+              {loadingData ? 'Cargando...' : 'Seleccionar...'}
+            </option>
+            {areas.map((area) => (
+              <option key={area._id} value={area._id}>
+                {area.name_area}
+              </option>
+            ))}
           </select>
         </div>
 
         {/* Puestos */}
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Puestos</label>
-          <select 
-            className={styles.formSelect}
-            value={formData.position}
-            onChange={(e) => handleInputChange('position', e.target.value)}
-          >
-            <option value="">--</option>
-            <option value="Director">Director</option>
-            <option value="Gerente">Gerente</option>
-            <option value="Analista">Analista</option>
-          </select>
-        </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>Puestos</label>
+            <select 
+              className={styles.formSelect}
+              value={formData.position}
+              onChange={(e) => handleInputChange('position', e.target.value)}
+              disabled={loadingData}
+            >
+              <option value="">
+                {loadingData ? 'Cargando...' : '--'}
+              </option>
+              {puestos.map((puesto) => (
+                <option key={puesto._id} value={puesto._id}>
+                  {puesto.name_role}
+                </option>
+              ))}
+            </select>
+          </div>
 
         {/* Archivos */}
         <div className={styles.formGroup}>

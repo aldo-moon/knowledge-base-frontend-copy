@@ -611,13 +611,10 @@ const handleToggleThemeFavorite = async (themeId: string) => {
 const loadUserFavorites = async () => {
   try {
     const userId = "68adc29785d92b4c84e01c5b";
-    
-    // Limpiar estados al inicio
-    setFolderFavorites(new Set());
-    setThemeFavorites(new Set());
-    setFileFavorites(new Set());
+    console.log('🔍 Cargando favoritos del servidor...');
     
     const favoritesResponse = await favoritoService.getFavoritoById(userId);
+    console.log('🔍 RESPUESTA COMPLETA DEL SERVIDOR:', favoritesResponse);
 
     if (!favoritesResponse) {
       console.log('No hay favoritos para este usuario');
@@ -645,8 +642,8 @@ const loadUserFavorites = async () => {
     const folderFavorites = favorites.content_folder || [];
     const topicFavorites = favorites.content_topic || [];
     const fileFavorites = favorites.content_file || [];
-    
-    console.log('🔍 Archivos favoritos del servidor:', fileFavorites.length);
+    console.log('🔍 content_file del servidor completo:', fileFavorites);
+console.log('🔍 Cada archivo:', fileFavorites.map(f => f._id));
 
     // Siempre actualizar estados
     const folderIds = folderFavorites.map(folder => folder._id);
@@ -657,8 +654,12 @@ const loadUserFavorites = async () => {
 
     const fileIds = fileFavorites.map(file => file._id);
     setFileFavorites(new Set(fileIds));
-    
-    console.log('🔍 Estados actualizados con', fileIds.length, 'archivos');
+    console.log('🔍 IDs cargados:', fileIds);
+
+       // Verificar que realmente se guardó
+    setTimeout(() => {
+      console.log('🔍 Estado después de 1 segundo:', Array.from(fileFavorites));
+    }, 1000);
 
     // Actualizar sidebar
     const favFolders = folderFavorites.map(folder => ({
@@ -685,10 +686,11 @@ const loadUserFavorites = async () => {
   // Cargar favoritos al inicio
 useEffect(() => {
   const initializeData = async () => {
-    await Promise.all([
-      loadUserFavorites(),
-      loadSidebarFolders(),
-      refreshUserData()
+      await Promise.all([
+      loadUserFavorites(),     // Carga estados de favoritos
+      loadSidebarFolders(),    // Carga sidebar
+      refreshUserData(),       // Carga contenido del usuario  
+      loadFavoritesContent()   // Carga contenido completo de favoritos
     ]);
   };
   
@@ -818,7 +820,8 @@ const loadFavoritesContent = async () => {
     console.log('Cargando contenido completo de favoritos...');
     
     const favoritesResponse = await favoritoService.getFavoritoById(CURRENT_USER_ID);
-    
+    console.log('🔍 loadFavoritesContent - respuesta completa:', favoritesResponse);
+
     if (!favoritesResponse) {
       setFavoritesContent({ folders: [], themes: [], files: [] }); // Agregar files
       return;
@@ -840,7 +843,7 @@ const loadFavoritesContent = async () => {
     const fileFavorites = favorites.content_file || []; // Nuevo
 
 
-    console.log('🔍 loadFavoritesContent - datos del servidor:');
+    console.log('🔍  - datos del servidor:');
     console.log('🔍 folderFavorites:', folderFavorites);
     console.log('🔍 topicFavorites:', topicFavorites);
     console.log('🔍 fileFavorites:', fileFavorites); 
@@ -882,6 +885,8 @@ const loadFavoritesContent = async () => {
       themes: themeDetails,
       files: fileDetails // Agregar archivos
     });
+
+    console.log('🔍 setFavoritesContent llamado con files:', fileDetails);
 
   } catch (error) {
     console.error('Error cargando contenido de favoritos:', error);
@@ -998,15 +1003,30 @@ const handleToggleFileFavorite = async (fileId) => {
     const userId = "68adc29785d92b4c84e01c5b";
     const isFavorite = fileFavorites.has(fileId);
     
-    if (!isFavorite) {
-      console.log('🔍 Intentando agregar al servidor - userId:', userId, 'fileId:', fileId);
-      const result = await favoritoService.addFileToFavorites(userId, fileId);
-      console.log('🔍 Respuesta del servidor:', result);
-      
-      setFileFavorites(prev => new Set(prev).add(fileId));
-      console.log('Added file to favorites');
+    if (isFavorite) {
+      await favoritoService.removeFileFromFavorites(userId, fileId);
+      setFileFavorites(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(fileId);
+        return newSet;
+      });
+      console.log('Removed file from favorites');
+    } else {
+      try {
+        await favoritoService.addFileToFavorites(userId, fileId);
+        setFileFavorites(prev => new Set(prev).add(fileId));
+        console.log('Added file to favorites');
+      } catch (error) {
+        if (error.response?.status === 409) {
+          // El archivo ya estaba en favoritos, solo sincronizar estado local
+          setFileFavorites(prev => new Set(prev).add(fileId));
+          console.log('Archivo ya estaba en favoritos, estado sincronizado');
+        } else {
+          throw error; // Re-lanzar otros errores
+        }
+      }
     }
-    // ... resto del código
+
   } catch (error) {
     console.error('Error toggling file favorite:', error);
   }

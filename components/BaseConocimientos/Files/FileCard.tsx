@@ -73,7 +73,7 @@ export const FileCard: React.FC<FileCardProps> = ({
   };
 
   const handleCardClick = () => {
-    onSelect(file);
+  onFileSelect(file); 
   };
 
   const handleCardDoubleClick = () => {
