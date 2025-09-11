@@ -2,10 +2,24 @@
 import React, { useState } from 'react';
 import { ChevronLeft, Image } from 'lucide-react';
 import styles from './../../../styles/base-conocimientos.module.css';
+import dynamic from 'next/dynamic';
+
+// Importación dinámica para evitar SSR
+const ReactQuill = dynamic(() => import('react-quill'), {
+  ssr: false,
+  loading: () => <div>Cargando editor...</div>
+});
+
+// Mantener el import del CSS
+import 'react-quill/dist/quill.snow.css';
 
 interface ThemeEditorProps {
   onBack: () => void;
   onSave?: (themeData: ThemeData) => void;
+  title: string;
+  description: string;
+  onTitleChange: (title: string) => void;
+  onDescriptionChange: (description: string) => void;
 }
 
 interface ThemeData {
@@ -15,25 +29,76 @@ interface ThemeData {
 
 export const ThemeEditor: React.FC<ThemeEditorProps> = ({
   onBack,
-  onSave
+  onSave,
+  title,
+  description,
+  onTitleChange,
+  onDescriptionChange
 }) => {
-  const [themeTitle, setThemeTitle] = useState('');
-  const [themeDescription, setThemeDescription] = useState('');
 
   const handleSave = () => {
-    if (themeTitle.trim() && themeDescription.trim()) {
+    if (title.trim() && description.trim()) {
       onSave?.({
-        title: themeTitle,
-        description: themeDescription
+        title: title,
+        description: description
       });
     }
   };
 
   const handleCancel = () => {
-    setThemeTitle('');
-    setThemeDescription('');
+    onTitleChange?.('');
+    onDescriptionChange?.('');
     onBack();
   };
+
+
+
+const modules = {
+  toolbar: {
+    container: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'align': [] }],
+      ['blockquote', 'code-block'],
+      ['image', 'video', 'link'],
+      ['document'], // Botón personalizado para documentos
+      ['clean']
+    ],
+    handlers: {
+      'document': function() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.pdf,.doc,.docx,.txt,.xlsx,.pptx';
+        input.onchange = (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            // Crear un enlace para el documento
+            const fileName = file.name;
+            const range = this.quill.getSelection();
+            
+            // Insertar un enlace con el nombre del archivo
+            this.quill.insertText(range.index, `📄 ${fileName}`, {
+              'color': '#6262bf',
+              'bold': true
+            });
+            
+            // Opcional: También puedes hacer algo con el archivo aquí
+            console.log('Archivo seleccionado:', file);
+          }
+        };
+        input.click();
+      }
+    }
+  }
+};
+
+const formats = [
+  'header', 'bold', 'italic', 'underline', 'strike',
+  'color', 'background', 'list', 'bullet', 'align',
+  'blockquote', 'code-block', 'image', 'video'
+];
 
   return (
     <div className={styles.topicEditorSection}>
@@ -51,70 +116,27 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
       <div className={styles.topicEditorContent}>
         <div className={styles.topicTitleSection}>
           <label className={styles.topicLabel}>Título del tema</label>
-          <input
-            type="text"
-            className={styles.topicTitleInput}
-            value={themeTitle}
-            onChange={(e) => setThemeTitle(e.target.value)}
-            placeholder="Elige un nombre"
-          />
+            <input
+              type="text"
+              className={styles.topicTitleInput}
+              value={title}  // ← Cambiar de themeTitle a title
+              onChange={(e) => onTitleChange?.(e.target.value)}  // ← Cambiar
+              placeholder="Elige un nombre"
+            />
         </div>
         
         <div className={styles.topicDescriptionSection}>
-          <label className={styles.topicLabel}>Descripción</label>
-          <div className={styles.topicEditor}>
-            <textarea
-              className={styles.topicTextarea}
-              value={themeDescription}
-              onChange={(e) => setThemeDescription(e.target.value)}
-              placeholder="Escribe una descripción..."
-            />
-            <div className={styles.editorToolbar}>
-              <select className={styles.fontSelect}>
-                <option>Sans Serif</option>
-              </select>
-              <select className={styles.sizeSelect}>
-                <option>TT</option>
-              </select>
-              
-              <div className={styles.toolbarDivider}></div>
-              
-              <button className={styles.formatButton} title="Negrita">
-                <strong>B</strong>
-              </button>
-              <button className={styles.formatButton} title="Cursiva">
-                <em>I</em>
-              </button>
-              <button className={styles.formatButton} title="Subrayado">
-                <u>U</u>
-              </button>
-              <button className={styles.formatButton} title="Color de texto">
-                A
-              </button>
-              
-              <div className={styles.toolbarDivider}></div>
-              
-              <button className={styles.formatButton} title="Lista con viñetas">
-                •
-              </button>
-              <button className={styles.formatButton} title="Lista numerada">
-                1.
-              </button>
-              <button className={styles.formatButton} title="Cita">
-                "
-              </button>
-              
-              <div className={styles.toolbarDivider}></div>
-              
-              <button className={styles.formatButton} title="Adjuntar imagen">
-                <Image size={16} />
-              </button>
-              <button className={styles.formatButton} title="Adjuntar archivo">
-                📎
-              </button>
-            </div>
-          </div>
-        </div>
+  <label className={styles.topicLabel}>Descripción</label>
+  <div className={styles.customQuillEditor}>
+    <ReactQuill
+      value={description}
+      onChange={onDescriptionChange}
+      modules={modules}
+      formats={formats}
+      placeholder="Escribe una descripción..."
+    />
+  </div>
+</div>
       </div>
     </div>
   );

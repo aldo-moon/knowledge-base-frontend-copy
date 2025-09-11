@@ -33,7 +33,6 @@ export const FilesGrid: React.FC<FilesGridProps> = ({
   onFileMenuAction,
   onToggleFileFavorite
 }) => {
-  console.log('📁 FilesGrid recibió fileFavorites:', Array.from(fileFavorites));
 
   if (loading) {
     return (

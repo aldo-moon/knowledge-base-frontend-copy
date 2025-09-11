@@ -55,6 +55,10 @@ interface ContentAreaProps {
   folderFavorites?: Set<string>; 
   themeFavorites?: Set<string>; 
   fileFavorites?: Set<string>;
+    themeTitle?: string;
+  themeDescription?: string;
+  onThemeTitleChange?: (title: string) => void;
+  onThemeDescriptionChange?: (description: string) => void;
   
   //  Datos del usuario para vista "Mis archivos"
   userContent?: {
@@ -124,6 +128,10 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
   onToggleFileFavorite,        
   loading,
   error,
+    themeTitle,
+  themeDescription,
+  onThemeTitleChange,
+  onThemeDescriptionChange,
   
   //  Props para contenido del usuario
   userContent,
@@ -167,6 +175,10 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
       <ThemeEditor 
         onBack={onThemeEditorBack}
         onSave={onThemeEditorSave}
+        title={themeTitle || ''}
+        description={themeDescription || ''}
+        onTitleChange={onThemeTitleChange}
+        onDescriptionChange={onThemeDescriptionChange}
       />
     );
   }

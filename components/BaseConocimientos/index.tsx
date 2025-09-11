@@ -128,6 +128,8 @@ const BaseConocimientos = () => {
   const [folderFavorites, setFolderFavorites] = useState<Set<string>>(new Set());
   const [themeFavorites, setThemeFavorites] = useState<Set<string>>(new Set());
 
+  const [themeTitle, setThemeTitle] = useState('');
+  const [themeDescription, setThemeDescription] = useState('');
 
   const [userContent, setUserContent] = useState({
     folders: [],
@@ -303,12 +305,44 @@ const handleSubfolderClick = (folderId: string, folderName: string) => {
   };
 
   // Handler para ThemeForm (en el DetailsPanel) - usar navegación con routing
-  const handleThemeFormSubmit = (formData: any) => {
-    console.log('Theme form data:', formData);
-    // Aquí iría la lógica para crear el tema usando temaService
-    // await temaService.createTema(formData);
+const handleThemeFormSubmit = async (formData: any) => {
+  try {
+    // Validar que tenemos título y descripción
+    if (!themeTitle.trim() || !themeDescription.trim()) {
+      console.error('Título y descripción son requeridos');
+      return;
+    }
+
+    // Estructura completa del tema para el backend
+    const temaCompleto = {
+      title_name: themeTitle,
+      description: themeDescription,
+      priority: formData.priority === 'Alta' ? 2 : formData.priority === 'Baja' ? 0 : 1,
+      area_id: formData.area,
+      puesto_id: formData.position,
+      folder_id: currentFolderId,
+      author_topic_id: CURRENT_USER_ID,
+      keywords: formData.tags ? [formData.tags] : []
+    };
+
+    console.log('Creando tema:', temaCompleto);
+    
+    // Crear el tema usando el servicio
+    const nuevoTema = await temaService.createTema(temaCompleto);
+    console.log('Tema creado exitosamente:', nuevoTema);
+    
+    // Limpiar estados
+    setThemeTitle('');
+    setThemeDescription('');
+    
+    // Volver a la vista anterior y recargar contenido
     navigateBackFromTheme(currentFolderId);
-  };
+    await loadCarpetas(); // Recargar para mostrar el nuevo tema
+    
+  } catch (error) {
+    console.error('Error creando tema:', error);
+  }
+};
 
   const handleThemeFormCancel = () => {
     navigateBackFromTheme(currentFolderId);
@@ -1104,7 +1138,11 @@ const handleToggleFileFavorite = async (fileId) => {
               favoritesContentError={favoritesContentError}
               onToggleFileFavorite={handleToggleFileFavorite} 
               onFileMenuAction={handleFileMenuAction} 
-              onFileSelect={handleFileSelection} 
+              onFileSelect={handleFileSelection}
+              themeTitle={themeTitle}
+              themeDescription={themeDescription}
+              onThemeTitleChange={setThemeTitle}
+              onThemeDescriptionChange={setThemeDescription}
             />
 
             {/* Details Panel - siempre visible, cambia contenido según el contexto */}

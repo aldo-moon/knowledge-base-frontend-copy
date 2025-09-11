@@ -2762,3 +2762,52 @@ font-size: 1rem;
 }
 
 
+
+
+
+/* React Quill personalizado */
+.customQuillEditor :global(.ql-toolbar) {
+  background: #27293d  !important;
+  border: 1px solid #6262bf !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.customQuillEditor :global(.ql-container) {
+  background: #1e1e2f !important;
+  border: 1px solid #6262bf !important;
+  border-top: none !important;
+  border-radius: 0 0 8px 8px !important;
+}
+
+.customQuillEditor :global(.ql-editor) {
+  color: white !important;
+  min-height: 27rem !important;
+}
+
+.customQuillEditor :global(.ql-editor.ql-blank::before) {
+  color: #6b7280 !important;
+}
+
+.customQuillEditor :global(.ql-toolbar .ql-stroke) {
+  stroke: #cbd5e1 !important;
+}
+
+.customQuillEditor :global(.ql-toolbar .ql-fill) {
+  fill: #cbd5e1 !important;
+}
+
+
+.customQuillEditor :global(.ql-toolbar .ql-picker-label) {
+  color: #cbd5e1 !important;
+}
+
+.customQuillEditor :global(.ql-document) {
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14,2 14,8 20,8"></polyline></svg>') no-repeat center !important;
+  background-size: 16px !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.customQuillEditor :global(.ql-document::before) {
+  content: '' !important;
+}
