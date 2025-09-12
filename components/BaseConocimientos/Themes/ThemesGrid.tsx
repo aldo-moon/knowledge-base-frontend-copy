@@ -19,7 +19,7 @@ interface ThemesGridProps {
   error?: string | null;
   themeFavorites?: Set<string>; 
   onThemeSelect: (theme: Theme) => void;
-  onThemeDoubleClick?: (theme: Theme) => void;
+  onThemeDoubleClick?: (theme: Theme) => void;  // NUEVO
   onThemeMenuAction?: (action: string, theme: Theme) => void;
   onToggleThemeFavorite?: (folderId: string) => void; 
 }
@@ -64,7 +64,7 @@ export const ThemesGrid: React.FC<ThemesGridProps> = ({
             theme={theme}
             isFavorite={themeFavorites.has(theme._id)}
             onSelect={onThemeSelect}
-            onDoubleClick={onThemeDoubleClick}
+            onThemeDoubleClick={onThemeDoubleClick}
             onMenuAction={onThemeMenuAction}
             onToggleFavorite={onToggleThemeFavorite}
           />

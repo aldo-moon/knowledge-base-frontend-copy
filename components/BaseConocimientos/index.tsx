@@ -28,6 +28,9 @@ import UserFavoritesView from './Content/FavoritesContentView';
 import RenameFileModal from './Modals/RenameFileModal';
 import DeleteFileModal from './Modals/DeleteFileModal';
 import FilesGrid from './Files/FilesGrid';
+import ThemeDetailView from './Content/ThemeDetailView';
+import ThemeCommentsPanel from './Details/ThemeCommentsPanel';
+
 
 // Importar servicios
 import { carpetaService } from '../../services/carpetaService';
@@ -93,6 +96,8 @@ const BaseConocimientos = () => {
     navigateToCreateTheme,
     navigateBackFromTheme,
     navigateToSection,
+    navigateToThemeDetail,        // NUEVO
+    navigateBackFromThemeDetail,
     updateSearchFilters,
     getFiltersFromUrl,
     initializeFromUrl,
@@ -573,6 +578,27 @@ const handleDeleteTheme = async () => {
   }
 };
 
+// AGREGAR función para manejar doble click en temas
+const handleThemeDoubleClick = (theme: Theme) => {
+  console.log('Doble click en tema:', theme.title_name);
+  navigateToThemeDetail(theme._id);
+};
+
+// AGREGAR handlers para acciones desde la vista detallada
+const handleThemeEditFromDetail = (theme: Theme) => {
+  // Usar la lógica existente de edición
+  setSelectedTheme(theme);
+  setIsRenameThemeModalOpen(true);
+};
+
+const handleThemeDeleteFromDetail = (theme: Theme) => {
+  // Usar la lógica existente de eliminación
+  setThemeToDelete(theme);
+  setIsDeleteThemeModalOpen(true);
+};
+
+
+
   // Handler genérico para cerrar modales
   const closeModal = (setModalState, clearDataFunction = null) => {
     setModalState(false);
@@ -645,10 +671,10 @@ const handleToggleThemeFavorite = async (themeId: string) => {
 const loadUserFavorites = async () => {
   try {
     const userId = "68adc29785d92b4c84e01c5b";
-    console.log('🔍 Cargando favoritos del servidor...');
+
     
     const favoritesResponse = await favoritoService.getFavoritoById(userId);
-    console.log('🔍 RESPUESTA COMPLETA DEL SERVIDOR:', favoritesResponse);
+
 
     if (!favoritesResponse) {
       console.log('No hay favoritos para este usuario');
@@ -676,8 +702,7 @@ const loadUserFavorites = async () => {
     const folderFavorites = favorites.content_folder || [];
     const topicFavorites = favorites.content_topic || [];
     const fileFavorites = favorites.content_file || [];
-    console.log('🔍 content_file del servidor completo:', fileFavorites);
-console.log('🔍 Cada archivo:', fileFavorites.map(f => f._id));
+
 
     // Siempre actualizar estados
     const folderIds = folderFavorites.map(folder => folder._id);
@@ -688,12 +713,7 @@ console.log('🔍 Cada archivo:', fileFavorites.map(f => f._id));
 
     const fileIds = fileFavorites.map(file => file._id);
     setFileFavorites(new Set(fileIds));
-    console.log('🔍 IDs cargados:', fileIds);
 
-       // Verificar que realmente se guardó
-    setTimeout(() => {
-      console.log('🔍 Estado después de 1 segundo:', Array.from(fileFavorites));
-    }, 1000);
 
     // Actualizar sidebar
     const favFolders = folderFavorites.map(folder => ({
@@ -831,9 +851,12 @@ const getActiveView = () => {
   if (isCreatingTheme) {
     return 'folder';
   }
-  
+
   // Vista específica según la sección activa
   switch (activeSection) {
+    case 'theme-detail':
+      return 'theme-detail';
+
     case 'Mis archivos':
       return 'user-content';
     
@@ -846,15 +869,16 @@ const getActiveView = () => {
   }
 };
 
+
 const loadFavoritesContent = async () => {
   try {
     setFavoritesContentLoading(true);
     setFavoritesContentError(null);
     
-    console.log('Cargando contenido completo de favoritos...');
+
     
     const favoritesResponse = await favoritoService.getFavoritoById(CURRENT_USER_ID);
-    console.log('🔍 loadFavoritesContent - respuesta completa:', favoritesResponse);
+
 
     if (!favoritesResponse) {
       setFavoritesContent({ folders: [], themes: [], files: [] }); // Agregar files
@@ -876,11 +900,6 @@ const loadFavoritesContent = async () => {
     const topicFavorites = favorites.content_topic || [];
     const fileFavorites = favorites.content_file || []; // Nuevo
 
-
-    console.log('🔍  - datos del servidor:');
-    console.log('🔍 folderFavorites:', folderFavorites);
-    console.log('🔍 topicFavorites:', topicFavorites);
-    console.log('🔍 fileFavorites:', fileFavorites); 
 
     // Obtener datos completos
     const folderDetails = await Promise.all(
@@ -1127,6 +1146,7 @@ const handleToggleFileFavorite = async (fileId) => {
               onToggleThemeFavorite={handleToggleThemeFavorite}
               onThemeSelect={handleThemeSelection}
               onThemeMenuAction={handleThemeMenuAction}
+              onThemeDoubleClick={handleThemeDoubleClick} 
               onThemeEditorBack={handleThemeEditorBack}
               onThemeEditorSave={handleThemeEditorSave}
               userContent={userContent}
@@ -1143,6 +1163,10 @@ const handleToggleFileFavorite = async (fileId) => {
               themeDescription={themeDescription}
               onThemeTitleChange={setThemeTitle}
               onThemeDescriptionChange={setThemeDescription}
+                viewingThemeId={currentThemeId}
+  onThemeDetailBack={navigateBackFromThemeDetail}
+  onThemeEdit={handleThemeEditFromDetail}
+  onThemeDelete={handleThemeDeleteFromDetail}
             />
 
             {/* Details Panel - siempre visible, cambia contenido según el contexto */}

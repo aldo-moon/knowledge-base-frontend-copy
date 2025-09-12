@@ -45,15 +45,14 @@ useEffect(() => {
   const loadFormData = async () => {
     try {
       setLoadingData(true);
-      console.log('🔍 Cargando áreas y puestos...');
+
       
       const [areasData, puestosData] = await Promise.all([
         areaService.getAllAreas(),
         puestoService.getAllPuestos()
       ]);
       
-      console.log('🔍 Áreas recibidas:', areasData);
-      console.log('🔍 Puestos recibidos:', puestosData);
+
       
       setAreas(areasData);
       setPuestos(puestosData);
@@ -134,7 +133,7 @@ useEffect(() => {
               disabled={loadingData}
             >
               <option value="">
-                {loadingData ? 'Cargando...' : '--'}
+                {loadingData ? 'Cargando...' : 'Seleccionar...'}
               </option>
               {puestos.map((puesto) => (
                 <option key={puesto._id} value={puesto._id}>

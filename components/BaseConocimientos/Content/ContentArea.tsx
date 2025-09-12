@@ -8,6 +8,7 @@ import ThemeEditor from '../Themes/ThemeEditor';
 import UserContentView from './UserContentView';
 import FavoritesContentView from './FavoritesContentView';
 import FilesGrid from '../Files/FilesGrid';
+import ThemeDetailView from './ThemeDetailView';
 
 import styles from './../../../styles/base-conocimientos.module.css';
 
@@ -59,6 +60,13 @@ interface ContentAreaProps {
   themeDescription?: string;
   onThemeTitleChange?: (title: string) => void;
   onThemeDescriptionChange?: (description: string) => void;
+  showCommentsPanel?: boolean;
+
+  viewingThemeId?: string | null;
+  onThemeDetailBack: () => void;
+  onThemeEdit?: (theme: any) => void;
+  onThemeDelete?: (theme: any) => void;
+  onThemeDoubleClick?: (theme: any) => void;
   
   //  Datos del usuario para vista "Mis archivos"
   userContent?: {
@@ -132,7 +140,11 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
   themeDescription,
   onThemeTitleChange,
   onThemeDescriptionChange,
-  
+  viewingThemeId,
+  onThemeDetailBack,
+  onThemeEdit,
+  onThemeDelete,
+  onThemeDoubleClick,
   //  Props para contenido del usuario
   userContent,
   userContentLoading = false,
@@ -168,7 +180,20 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
   
 
 }) => {
-  
+
+  if (activeView === 'theme-detail' && viewingThemeId) {
+    return (
+      <ThemeDetailView
+        themeId={viewingThemeId}
+        onBack={onThemeDetailBack}
+        onEdit={onThemeEdit}
+        onDelete={onThemeDelete}
+        onToggleFavorite={onToggleThemeFavorite}
+        isFavorite={themeFavorites?.has(viewingThemeId)}
+      />
+    );
+  }
+
   // Si está creando un nuevo tema, mostrar el editor
   if (isCreatingNewTopic) {
     return (
@@ -182,11 +207,9 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
       />
     );
   }
-
   //  Si la vista activa es "user-content", mostrar UserContentView
   if (activeView === 'user-content') {
-  console.log('🏠 ContentArea - fileFavorites recibido:', fileFavorites);
-  console.log('🏠 ContentArea - tipo:', typeof fileFavorites);
+
     return (
       <UserContentView
         userFolders={userContent?.folders || []}
@@ -289,12 +312,11 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
         {/* Sección de Temas */}
         <ThemesGrid
           themes={themes}
-          themeFavorites={themeFavorites} 
-          loading={loading}
-          error={error}
           onThemeSelect={onThemeSelect}
           onThemeMenuAction={onThemeMenuAction}
-          onToggleThemeFavorite={onToggleThemeFavorite} 
+          onThemeDoubleClick={onThemeDoubleClick}  // NUEVO
+          onToggleThemeFavorite={onToggleThemeFavorite}
+          themeFavorites={themeFavorites}
         />
 
         <FilesGrid

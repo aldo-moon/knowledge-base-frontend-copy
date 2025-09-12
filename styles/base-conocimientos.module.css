@@ -740,7 +740,11 @@
   padding: 1.5rem;
   background: #27293d;
   border-radius: 1.5rem;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+  height: 46.5rem;
 }
 
 .contentHeader {
@@ -788,7 +792,7 @@
   animation: filtersSlideIn 0.3s ease-out;
   max-width: 26.7rem;
   position: absolute;
-  right: 23%;
+  right: 24%;
 }
 
 .contentHeaderTags1 {
@@ -1756,6 +1760,9 @@
   border-radius: 1.5rem;
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+  height: 46.5rem;
 }
 
 /* Header del editor */
@@ -2763,11 +2770,13 @@ font-size: 1rem;
 
 
 
-
+/* ========================================= */
+/* ESTILOS CORREGIDOS PARA REACT QUILL */
+/* ========================================= */
 
 /* React Quill personalizado */
 .customQuillEditor :global(.ql-toolbar) {
-  background: #27293d  !important;
+  background: #27293d !important;
   border: 1px solid #6262bf !important;
   border-radius: 8px 8px 0 0 !important;
 }
@@ -2788,6 +2797,7 @@ font-size: 1rem;
   color: #6b7280 !important;
 }
 
+/* ICONOS Y ELEMENTOS DE LA TOOLBAR - Estado normal */
 .customQuillEditor :global(.ql-toolbar .ql-stroke) {
   stroke: #cbd5e1 !important;
 }
@@ -2796,11 +2806,91 @@ font-size: 1rem;
   fill: #cbd5e1 !important;
 }
 
-
 .customQuillEditor :global(.ql-toolbar .ql-picker-label) {
   color: #cbd5e1 !important;
 }
 
+/* NUEVOS ESTILOS PARA ESTADOS ACTIVOS */
+
+/* Botones activos - cuando están seleccionados */
+.customQuillEditor :global(.ql-toolbar button.ql-active) {
+  background-color: #6262bf !important;
+  border-radius: 4px !important;
+}
+
+.customQuillEditor :global(.ql-toolbar button.ql-active .ql-stroke) {
+  stroke: #ffffff !important;
+}
+
+.customQuillEditor :global(.ql-toolbar button.ql-active .ql-fill) {
+  fill: #ffffff !important;
+}
+
+/* Hover states para todos los botones */
+.customQuillEditor :global(.ql-toolbar button:hover) {
+  background-color: #3b3f5f !important;
+  border-radius: 4px !important;
+}
+
+.customQuillEditor :global(.ql-toolbar button:hover .ql-stroke) {
+  stroke: #ffffff !important;
+}
+
+.customQuillEditor :global(.ql-toolbar button:hover .ql-fill) {
+  fill: #ffffff !important;
+}
+
+/* Picker activo (dropdowns como header, color, etc.) */
+.customQuillEditor :global(.ql-toolbar .ql-picker.ql-expanded) {
+  background-color: #6262bf !important;
+  border-radius: 4px !important;
+}
+
+.customQuillEditor :global(.ql-toolbar .ql-picker.ql-expanded .ql-picker-label) {
+  color: #ffffff !important;
+}
+
+.customQuillEditor :global(.ql-toolbar .ql-picker.ql-expanded .ql-stroke) {
+  stroke: #ffffff !important;
+}
+
+/* Picker options dropdown */
+.customQuillEditor :global(.ql-toolbar .ql-picker-options) {
+  background-color: #1e1e2f !important;
+  border: 1px solid #6262bf !important;
+  border-radius: 4px !important;
+  padding: 4px 0 !important;
+}
+
+.customQuillEditor :global(.ql-toolbar .ql-picker-item) {
+  color: #cbd5e1 !important;
+  padding: 8px 12px !important;
+}
+
+.customQuillEditor :global(.ql-toolbar .ql-picker-item:hover) {
+  background-color: #6262bf !important;
+  color: #ffffff !important;
+}
+
+.customQuillEditor :global(.ql-toolbar .ql-picker-item.ql-selected) {
+  background-color: #6262bf !important;
+  color: #ffffff !important;
+}
+
+/* Color picker específico */
+.customQuillEditor :global(.ql-toolbar .ql-color .ql-picker-options) {
+  padding: 8px !important;
+}
+
+.customQuillEditor :global(.ql-toolbar .ql-color .ql-picker-item) {
+  width: 20px !important;
+  height: 20px !important;
+  margin: 2px !important;
+  border-radius: 2px !important;
+  border: 1px solid #3b3f5f !important;
+}
+
+/* Custom document button icon */
 .customQuillEditor :global(.ql-document) {
   background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14,2 14,8 20,8"></polyline></svg>') no-repeat center !important;
   background-size: 16px !important;
@@ -2810,4 +2900,567 @@ font-size: 1rem;
 
 .customQuillEditor :global(.ql-document::before) {
   content: '' !important;
+}
+
+/* Mejor contraste para el ícono de documento */
+.customQuillEditor :global(.ql-toolbar button .ql-document) {
+  opacity: 0.8;
+}
+
+.customQuillEditor :global(.ql-toolbar button:hover .ql-document) {
+  opacity: 1;
+}
+
+/* Scroll personalizado para el editor */
+.customQuillEditor :global(.ql-editor)::-webkit-scrollbar {
+  width: 8px;
+}
+
+.customQuillEditor :global(.ql-editor)::-webkit-scrollbar-track {
+  background: #1e1e2f;
+}
+
+.customQuillEditor :global(.ql-editor)::-webkit-scrollbar-thumb {
+  background: #6262bf;
+  border-radius: 4px;
+}
+
+.customQuillEditor :global(.ql-editor)::-webkit-scrollbar-thumb:hover {
+  background: #7c7ce0;
+}
+
+
+
+
+/* ========================================= */
+/* ESTILOS PARA VISTA DETALLADA DE TEMA */
+/* ========================================= */
+
+/* Contenedor principal */
+.themeDetailContainer {
+  flex: 1;
+  padding: 1.5rem;
+  background: #27293d;
+  border-radius: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+  height: 46.5rem;
+}
+
+/* Header con botón volver y acciones */
+.themeDetailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.themeDetailActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  background: transparent;
+  border: 0px solid #3b3f5f;
+  color: #cbd5e1;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton:hover {
+  background: #3b3f5f;
+  color: white;
+  border-color: #6262bf;
+}
+
+.favoriteActive {
+  color: #6262bf !important;
+  border-color: #6262bf !important;
+}
+
+/* Contenido principal */
+.themeDetailContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Metadata del tema */
+.themeDetailMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.themeDetailTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.themeMetadata {
+  display: flex;
+  flex-wrap:  nowrap;
+  gap: 1rem;
+  align-items: center;
+
+}
+
+.metadataItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #9ca3af;
+  font-size: 0.800rem;
+}
+
+.priorityBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  color: white;
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+/* Keywords */
+.keywordsList {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.keywordTag {
+  background: #6262bf;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Cuerpo del contenido */
+.themeDetailBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.themeDetailBody h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+/* Nueva clase específica para imágenes en el contenido del tema */
+/* Clase específica para imágenes en el contenido del tema */
+/* Clase específica para imágenes en el contenido del tema */
+/* Contenedor principal para todo el contenido del tema */
+/* Contenedor principal para todo el contenido del tema */
+/* Contenedor principal para todo el contenido del tema */
+.themeContentWrapper {
+  background-color: #30334d;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin: 1rem 0;
+  border: 1px solid #3b3f5f;
+  text-align: center;
+}
+
+/* Contenido interno */
+.themeContent1 {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  color: white;
+  line-height: 1.6;
+  overflow-x: auto;
+  text-align: left;
+  min-width: 100%;          /* Ocupar todo el ancho */
+  min-height: 100%;     /* Ocupar toda la altura */
+  box-sizing: border-box; /* Incluir padding en el cálculo del tamaño */
+}
+
+/* Estilos para las imágenes con su propio rectángulo */
+.themeContent1 img {
+  max-width: 200px;
+  min-height: 180px;
+  width: auto;
+  height: auto;
+  border-radius: 0.5rem;
+  object-fit: contain;
+  display: block;
+  background-color: #30334d ;  /* Rectangulo individual más oscuro */
+  padding: 0 1rem 0rem 1rem ;             /* Espaciado interno del rectángulo */
+
+}
+
+/* Para móviles */
+@media (max-width: 768px) {
+  .themeContentWrapper {
+    padding: 1rem;
+  }
+  
+  .themeContent img {
+    max-width: 95%;
+    padding: 0.5rem;
+  }
+}
+
+.additionalContent {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #3b3f5f;
+  color: #9ca3af;
+  text-align: center;
+}
+
+
+
+
+
+
+/* Contador de vistas con barra de progreso */
+.viewsCounter {
+  margin-top: 2.5rem;
+  padding: 1rem 0;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.viewsInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.viewsLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.viewsNumber {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.viewsText {
+  color: #e0e7ff;
+}
+
+.viewsPercentage {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+/* Barra de progreso */
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background-color: #374151;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  min-width: 2px; /* Mínimo para que siempre se vea algo */
+}
+
+
+/* Contenedor para imagen con su nombre */
+.imageWithCaption {
+  margin: 1rem auto;
+  text-align: center;
+  max-width: 90%;
+}
+
+.imageCaption {
+  color: #e5e7eb;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: #2a2d3f;
+  border-radius: 0.5rem 0.5rem 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+
+
+/* Estilos globales para imágenes con caption */
+.themeContent1 :global(.imageWithCaption) {
+  text-align: center;
+  max-width: 90%;
+  border: 2px solid #6262bf;
+  border-radius: 0.5rem;
+  overflow: hidden;
+    max-width: 200px;
+  min-height: 180px;
+  width: auto;
+  height: auto;
+}
+
+.themeContent1 :global(.imageCaption) {
+max-width: 300px;
+  margin: 0 auto;
+  background: #30334d ;
+  color: #e5e7eb;
+  padding: 0.5rem 0.5rem 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  border-radius: 0.5rem 0.5rem 0 0;
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Modificar las imágenes dentro del caption container */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* ESTILOS PARA PANEL DE COMENTARIOS */
+/* ========================================= */
+
+/* Panel principal de comentarios */
+.commentsPanel {
+  width: 17%;
+  height: 46.5rem;
+  background-color: #27293d;
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+/* Header del panel */
+.commentsPanelHeader {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #3b3f5f;
+}
+
+.commentsPanelTitle {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Sección de input para comentarios */
+.commentInputSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.commentTextarea {
+  background: #1e1e2f;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  color: white;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 80px;
+  max-height: 120px;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.commentTextarea:focus {
+  outline: none;
+  border-color: #6262bf;
+  box-shadow: 0 0 0 3px rgba(98, 98, 191, 0.1);
+}
+
+.commentTextarea::placeholder {
+  color: #6b7280;
+}
+
+/* Botón publicar */
+.publishButton {
+  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.publishButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29, 140, 248, 0.3);
+}
+
+.publishButton:disabled {
+  background: #4a5568;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Lista de comentarios */
+.commentsList {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Scroll personalizado para la lista */
+.commentsList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.commentsList::-webkit-scrollbar-track {
+  background: #1e1e2f;
+  border-radius: 3px;
+}
+
+.commentsList::-webkit-scrollbar-thumb {
+  background: #6262bf;
+  border-radius: 3px;
+}
+
+.commentsList::-webkit-scrollbar-thumb:hover {
+  background: #7c7ce0;
+}
+
+/* Item individual de comentario */
+.commentItem {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #1e1e2f;
+  border-radius: 0.75rem;
+  border: 1px solid #3b3f5f;
+  transition: background-color 0.2s ease;
+}
+
+.commentItem:hover {
+  background: #252740;
+}
+
+/* Avatar del comentario */
+.commentAvatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #e91e63, #9c27b0);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* Contenido del comentario */
+.commentContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0; /* Para permitir text-overflow */
+}
+
+.commentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.commentAuthor {
+  color: white;
+  font-weight: 500;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.commentTime {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.commentText {
+  color: #e5e7eb;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin: 0;
+  word-wrap: break-word;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .commentsPanel {
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+  }
+  
+  .commentItem {
+    padding: 0.75rem;
+  }
+  
+  .commentAvatar {
+    width: 35px;
+    height: 35px;
+    font-size: 0.875rem;
+  }
 }

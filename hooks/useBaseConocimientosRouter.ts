@@ -17,52 +17,61 @@ export const useBaseConocimientosRouter = () => {
   ]);
 
   // Parsear la URL desde el slug
-  const parseSlugFromUrl = () => {
-    if (!slug || !Array.isArray(slug)) {
-      return {
-        folderId: "68acb06886d455d16cceef05",
-        themeId: null,
-        isCreatingTheme: false,
-        isViewingTheme: false,
-        activeSection: 'Contenedor' // 🆕 Nuevo campo
-      };
-    }
+// Parsear la URL desde el slug
+const parseSlugFromUrl = () => {
+  if (!slug || !Array.isArray(slug)) {
+    return {
+      folderId: "68acb06886d455d16cceef05",
+      themeId: null,
+      isCreatingTheme: false,
+      isViewingTheme: false,
+      activeSection: 'Contenedor'
+    };
+  }
 
-    let folderId = "68acb06886d455d16cceef05";
-    let themeId = null;
-    let isCreatingTheme = false;
-    let isViewingTheme = false;
-    let activeSection = 'Contenedor'; // 🆕 Por defecto Contenedor
+  let folderId = "68acb06886d455d16cceef05";
+  let themeId = null;
+  let isCreatingTheme = false;
+  let isViewingTheme = false;
+  let activeSection = 'Contenedor';
 
-    // 🆕 Verificar secciones especiales primero
-    if (slug[0] === 'mis-archivos') {
-      activeSection = 'Mis archivos';
-      return { folderId, themeId, isCreatingTheme, isViewingTheme, activeSection };
-    }
-
-    if (slug[0] === 'favoritos') {
-      activeSection = 'Favoritos';
-      return { folderId, themeId, isCreatingTheme, isViewingTheme, activeSection };
-    }
-
-    // Verificación para folder (lógica existente)
-    if (slug[0] === 'folder' && slug[1]) {
-      folderId = slug[1] as string;
-      activeSection = 'Contenedor'; // Las carpetas siguen siendo parte de Contenedor
-    }
-
-    if (slug.includes('theme') && slug.length >= 2) {
-      const themeIndex = slug.indexOf('theme');
-      themeId = slug[themeIndex + 1] as string;
-      isViewingTheme = true;
-    }
-
-    if (slug.includes('new-theme')) {
-      isCreatingTheme = true;
-    }
-
+  // Verificar secciones especiales primero
+  if (slug[0] === 'mis-archivos') {
+    activeSection = 'Mis archivos';
     return { folderId, themeId, isCreatingTheme, isViewingTheme, activeSection };
-  };
+  }
+
+  if (slug[0] === 'favoritos') {
+    activeSection = 'Favoritos';
+    return { folderId, themeId, isCreatingTheme, isViewingTheme, activeSection };
+  }
+
+  // AGREGAR: Verificar vista de tema detallada
+  if (slug[0] === 'theme-detail' && slug[1]) {
+    themeId = slug[1] as string;
+    isViewingTheme = true;
+    activeSection = 'theme-detail';
+    return { folderId, themeId, isCreatingTheme, isViewingTheme, activeSection };
+  }
+
+  // Verificación para folder (lógica existente)
+  if (slug[0] === 'folder' && slug[1]) {
+    folderId = slug[1] as string;
+    activeSection = 'Contenedor';
+  }
+
+  if (slug.includes('theme') && slug.length >= 2) {
+    const themeIndex = slug.indexOf('theme');
+    themeId = slug[themeIndex + 1] as string;
+    isViewingTheme = true;
+  }
+
+  if (slug.includes('new-theme')) {
+    isCreatingTheme = true;
+  }
+
+  return { folderId, themeId, isCreatingTheme, isViewingTheme, activeSection };
+};
 
   // 🆕 Navegar a secciones especiales
   const navigateToSection = (sectionName: string) => {
@@ -312,6 +321,25 @@ export const useBaseConocimientosRouter = () => {
         : `${baseUrl}/base-conocimientos/theme/${itemId}`;
     }
   };
+
+
+// AGREGAR nuevas funciones de navegación
+const navigateToThemeDetail = (themeId: string) => {
+  const currentQuery = { ...router.query };
+  delete currentQuery.slug;
+  
+  const url = `/base-conocimientos/theme-detail/${themeId}`;
+  const queryString = Object.keys(currentQuery).length > 0 
+    ? '?' + new URLSearchParams(currentQuery as Record<string, string>).toString()
+    : '';
+  
+  router.push(`${url}${queryString}`);
+};
+
+const navigateBackFromThemeDetail = () => {
+  // Volver a la vista de contenedor por defecto
+  navigateToSection('Contenedor');
+};
   
   return {
     // Estados actuales (actualizado)
@@ -319,7 +347,7 @@ export const useBaseConocimientosRouter = () => {
     currentThemeId: currentContext.themeId,
     isCreatingTheme: currentContext.isCreatingTheme,
     isViewingTheme: currentContext.isViewingTheme,
-    activeSection: currentContext.activeSection, // 🆕 Nueva propiedad
+    activeSection: currentContext.activeSection, 
     navigationPath,
     
     // Funciones de navegación (actualizado)
@@ -327,7 +355,9 @@ export const useBaseConocimientosRouter = () => {
     navigateToTheme,
     navigateToCreateTheme,
     navigateBackFromTheme,
-    navigateToSection, // 🆕 Nueva función
+    navigateToSection,
+     navigateToThemeDetail,
+  navigateBackFromThemeDetail, // 🆕 Nueva función
     
     // Funciones de filtros
     updateSearchFilters,

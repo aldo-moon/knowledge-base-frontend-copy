@@ -22,7 +22,7 @@ interface MenuOption {
 interface ThemeCardProps {
   theme: Theme;
   onSelect: (theme: Theme) => void;
-  onDoubleClick?: (theme: Theme) => void;
+  onThemeDoubleClick?: (theme: Theme) => void;
   onMenuAction?: (action: string, theme: Theme) => void;
   isFavorite?: boolean;
   onToggleFavorite?: (themeId: string) => void; 
@@ -31,7 +31,7 @@ interface ThemeCardProps {
 export const ThemeCard: React.FC<ThemeCardProps> = ({
   theme,
   onSelect,
-  onDoubleClick,
+  onThemeDoubleClick,
   onMenuAction,
   isFavorite = false,
   onToggleFavorite
@@ -79,8 +79,8 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   };
 
   const handleCardDoubleClick = () => {
-    if (onDoubleClick) {
-      onDoubleClick(theme);
+    if (onThemeDoubleClick) {
+      onThemeDoubleClick(theme);
     }
   };
 
@@ -88,7 +88,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
       <div
         className={styles.themeCard}
         onClick={handleCardClick}
-        onDoubleClick={handleCardDoubleClick}
+        onDoubleClick={handleCardDoubleClick}  // Usar onDoubleClick del DOM
       >
         <div className={styles.themeContent}>
           <div className={styles.themeIconContainer}>
