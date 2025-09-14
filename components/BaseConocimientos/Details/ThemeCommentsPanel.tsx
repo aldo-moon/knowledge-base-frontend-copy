@@ -1,14 +1,18 @@
 // components/BaseConocimientos/Details/ThemeCommentsPanel.tsx
-import React, { useState } from 'react';
-import { Send } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Send, Loader } from 'lucide-react';
 import styles from './../../../styles/base-conocimientos.module.css';
+import { comentarioService } from '../../../services/comentarioService';
 
 interface Comment {
-  id: string;
-  author: string;
-  content: string;
-  timestamp: string;
-  avatar: string;
+  _id: string;
+  comment_user_id: {
+    nombre: string;
+    aPaterno?: string;
+  } | string;
+  message: string;
+  creation_date: string;
+  topic_id: string;
 }
 
 interface ThemeCommentsPanelProps {
@@ -17,51 +21,68 @@ interface ThemeCommentsPanelProps {
 
 export const ThemeCommentsPanel: React.FC<ThemeCommentsPanelProps> = ({ themeId }) => {
   const [commentText, setCommentText] = useState('');
-  
-  // Datos estáticos de comentarios de ejemplo
-  const [comments] = useState<Comment[]>([
-    {
-      id: '1',
-      author: 'Elena Rodríguez',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut',
-      timestamp: '2:48 PM AM',
-      avatar: 'E'
-    },
-    {
-      id: '2', 
-      author: 'Elena Rodríguez',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut',
-      timestamp: '2:48 PM AM',
-      avatar: 'E'
-    },
-    {
-      id: '3',
-      author: 'Elena Rodríguez', 
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut',
-      timestamp: '2:48 PM AM',
-      avatar: 'E'
-    },
-    {
-      id: '4',
-      author: 'Elena Rodríguez',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut',
-      timestamp: '2:48 PM AM',
-      avatar: 'E'
-    },
-    {
-      id: '5',
-      author: 'Elena Rodríguez',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut',
-      timestamp: '2:48 PM AM',
-      avatar: 'E'
-    }
-  ]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmitComment = () => {
-    if (commentText.trim()) {
-      // Aquí iría la lógica para enviar el comentario al backend
-      console.log('Enviando comentario:', commentText);
+  // ID del usuario actual - ajusta según tu implementación
+  const CURRENT_USER_ID = "66de69ba7b59f3a6ce60aad1"; // Tu ID de usuario
+
+  useEffect(() => {
+    loadComments();
+  }, [themeId]);
+
+  const loadComments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Obtener todos los comentarios y filtrar por tema
+      const allComments = await comentarioService.getAllComentarios();
+      const themeComments = allComments.filter((comment: Comment) => 
+        comment.topic_id === themeId
+      );
+      
+      // Ordenar por fecha más reciente primero
+      const sortedComments = themeComments.sort((a: Comment, b: Comment) => 
+        new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime()
+      );
+      
+      setComments(sortedComments);
+    } catch (err) {
+      setError('Error al cargar los comentarios');
+      console.error('Error loading comments:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitComment = async () => {
+    if (!commentText.trim() || submitting) return;
+
+    try {
+      setSubmitting(true);
+      
+      const commentData = {
+        message: commentText.trim(),
+        comment_user_id: CURRENT_USER_ID,
+        topic_id: themeId
+      };
+
+      await comentarioService.createComentario(commentData);
+      
+      // Limpiar el campo de texto
       setCommentText('');
+      
+      // Recargar comentarios para mostrar el nuevo
+      await loadComments();
+      
+    } catch (err) {
+      setError('Error al publicar el comentario');
+      console.error('Error creating comment:', err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -72,11 +93,39 @@ export const ThemeCommentsPanel: React.FC<ThemeCommentsPanelProps> = ({ themeId 
     }
   };
 
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+  const getAuthorName = (author: Comment['comment_user_id']) => {
+    if (typeof author === 'string') {
+      return 'Usuario';
+    }
+    return `${author.nombre} ${author.aPaterno || ''}`.trim();
+  };
+
+  const getAuthorInitial = (author: Comment['comment_user_id']) => {
+    if (typeof author === 'string') {
+      return 'U';
+    }
+    return author.nombre.charAt(0).toUpperCase();
+  };
+
   return (
     <div className={styles.commentsPanel}>
       {/* Header */}
       <div className={styles.commentsPanelHeader}>
         <h2 className={styles.commentsPanelTitle}>Comentarios</h2>
+        {comments.length > 0 && (
+          <span className={styles.commentsCount}>({comments.length})</span>
+        )}
       </div>
 
       {/* Comment Input */}
@@ -88,35 +137,68 @@ export const ThemeCommentsPanel: React.FC<ThemeCommentsPanelProps> = ({ themeId 
           onChange={(e) => setCommentText(e.target.value)}
           onKeyPress={handleKeyPress}
           rows={3}
+          disabled={submitting}
         />
         
         <button
           className={styles.publishButton}
           onClick={handleSubmitComment}
-          disabled={!commentText.trim()}
+          disabled={!commentText.trim() || submitting}
         >
-          PUBLICAR
+          {submitting ? (
+            <>
+              <Loader size={16} className={styles.spinner} />
+              PUBLICANDO...
+            </>
+          ) : (
+            'PUBLICAR'
+          )}
         </button>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className={styles.errorMessage}>
+          {error}
+        </div>
+      )}
+
       {/* Comments List */}
       <div className={styles.commentsList}>
-        {comments.map((comment) => (
-          <div key={comment.id} className={styles.commentItem}>
-            <div className={styles.commentAvatar}>
-              {comment.avatar}
-            </div>
-            
-            <div className={styles.commentContent}>
-              <div className={styles.commentHeader}>
-                <span className={styles.commentAuthor}>{comment.author}</span>
-                <span className={styles.commentTime}>{comment.timestamp}</span>
-              </div>
-              
-              <p className={styles.commentText}>{comment.content}</p>
-            </div>
+        {loading ? (
+          <div className={styles.commentsLoading}>
+            <Loader size={24} className={styles.spinner} />
+            <p>Cargando comentarios...</p>
           </div>
-        ))}
+        ) : comments.length === 0 ? (
+          <div className={styles.noComments}>
+            <p>No hay comentarios aún.</p>
+            <p>¡Sé el primero en comentar!</p>
+          </div>
+        ) : (
+         comments.map((comment) => (
+  <div key={comment._id} className={styles.commentItem}>
+    <div className={styles.commentAvatar}>
+      {getAuthorInitial(comment.comment_user_id)}
+    </div>
+    
+    <div className={styles.commentContent}>
+      <div className={styles.commentHeader}>
+        <span className={styles.commentAuthor}>
+          {getAuthorName(comment.comment_user_id)}
+        </span>
+      </div>
+      
+      <p className={styles.commentText}>{comment.message}</p>
+      
+      <span className={styles.commentTime}>
+        {formatDate(comment.creation_date)}
+      </span>
+    </div>
+    
+  </div>
+))
+        )}
       </div>
     </div>
   );

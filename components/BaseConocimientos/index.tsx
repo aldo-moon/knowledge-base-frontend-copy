@@ -846,6 +846,7 @@ const handleSectionChange = async (sectionName) => {
   }
 };
 
+// Agregar esta función en tu componente principal
 const getActiveView = () => {
   // Si está creando tema, usar vista normal
   if (isCreatingTheme) {
@@ -859,11 +860,10 @@ const getActiveView = () => {
 
     case 'Mis archivos':
       return 'user-content';
-    
+
     case 'Favoritos':
-      return 'favorites'; 
-    
-    case 'Contenedor':
+      return 'favorites';
+
     default:
       return 'folder';
   }
@@ -1048,6 +1048,8 @@ const handleCancelDeleteFile = () => {
 
 
 
+
+
 /////////////////////////////////////////// handlers Para AGREGAR A FAVORITOS ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Handler para favoritos de archivos
@@ -1170,18 +1172,24 @@ const handleToggleFileFavorite = async (fileId) => {
             />
 
             {/* Details Panel - siempre visible, cambia contenido según el contexto */}
-            <DetailsPanel 
-              selectedFolderDetails={selectedFolderDetails}
-              selectedTemaId={selectedTemaId}
-              isCreatingNewTopic={isCreatingTheme}
-            >
-              {isCreatingTheme && (
-                <ThemeForm 
-                  onSubmit={handleThemeFormSubmit}
-                  onCancel={handleThemeFormCancel}
-                />
-              )}
-            </DetailsPanel>
+            {/* Panel derecho - cambiar según el contexto */}
+{activeSection === 'theme-detail' && currentThemeId ? (  // Mostrar panel de comentarios cuando estás viendo un tema
+  <ThemeCommentsPanel themeId={currentThemeId} />
+) : (
+  // Mostrar DetailsPanel normal para otras vistas
+  <DetailsPanel 
+    selectedFolderDetails={selectedFolderDetails}
+    selectedTemaId={selectedTemaId}
+    isCreatingNewTopic={isCreatingTheme}
+  >
+    {isCreatingTheme && (
+      <ThemeForm 
+        onSubmit={handleThemeFormSubmit}
+        onCancel={handleThemeFormCancel}
+      />
+    )}
+  </DetailsPanel>
+)}
           </div>
         </div>
       </div>

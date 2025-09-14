@@ -32,7 +32,7 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
   const [loadingData, setLoadingData] = useState(true);
 
   const [formData, setFormData] = useState<ThemeFormData>({
-    priority: 'Normal',
+    priority: '',
     area: '',
     position: '',
     files: [],
@@ -40,6 +40,49 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
     aiModel: '',
     suggestInHelpDesk: false
   });
+
+  const [errors, setErrors] = useState({
+  priority: '',
+  area: '',
+  position: '',
+  tags: ''
+});
+
+// Función de validación
+const validateForm = () => {
+  const newErrors = {
+    priority: '',
+    area: '',
+    position: '',
+    tags: ''
+  };
+
+  // Validar Prioridad
+  if (!formData.priority || formData.priority === '') {
+    newErrors.priority = 'La prioridad es obligatoria';
+  }
+
+  // Validar Área
+  if (!formData.area || formData.area === '') {
+    newErrors.area = 'El área es obligatoria';
+  }
+
+  // Validar Puesto
+  if (!formData.position || formData.position === '') {
+    newErrors.position = 'El puesto es obligatorio';
+  }
+
+  // Validar Tags
+  if (!formData.tags || formData.tags === '') {
+    newErrors.tags = 'Los tags son obligatorios';
+  }
+
+  setErrors(newErrors);
+
+  // Retornar true si no hay errores
+  return Object.values(newErrors).every(error => error === '');
+};
+
 
 useEffect(() => {
   const loadFormData = async () => {
@@ -74,9 +117,26 @@ useEffect(() => {
     }));
   };
 
-  const handleSubmit = () => {
+ const handleSubmit = () => {
+  if (validateForm()) {
     onSubmit?.(formData);
-  };
+  }
+};
+
+const handleInputChangeWithValidation = (field: keyof ThemeFormData, value: any) => {
+  setFormData(prev => ({
+    ...prev,
+    [field]: value
+  }));
+
+  // Limpiar error del campo cuando el usuario selecciona algo
+  if (errors[field as keyof typeof errors]) {
+    setErrors(prev => ({
+      ...prev,
+      [field]: ''
+    }));
+  }
+};
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -91,35 +151,39 @@ useEffect(() => {
         {/* Prioridad */}
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>Prioridad</label>
+
           <select 
-            className={styles.formSelect}
+            className={`${styles.formSelect} ${errors.priority ? styles.formSelectError : ''}`}
             value={formData.priority}
-            onChange={(e) => handleInputChange('priority', e.target.value)}
+            onChange={(e) => handleInputChangeWithValidation('priority', e.target.value)}
           >
+            <option value="">Seleccionar prioridad</option>
             <option value="Normal">Normal</option>
             <option value="Alta">Alta</option>
             <option value="Baja">Baja</option>
           </select>
+          {errors.priority && <span className={styles.errorMessage}>{errors.priority}</span>}
         </div>
 
         {/* Áreas */}
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>Áreas</label>
-          <select 
-            className={styles.formSelect}
-            value={formData.area}
-            onChange={(e) => handleInputChange('area', e.target.value)}
-            disabled={loadingData}
-          >
-            <option value="">
-              {loadingData ? 'Cargando...' : 'Seleccionar...'}
-            </option>
-            {areas.map((area) => (
-              <option key={area._id} value={area._id}>
-                {area.name_area}
+            <select 
+              className={`${styles.formSelect} ${errors.area ? styles.formSelectError : ''}`}
+              value={formData.area}
+              onChange={(e) => handleInputChangeWithValidation('area', e.target.value)}
+              disabled={loadingData}
+            >
+              <option value="">
+                {loadingData ? 'Cargando...' : 'Seleccionar área'}
               </option>
-            ))}
-          </select>
+              {areas.map((area) => (
+                <option key={area._id} value={area._id}>
+                  {area.name_area}
+                </option>
+              ))}
+            </select>
+            {errors.area && <span className={styles.errorMessage}>{errors.area}</span>}
         </div>
 
         {/* Puestos */}
@@ -127,13 +191,13 @@ useEffect(() => {
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Puestos</label>
             <select 
-              className={styles.formSelect}
+              className={`${styles.formSelect} ${errors.position ? styles.formSelectError : ''}`}
               value={formData.position}
-              onChange={(e) => handleInputChange('position', e.target.value)}
+              onChange={(e) => handleInputChangeWithValidation('position', e.target.value)}
               disabled={loadingData}
             >
               <option value="">
-                {loadingData ? 'Cargando...' : 'Seleccionar...'}
+                {loadingData ? 'Cargando...' : 'Seleccionar puesto'}
               </option>
               {puestos.map((puesto) => (
                 <option key={puesto._id} value={puesto._id}>
@@ -141,6 +205,7 @@ useEffect(() => {
                 </option>
               ))}
             </select>
+            {errors.position && <span className={styles.errorMessage}>{errors.position}</span>}
           </div>
 
         {/* Archivos */}
@@ -157,7 +222,7 @@ useEffect(() => {
               style={{ display: 'none' }}
               id="fileInput"
             />
-            <label htmlFor="fileInput" style={{ cursor: 'pointer', width: '100%' }}>
+            <label htmlFor="fileInput" style={{ cursor: 'pointer', width: '100%', display:'flex', flexDirection:'column', alignItems:'center' }}>
               <div className={styles.uploadIcon}>
                 <Upload size={48} />
               </div>
@@ -175,15 +240,16 @@ useEffect(() => {
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>Tags</label>
           <select 
-            className={styles.formSelect}
+            className={`${styles.formSelect} ${errors.tags ? styles.formSelectError : ''}`}
             value={formData.tags}
-            onChange={(e) => handleInputChange('tags', e.target.value)}
+            onChange={(e) => handleInputChangeWithValidation('tags', e.target.value)}
           >
-            <option value="">Escribe palabras clave</option>
+            <option value="">Seleccionar tags</option>
             <option value="importante">Importante</option>
             <option value="urgente">Urgente</option>
             <option value="proyecto">Proyecto</option>
           </select>
+          {errors.tags && <span className={styles.errorMessage}>{errors.tags}</span>}
         </div>
 
         {/* Alimentar AI */}
