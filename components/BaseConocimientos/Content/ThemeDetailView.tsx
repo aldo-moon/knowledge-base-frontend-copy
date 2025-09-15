@@ -4,6 +4,7 @@ import { ChevronLeft, Edit2, Trash2, Star, Calendar, User, Tag, Eye, Image, File
 import { archivoService } from '../../../services/archivoService';
 import styles from './../../../styles/base-conocimientos.module.css';
 import { temaService } from '../../../services/temaService';
+import FilePreview from '../Files/FilePreview'
 
 interface Theme {
   _id: string;
@@ -104,18 +105,7 @@ const loadAttachedFiles = async (fileIds: string[]) => {
   }
 };
 
-// Obtener icono según tipo de archivo
-const getFileIcon = (fileType: string) => {
-  if (fileType.includes('image')) return '🖼️';
-  if (fileType.includes('video')) return '🎥';
-  if (fileType.includes('audio')) return '🎵';
-  if (fileType.includes('pdf')) return '📄';
-  if (fileType.includes('document') || fileType.includes('text')) return '📝';
-  if (fileType.includes('spreadsheet') || fileType.includes('excel')) return '📊';
-  if (fileType.includes('presentation')) return '📋';
-  if (fileType.includes('zip') || fileType.includes('rar')) return '📦';
-  return '📁';
-};
+
 
 
 const handleFileDownload = (file: AttachedFile) => {
@@ -378,7 +368,6 @@ const processImagesWithCaptions = (htmlContent: string): string => {
                 }}
                 />
                 
-                {/* ⭐ MOVER ARCHIVOS ADJUNTOS AQUÍ - ANTES DEL CONTADOR ⭐ */}
                 {(attachedFiles.length > 0 || loadingFiles) && (
                   <div className={styles.attachmentsSection}>
                     <h3 className={styles.attachmentsTitle}>Archivos</h3>
@@ -388,30 +377,26 @@ const processImagesWithCaptions = (htmlContent: string): string => {
                         <p>Cargando archivos...</p>
                       </div>
                     ) : (
-                      <div className={styles.attachmentsGrid}>
-                        {attachedFiles.map((file) => (
-                          <div key={file._id} className={styles.attachmentCard}>
-                            <div className={styles.attachmentPreview}>
-                              <span className={styles.attachmentIcon}>
-                                {getFileIcon(file.type_file)}
-                              </span>
-                            </div>
-                            
-                            <div className={styles.attachmentContent}>
-                              <h4 className={styles.attachmentTitle}>{file.file_name}</h4>
-                              <div className={styles.attachmentActions}>
-                                <button
-                                  className={styles.attachmentButton}
-                                  onClick={() => handleFileDownload(file)}
-                                  title="Descargar archivo"
-                                >
-                                  <Download size={16} />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <div className={styles.filesGrid1}>
+                      {attachedFiles.map((file) => (
+                        <FilePreview
+                          key={file._id}
+                          file={file}
+                          onSelect={(file) => console.log('Archivo seleccionado:', file.file_name)}
+                          onDoubleClick={(file) => {
+                            if (file.s3_path) {
+                              window.open(file.s3_path, '_blank');
+                            }
+                          }}
+                          onMenuAction={(action, file) => {
+                            if (action === 'download') {
+                              handleFileDownload(file);
+                            }
+                          }}
+                          showPreview={true}
+                        />
+                      ))}
+                    </div>
                     )}
                   </div>
                 )}

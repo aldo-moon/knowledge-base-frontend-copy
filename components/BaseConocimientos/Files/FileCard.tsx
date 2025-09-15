@@ -1,6 +1,6 @@
 // components/BaseConocimientos/Files/FileCard.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreHorizontal, Star, Edit, Trash } from 'lucide-react';
+import { MoreHorizontal, Star, Edit, Trash, FileText, Film, Music, Archive, Code, Image as ImageIcon  } from 'lucide-react';
 import styles from '../../../styles/base-conocimientos.module.css';
 
 interface File {
@@ -37,11 +37,104 @@ export const FileCard: React.FC<FileCardProps> = ({
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [previewError, setPreviewError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const menuOptions: MenuOption[] = [
     { icon: Edit, label: 'Cambiar nombre', action: 'rename' },
     { icon: Trash, label: 'Eliminar', action: 'delete' }
   ];
+
+  const getFileType = (fileName: string, mimeType?: string) => {
+  const extension = fileName.split('.').pop()?.toLowerCase() || '';
+  
+  const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'ico'];
+  const videoExts = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv', 'm4v'];
+  const audioExts = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'wma'];
+  
+  if (imageExts.includes(extension)) return 'image';
+  if (videoExts.includes(extension)) return 'video';
+  if (audioExts.includes(extension)) return 'audio';
+  if (extension === 'pdf') return 'pdf';
+  
+  return 'other';
+};
+const fileType = getFileType(file.file_name, file.type_file);
+
+const renderPreview = () => {
+  if (previewError || !file.s3_path) {
+    return (
+      <div className={styles.fileIconFallback}>
+        {getFallbackIcon()}
+      </div>
+    );
+  }
+
+  switch (fileType) {
+    case 'image':
+      return (
+        <div className={styles.fileImagePreview}>
+          <img
+            src={file.s3_path}
+            alt={file.file_name}
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              setPreviewError(true);
+              setIsLoading(false);
+            }}
+            style={{ display: isLoading ? 'none' : 'block' }}
+          />
+          {isLoading && (
+            <div className={styles.fileIconFallback}>
+              {getFallbackIcon()}
+            </div>
+          )}
+        </div>
+      );
+
+    case 'video':
+      return (
+        <div className={styles.fileVideoPreview}>
+          <video
+            src={file.s3_path}
+            onLoadedData={() => setIsLoading(false)}
+            onError={() => {
+              setPreviewError(true);
+              setIsLoading(false);
+            }}
+            style={{ display: isLoading ? 'none' : 'block' }}
+            muted
+          />
+          {isLoading && (
+            <div className={styles.fileIconFallback}>
+              {getFallbackIcon()}
+            </div>
+          )}
+          <div className={styles.fileVideoOverlay}>
+            <Film size={24} color="white" />
+          </div>
+        </div>
+      );
+
+    default:
+      return (
+        <div className={styles.fileIconFallback}>
+          {getFallbackIcon()}
+        </div>
+      );
+  }
+};
+const getFallbackIcon = () => {
+  switch (fileType) {
+    case 'image': return <ImageIcon size={48} color="#10b981" />;
+    case 'video': return <Film size={48} color="#ef4444" />;
+    case 'audio': return <Music size={48} color="#f59e0b" />;
+    case 'pdf': 
+    case 'document': return <FileText size={48} color="#3b82f6" />;
+    default: return <FileText size={48} color="#6b7280" />;
+  }
+};
+
 
   // Cerrar menú cuando se hace clic fuera
   useEffect(() => {
@@ -90,8 +183,8 @@ export const FileCard: React.FC<FileCardProps> = ({
     >
       <div className={styles.themeContent}>
         <div className={styles.themeIconContainer}>
-          <img src="/Imagen.svg" alt="Archivo" className={styles.themeIcon} />
-        </div>
+  {renderPreview()}
+</div>
         <h3 className={styles.themeName}>{file.file_name}</h3>
       </div>
 
@@ -125,8 +218,6 @@ export const FileCard: React.FC<FileCardProps> = ({
             className={styles.themeStarButton}
             onClick={(e) => {
               e.stopPropagation();
-              console.log('Star clicked, onToggleFavorite exists:', !!onToggleFavorite);
-              console.log('File ID:', file._id);
               onToggleFavorite?.(file._id);
             }}
           >
