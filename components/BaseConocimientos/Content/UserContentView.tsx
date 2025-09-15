@@ -58,7 +58,8 @@ interface UserContentViewProps {
   onThemeSelect: (theme: any) => void;
   onThemeMenuAction?: (action: string, theme: any) => void;
   onToggleThemeFavorite?: (themeId: string) => void;
-  
+  onThemeDoubleClick?: (theme: any) => void;
+
   // Handlers para archivos
   onFileSelect: (file: any) => void;
   onFileDoubleClick?: (file: any) => void;
@@ -89,6 +90,7 @@ export const UserContentView: React.FC<UserContentViewProps> = ({
   onThemeSelect,
   onThemeMenuAction,
   onToggleThemeFavorite,
+  onThemeDoubleClick,
   onFileSelect,
   onFileDoubleClick,
   onFileMenuAction,
@@ -278,6 +280,7 @@ export const UserContentView: React.FC<UserContentViewProps> = ({
               loading={false}
               error={null}
               onThemeSelect={onThemeSelect}
+              onThemeDoubleClick={onThemeDoubleClick}  
               onThemeMenuAction={onThemeMenuAction}
               onToggleThemeFavorite={onToggleThemeFavorite}
             />

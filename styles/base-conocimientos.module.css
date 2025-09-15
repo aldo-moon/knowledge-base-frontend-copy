@@ -3147,10 +3147,11 @@ font-size: 1rem;
   line-height: 1.6;
   overflow-x: auto;
   text-align: left;
-  min-width: 100%;          /* Ocupar todo el ancho */
-  min-height: 100%;     /* Ocupar toda la altura */
-  box-sizing: border-box; /* Incluir padding en el cálculo del tamaño */
+  width: auto;       /* Ajustar al contenido */
+  height: auto;      /* Ajustar al contenido */
+  box-sizing: border-box;
 }
+
 
 /* Estilos para las imágenes con su propio rectángulo */
 .themeContent1 img {
@@ -3609,4 +3610,184 @@ max-width: 300px;
 
 .publishButton:disabled .spinner {
   margin-right: 0.5rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* CSS SOLO para la sección de Archivos Adjuntos */
+/* ========================================= */
+
+/* ========================================= */
+/* CSS simplificado para archivos adjuntos estilo cards */
+/* ========================================= */
+
+/* Sección de archivos adjuntos */
+.attachmentsSection {
+  margin: 2rem 0;
+}
+
+/* Título simplificado */
+.attachmentsTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 1rem 0;
+}
+
+/* Estado de carga */
+.loadingFiles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Grid de archivos - estilo horizontal como en la imagen */
+.attachmentsGrid {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+/* Card individual de archivo */
+.attachmentCard {
+  background: #27293d;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  min-width: 200px;
+  flex-shrink: 0;
+  border: 1px solid #3b3f5f;
+  transition: all 0.2s ease;
+  position: relative;
+  margin-top: 0.2rem;
+}
+
+.attachmentCard:hover {
+  background: #2a2d42;
+  border-color: #6262bf;
+  transform: translateY(-2px);
+}
+
+/* Preview del archivo */
+.attachmentPreview {
+  width: 100%;
+  height: 120px;
+  background: #1e1e2f;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  border: 1px solid #3b3f5f;
+}
+
+/* Icono del archivo */
+.attachmentIcon {
+  font-size: 2.5rem;
+  opacity: 0.8;
+}
+
+/* Contenido del card */
+.attachmentContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Título del archivo */
+.attachmentTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  margin: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Acciones del archivo */
+.attachmentActions {
+  display: flex;
+  align-items: center;
+}
+
+/* Botón de menú (tres puntos) */
+.attachmentButton {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attachmentButton:hover {
+  background: rgba(98, 98, 191, 0.2);
+  color: #6262bf;
+}
+
+/* Scrollbar personalizada para el grid horizontal */
+.attachmentsGrid::-webkit-scrollbar {
+  height: 6px;
+}
+
+.attachmentsGrid::-webkit-scrollbar-track {
+  background: #1e1e2f;
+  border-radius: 3px;
+}
+
+.attachmentsGrid::-webkit-scrollbar-thumb {
+  background: #6262bf;
+  border-radius: 3px;
+}
+
+.attachmentsGrid::-webkit-scrollbar-thumb:hover {
+  background: #7373c4;
+}
+
+/* Responsive para archivos adjuntos */
+@media (max-width: 768px) {
+  .attachmentCard {
+    min-width: 160px;
+    padding: 0.75rem;
+  }
+  
+  .attachmentPreview {
+    height: 100px;
+  }
+  
+  .attachmentIcon {
+    font-size: 2rem;
+  }
+  
+  .attachmentTitle {
+    font-size: 0.8rem;
+  }
 }

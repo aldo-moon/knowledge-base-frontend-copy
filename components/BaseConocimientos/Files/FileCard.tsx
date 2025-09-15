@@ -20,7 +20,7 @@ interface MenuOption {
 
 interface FileCardProps {
   file: File;
-  onFileSelect: (file: File) => void;
+  onSelect: (file: File) => void;
   onDoubleClick?: (file: File) => void;
   onMenuAction?: (action: string, file: File) => void;
   isFavorite?: boolean;
@@ -29,7 +29,7 @@ interface FileCardProps {
 
 export const FileCard: React.FC<FileCardProps> = ({
   file, 
-  onFileSelect,
+  onSelect,
   onDoubleClick,
   onMenuAction,
   isFavorite = false,
@@ -73,7 +73,7 @@ export const FileCard: React.FC<FileCardProps> = ({
   };
 
   const handleCardClick = () => {
-  onFileSelect(file); 
+  onSelect(file); 
   };
 
   const handleCardDoubleClick = () => {

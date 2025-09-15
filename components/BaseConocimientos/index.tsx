@@ -310,15 +310,11 @@ const handleSubfolderClick = (folderId: string, folderName: string) => {
   };
 
   // Handler para ThemeForm (en el DetailsPanel) - usar navegación con routing
-const handleThemeFormSubmit = async (formData: any) => {
+const handleThemeFormSubmit = async (formData) => {
   try {
-    // Validar que tenemos título y descripción
-    if (!themeTitle.trim() || !themeDescription.trim()) {
-      console.error('Título y descripción son requeridos');
-      return;
-    }
+    console.log('📝 Datos del formulario recibidos:', formData);
 
-    // Estructura completa del tema para el backend
+    // Construir objeto tema con archivos adjuntos
     const temaCompleto = {
       title_name: themeTitle,
       description: themeDescription,
@@ -327,25 +323,32 @@ const handleThemeFormSubmit = async (formData: any) => {
       puesto_id: formData.position,
       folder_id: currentFolderId,
       author_topic_id: CURRENT_USER_ID,
-      keywords: formData.tags ? [formData.tags] : []
+      keywords: formData.tags ? [formData.tags] : [],
+      files_attachment_id: formData.fileIds || [] // ⭐ AGREGAR IDs de archivos
     };
 
-    console.log('Creando tema:', temaCompleto);
+    console.log('📁 Tema con archivos adjuntos:', temaCompleto);
+    console.log('🔗 IDs de archivos:', formData.fileIds);
     
     // Crear el tema usando el servicio
     const nuevoTema = await temaService.createTema(temaCompleto);
-    console.log('Tema creado exitosamente:', nuevoTema);
+    console.log('✅ Tema creado exitosamente:', nuevoTema);
     
     // Limpiar estados
     setThemeTitle('');
     setThemeDescription('');
+    // Eliminé: setIsCreatingTheme(false); ← ESTA LÍNEA CAUSABA EL ERROR
     
     // Volver a la vista anterior y recargar contenido
     navigateBackFromTheme(currentFolderId);
     await loadCarpetas(); // Recargar para mostrar el nuevo tema
     
   } catch (error) {
-    console.error('Error creando tema:', error);
+    console.error('❌ Error creando tema:', error);
+    
+    // Aquí puedes mostrar un mensaje de error al usuario
+    // Por ejemplo, con un sistema de notificaciones:
+    // showErrorNotification('Error al crear el tema. Inténtalo de nuevo.');
   }
 };
 
@@ -754,11 +757,45 @@ useEffect(() => {
 
 
 
-  const handleMultimediaUpload = () => {
-    console.log('Procesando subida de multimedia...');
-    // Aquí puedes agregar la lógica real de subida de archivos
-    // Por ejemplo: await archivoService.uploadFile(files);
-  };
+const handleMultimediaUpload = async (files: FileList) => {
+  try {
+    console.log('📁 Subiendo archivos a carpeta:', currentFolderId);
+    console.log('👤 Usuario:', CURRENT_USER_ID);
+    console.log('📄 Archivos:', files.length);
+    
+    // Convertir FileList a Array para el servicio
+    const filesArray = Array.from(files);
+    
+    // Subir archivos usando el servicio
+    const response = await archivoService.uploadArchivos(
+      filesArray,
+      currentFolderId || "68acb06886d455d16cceef05", // Carpeta actual o root
+      CURRENT_USER_ID
+    );
+    
+    console.log('✅ Respuesta del servidor:', response);
+    
+    // Recargar contenido para mostrar los archivos nuevos
+    await loadCarpetas();
+    
+    // Actualizar datos del usuario si está en "Mis archivos"
+    if (activeSection === 'Mis archivos') {
+      await refreshUserData();
+    }
+    
+    // Mostrar mensaje de éxito (opcional)
+    // Puedes agregar aquí una notificación toast si tienes sistema de notificaciones
+    
+  } catch (error) {
+    console.error('❌ Error al subir archivos:', error);
+    
+    // Aquí puedes mostrar un mensaje de error al usuario
+    // Por ejemplo, si tienes un sistema de notificaciones:
+    // showErrorNotification('Error al subir archivos. Inténtalo de nuevo.');
+    
+    throw error; // Re-lanzar para que el modal pueda manejarlo
+  }
+};
 
 
   const loadCarpetas = async () => {
@@ -1165,31 +1202,33 @@ const handleToggleFileFavorite = async (fileId) => {
               themeDescription={themeDescription}
               onThemeTitleChange={setThemeTitle}
               onThemeDescriptionChange={setThemeDescription}
-                viewingThemeId={currentThemeId}
-  onThemeDetailBack={navigateBackFromThemeDetail}
-  onThemeEdit={handleThemeEditFromDetail}
-  onThemeDelete={handleThemeDeleteFromDetail}
+              viewingThemeId={currentThemeId}
+              onThemeDetailBack={navigateBackFromThemeDetail}
+              onThemeEdit={handleThemeEditFromDetail}
+              onThemeDelete={handleThemeDeleteFromDetail}
             />
 
             {/* Details Panel - siempre visible, cambia contenido según el contexto */}
             {/* Panel derecho - cambiar según el contexto */}
-{activeSection === 'theme-detail' && currentThemeId ? (  // Mostrar panel de comentarios cuando estás viendo un tema
-  <ThemeCommentsPanel themeId={currentThemeId} />
-) : (
-  // Mostrar DetailsPanel normal para otras vistas
-  <DetailsPanel 
-    selectedFolderDetails={selectedFolderDetails}
-    selectedTemaId={selectedTemaId}
-    isCreatingNewTopic={isCreatingTheme}
-  >
-    {isCreatingTheme && (
-      <ThemeForm 
-        onSubmit={handleThemeFormSubmit}
-        onCancel={handleThemeFormCancel}
-      />
-    )}
-  </DetailsPanel>
-)}
+            {activeSection === 'theme-detail' && currentThemeId ? (  // Mostrar panel de comentarios cuando estás viendo un tema
+              <ThemeCommentsPanel themeId={currentThemeId} />
+            ) : (
+              // Mostrar DetailsPanel normal para otras vistas
+              <DetailsPanel 
+                selectedFolderDetails={selectedFolderDetails}
+                selectedTemaId={selectedTemaId}
+                isCreatingNewTopic={isCreatingTheme}
+              >
+              {isCreatingTheme && (
+                  <ThemeForm 
+                    onSubmit={handleThemeFormSubmit}
+                    onCancel={handleThemeFormCancel}
+                    currentFolderId={currentFolderId || "68acb06886d455d16cceef05"}
+                    userId={CURRENT_USER_ID}
+                  />
+                )}
+              </DetailsPanel>
+            )}
           </div>
         </div>
       </div>
@@ -1230,6 +1269,8 @@ const handleToggleFileFavorite = async (fileId) => {
         isOpen={isMultimediaModalOpen}
         onClose={() => setIsMultimediaModalOpen(false)}
         onUpload={handleMultimediaUpload}
+        currentFolderId={currentFolderId || "68acb06886d455d16cceef05"}
+        userId={CURRENT_USER_ID}
       />
 
       {/* Modal para Eliminar Tema */}

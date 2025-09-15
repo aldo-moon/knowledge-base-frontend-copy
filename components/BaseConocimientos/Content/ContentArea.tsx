@@ -61,13 +61,13 @@ interface ContentAreaProps {
   onThemeTitleChange?: (title: string) => void;
   onThemeDescriptionChange?: (description: string) => void;
   showCommentsPanel?: boolean;
+  
 
   viewingThemeId?: string | null;
   onThemeDetailBack: () => void;
   onThemeEdit?: (theme: any) => void;
   onThemeDelete?: (theme: any) => void;
   onThemeDoubleClick?: (theme: any) => void;
-  
   //  Datos del usuario para vista "Mis archivos"
   userContent?: {
     folders: Folder[];
@@ -136,7 +136,7 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
   onToggleFileFavorite,        
   loading,
   error,
-    themeTitle,
+  themeTitle,
   themeDescription,
   onThemeTitleChange,
   onThemeDescriptionChange,
@@ -233,6 +233,7 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
         onThemeSelect={onThemeSelect}
         onThemeMenuAction={onThemeMenuAction}
         onToggleThemeFavorite={onToggleThemeFavorite}
+        onThemeDoubleClick={onThemeDoubleClick}
         onFileSelect={onFileSelect}
         onFileDoubleClick={onFileDoubleClick}
         onFileMenuAction={onFileMenuAction}
@@ -244,8 +245,7 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
 
   // 🆕 Si la vista activa es "favorites", mostrar FavoritesContentView
   if (activeView === 'favorites') {
-      console.log('🔍 ContentArea - favoritesContent completo:', favoritesContent);
-  console.log('🔍 ContentArea - favoriteFiles que voy a pasar:', favoritesContent?.files || []);
+
   
     return (
     <FavoritesContentView
@@ -254,6 +254,9 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
       favoriteFiles={favoritesContent?.files || []}
       loading={favoritesContentLoading}
       error={favoritesContentError}
+      onThemeDoubleClick={onThemeDoubleClick}  // ← CLAVE
+      onFileDoubleClick={onFileDoubleClick}
+      onFileMenuAction={onFileMenuAction}
       folderFavorites={folderFavorites}
       themeFavorites={themeFavorites}
       fileFavorites={fileFavorites}

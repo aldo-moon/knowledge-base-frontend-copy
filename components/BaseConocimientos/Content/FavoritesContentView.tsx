@@ -37,6 +37,7 @@ interface FavoritesContentViewProps {
   onToggleFiltersVisibility: () => void;
   areFiltersVisible: boolean;
 
+
     activeContentFilters: string[];
   currentSortBy: string;
   onFilterClick: (filterLabel: string) => void;
@@ -46,7 +47,7 @@ interface FavoritesContentViewProps {
   // Estados de favoritos
   folderFavorites?: Set<string>;
   themeFavorites?: Set<string>;
-  fileFavorites?: Set<string>;  // ← ASEGURAR QUE ESTÉ
+  fileFavorites?: Set<string>; 
 
   
   // Handlers para carpetas
@@ -59,6 +60,8 @@ interface FavoritesContentViewProps {
   onThemeSelect: (theme: any) => void;
   onThemeMenuAction?: (action: string, theme: any) => void;
   onToggleThemeFavorite?: (themeId: string) => void;
+  onThemeDoubleClick?: (theme: any) => void;  // ← ESTE ES EL MÁS IMPORTANTE
+
 
   onFileSelect: (file: any) => void;  
   onFileDoubleClick?: (file: any) => void;  
@@ -72,7 +75,8 @@ export const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
   favoriteFiles,  
   fileFavorites,  
   onFileSelect,   
-  onFileDoubleClick,  
+  onFileDoubleClick,
+  onThemeDoubleClick,  
   onFileMenuAction,   
   onToggleFileFavorite,
   loading,
@@ -94,11 +98,7 @@ export const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
   onToggleThemeFavorite
 }) => {
 
-    console.log('📁 FavoritesContentView recibió:');
-  console.log('📁 favoriteFolders:', favoriteFolders.length);
-  console.log('📁 favoriteThemes:', favoriteThemes.length);
-  console.log('📁 favoriteFiles:', favoriteFiles?.length || 'undefined');
-  console.log('📁 favoriteFiles contenido:', favoriteFiles);
+
     const filtersRef = useRef<HTMLDivElement>(null);
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
   
@@ -281,6 +281,7 @@ export const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
               loading={false}
               error={null}
               onThemeSelect={onThemeSelect}
+              onThemeDoubleClick={onThemeDoubleClick}  // ← AGREGAR ESTA LÍNEA
               onThemeMenuAction={onThemeMenuAction}
               onToggleThemeFavorite={onToggleThemeFavorite}
             />

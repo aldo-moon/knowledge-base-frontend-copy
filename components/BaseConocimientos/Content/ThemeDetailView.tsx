@@ -1,6 +1,7 @@
 // components/BaseConocimientos/Content/ThemeDetailView.tsx
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Edit2, Trash2, Star, Calendar, User, Tag, Eye, Image } from 'lucide-react';
+import { ChevronLeft, Edit2, Trash2, Star, Calendar, User, Tag, Eye, Image, FileText, Download, ExternalLink } from 'lucide-react';
+import { archivoService } from '../../../services/archivoService';
 import styles from './../../../styles/base-conocimientos.module.css';
 import { temaService } from '../../../services/temaService';
 
@@ -26,6 +27,15 @@ interface ThemeDetailViewProps {
   isFavorite?: boolean;
 }
 
+interface AttachedFile {
+  _id: string;
+  file_name: string;
+  type_file: string;
+  s3_path: string;
+  creation_date: string;
+  last_update?: string;
+}
+
 export const ThemeDetailView: React.FC<ThemeDetailViewProps> = ({
   themeId,
   onBack,
@@ -38,6 +48,8 @@ export const ThemeDetailView: React.FC<ThemeDetailViewProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewsCount, setViewsCount] = useState<number>(0);
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+  const [loadingFiles, setLoadingFiles] = useState(false);
   const [attachments, setAttachments] = useState<{images: string[], documents: string[]}>({
   images: [],
   documents: []
@@ -62,6 +74,56 @@ const calculatePercentage = (views: number): number => {
   // Meta de ejemplo: 725 vistas
   const goal = 725;
   return Math.min(Math.round((views / goal) * 100), 100);
+};
+
+const loadAttachedFiles = async (fileIds: string[]) => {
+  try {
+    setLoadingFiles(true);
+    console.log('📁 Cargando archivos adjuntos:', fileIds);
+    
+    // Obtener información de cada archivo
+    const filePromises = fileIds.map(async (fileId) => {
+      try {
+        return await archivoService.getArchivoById(fileId);
+      } catch (error) {
+        console.error(`Error cargando archivo ${fileId}:`, error);
+        return null;
+      }
+    });
+    
+    const filesData = await Promise.all(filePromises);
+    const validFiles = filesData.filter(file => file !== null);
+    
+    setAttachedFiles(validFiles);
+    console.log('✅ Archivos cargados:', validFiles);
+    
+  } catch (error) {
+    console.error('❌ Error cargando archivos adjuntos:', error);
+  } finally {
+    setLoadingFiles(false);
+  }
+};
+
+// Obtener icono según tipo de archivo
+const getFileIcon = (fileType: string) => {
+  if (fileType.includes('image')) return '🖼️';
+  if (fileType.includes('video')) return '🎥';
+  if (fileType.includes('audio')) return '🎵';
+  if (fileType.includes('pdf')) return '📄';
+  if (fileType.includes('document') || fileType.includes('text')) return '📝';
+  if (fileType.includes('spreadsheet') || fileType.includes('excel')) return '📊';
+  if (fileType.includes('presentation')) return '📋';
+  if (fileType.includes('zip') || fileType.includes('rar')) return '📦';
+  return '📁';
+};
+
+
+const handleFileDownload = (file: AttachedFile) => {
+  if (file.s3_path) {
+    window.open(file.s3_path, '_blank');
+  } else {
+    console.warn('No hay URL de descarga disponible para el archivo:', file.file_name);
+  }
 };
 
 // Agregar función helper después de los imports y antes del componente
@@ -143,6 +205,10 @@ const processImagesWithCaptions = (htmlContent: string): string => {
         // Incrementar contador local
         const newViews = incrementLocalViews(themeId);
         setViewsCount(newViews);
+       
+        if (themeData.files_attachment_id && themeData.files_attachment_id.length > 0) {
+  await loadAttachedFiles(themeData.files_attachment_id);
+}
         
     } catch (err) {
         setError('Error al cargar el tema');
@@ -152,16 +218,16 @@ const processImagesWithCaptions = (htmlContent: string): string => {
     }
     };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'No disponible';
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+    const formatDate = (dateString?: string) => {
+      if (!dateString) return 'No disponible';
+      return new Date(dateString).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
 
   const getPriorityText = (priority?: number) => {
     switch (priority) {
@@ -303,7 +369,6 @@ const processImagesWithCaptions = (htmlContent: string): string => {
 
         {/* Contenido del tema */}
         <div className={styles.themeDetailBody}>
-{/*           <h2>Contenido</h2> */}
             {theme.description ? (
             <div className={styles.themeContentWrapper}>
                 <div 
@@ -312,6 +377,44 @@ const processImagesWithCaptions = (htmlContent: string): string => {
                     __html: processImagesWithCaptions(theme.description)
                 }}
                 />
+                
+                {/* ⭐ MOVER ARCHIVOS ADJUNTOS AQUÍ - ANTES DEL CONTADOR ⭐ */}
+                {(attachedFiles.length > 0 || loadingFiles) && (
+                  <div className={styles.attachmentsSection}>
+                    <h3 className={styles.attachmentsTitle}>Archivos</h3>
+                    
+                    {loadingFiles ? (
+                      <div className={styles.loadingFiles}>
+                        <p>Cargando archivos...</p>
+                      </div>
+                    ) : (
+                      <div className={styles.attachmentsGrid}>
+                        {attachedFiles.map((file) => (
+                          <div key={file._id} className={styles.attachmentCard}>
+                            <div className={styles.attachmentPreview}>
+                              <span className={styles.attachmentIcon}>
+                                {getFileIcon(file.type_file)}
+                              </span>
+                            </div>
+                            
+                            <div className={styles.attachmentContent}>
+                              <h4 className={styles.attachmentTitle}>{file.file_name}</h4>
+                              <div className={styles.attachmentActions}>
+                                <button
+                                  className={styles.attachmentButton}
+                                  onClick={() => handleFileDownload(file)}
+                                  title="Descargar archivo"
+                                >
+                                  <Download size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
                 
                 {/* Contador de vistas al final */}
                 <div className={styles.viewsCounter}>
@@ -339,6 +442,7 @@ const processImagesWithCaptions = (htmlContent: string): string => {
             </div>
             )}
         </div>
+
       </div>
     </div>
   );
