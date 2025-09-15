@@ -9,6 +9,7 @@ import UserContentView from './UserContentView';
 import FavoritesContentView from './FavoritesContentView';
 import FilesGrid from '../Files/FilesGrid';
 import ThemeDetailView from './ThemeDetailView';
+import TrashContentView from './TrashContentView';
 
 import styles from './../../../styles/base-conocimientos.module.css';
 
@@ -124,6 +125,25 @@ interface ContentAreaProps {
 
   onToggleFileFavorite?: (fileId: string) => void;
 
+  trashContent?: {
+    items: TrashItem[];
+    folders: Folder[];
+    themes: Theme[];
+    files: File[];
+  };
+  trashContentLoading?: boolean;
+  trashContentError?: string | null;
+  
+  // Handlers de papelera
+  onRestoreItem?: (papeleraId: string, type: string) => void;
+  onPermanentDelete?: (papeleraId: string, type: string) => void;
+  onEmptyTrash?: () => void;
+  onRestoreSelected?: (papeleraIds: string[]) => void;
+  onDeleteSelected?: (papeleraIds: string[]) => void;
+  
+  // Actualizar activeView para incluir 'trash'
+  activeView: 'folder' | 'user-content' | 'favorites' | 'trash';
+
 }
 
 export const ContentArea: React.FC<ContentAreaProps> = ({
@@ -177,7 +197,14 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
   onThemeEditorSave,
   onToggleFolderFavorite,
   onToggleThemeFavorite,
-  
+   trashContent,
+  trashContentLoading = false,
+  trashContentError = null,
+  onRestoreItem,
+  onPermanentDelete,
+  onEmptyTrash,
+  onRestoreSelected,
+  onDeleteSelected,
 
 }) => {
 
@@ -276,6 +303,33 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
       onToggleFileFavorite={onToggleFileFavorite}
       
     />
+    );
+  }
+
+   if (activeView === 'trash') {
+    return (
+      <TrashContentView
+        trashItems={trashContent?.items || []}
+        trashFolders={trashContent?.folders || []}
+        trashThemes={trashContent?.themes || []}
+        trashFiles={trashContent?.files || []}
+        loading={trashContentLoading}
+        error={trashContentError}
+        areFiltersVisible={areFiltersVisible}
+        activeContentFilters={activeContentFilters}
+        currentSortBy={currentSortBy}
+        onToggleFiltersVisibility={onToggleFiltersVisibility}
+        onFilterClick={onFilterClick}
+        onSortOptionClick={onSortOptionClick}
+        onRestoreItem={onRestoreItem}
+        onPermanentDelete={onPermanentDelete}
+        onEmptyTrash={onEmptyTrash}
+        onRestoreSelected={onRestoreSelected}
+        onDeleteSelected={onDeleteSelected}
+        onThemeSelect={onThemeSelect}
+        onFolderSelect={onFolderSelect}
+        onFileSelect={onFileSelect}
+      />
     );
   }
 

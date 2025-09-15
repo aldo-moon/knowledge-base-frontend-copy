@@ -1,7 +1,9 @@
 // components/BaseConocimientos/Files/FileCard.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreHorizontal, Star, Edit, Trash, FileText, Film, Music, Archive, Code, Image as ImageIcon  } from 'lucide-react';
+import { MoreHorizontal, Star, Edit, Trash, CirclePlay, FileText, Film, Music, Archive, Code, Image as ImageIcon  } from 'lucide-react';
 import styles from '../../../styles/base-conocimientos.module.css';
+import { archivoService } from '../../../services/archivoService';
+
 
 interface File {
   _id: string;
@@ -38,7 +40,27 @@ export const FileCard: React.FC<FileCardProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [previewError, setPreviewError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [fullFileData, setFullFileData] = useState<any>(null);
+  const [loadingFileData, setLoadingFileData] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // 👈 agrega esto
+
+
+useEffect(() => {
+  const loadFileData = async () => {
+    try {
+      setLoadingFileData(true);
+      const fileData = await archivoService.getArchivoById(file._id);
+      setFullFileData(fileData);
+      console.log('Datos completos del archivo:', fileData);
+    } catch (error) {
+      console.error('Error cargando datos del archivo:', error);
+    } finally {
+      setLoadingFileData(false);
+    }
+  };
+
+  loadFileData();
+}, [file._id]);
 
   const menuOptions: MenuOption[] = [
     { icon: Edit, label: 'Cambiar nombre', action: 'rename' },
@@ -59,81 +81,63 @@ export const FileCard: React.FC<FileCardProps> = ({
   
   return 'other';
 };
+
 const fileType = getFileType(file.file_name, file.type_file);
 
 const renderPreview = () => {
-  if (previewError || !file.s3_path) {
+  if (loadingFileData || !fullFileData) {
+    return <img src="/Imagen.svg" alt="Archivo" className={styles.themeIcon1} />;
+  }
+
+  console.log('Datos completos:', fullFileData);
+  
+  const fileType = getFileType(fullFileData.file_name, fullFileData.type_file);
+  
+  if (previewError || !fullFileData.s3_path) {
+    return <img src="/Imagen.svg" alt="Archivo" className={styles.themeIcon1} />;
+  }
+
+switch (fileType) {
+  case 'image':
     return (
-      <div className={styles.fileIconFallback}>
-        {getFallbackIcon()}
-      </div>
+      <img
+        src={fullFileData.s3_path}
+        alt={fullFileData.file_name}
+        className={styles.themeIcon1}
+        onError={() => setPreviewError(true)}
+        style={{ 
+          objectFit: 'cover',
+          borderRadius: '0.75rem'
+        }}
+      />
     );
-  }
 
-  switch (fileType) {
-    case 'image':
-      return (
-        <div className={styles.fileImagePreview}>
-          <img
-            src={file.s3_path}
-            alt={file.file_name}
-            onLoad={() => setIsLoading(false)}
-            onError={() => {
-              setPreviewError(true);
-              setIsLoading(false);
-            }}
-            style={{ display: isLoading ? 'none' : 'block' }}
-          />
-          {isLoading && (
-            <div className={styles.fileIconFallback}>
-              {getFallbackIcon()}
-            </div>
-          )}
-        </div>
-      );
+case 'video':
+  return (
+    <div className={styles.videoPreview}>
+      <video
+        src={fullFileData.s3_path}
+        onLoadedData={() => setIsLoading(false)}
+        onError={() => {
+          setPreviewError(true);
+          setIsLoading(false);
+        }}
+        style={{ display: isLoading ? 'none' : 'block' }}
+        muted
+      />
+      <div className={styles.videoOverlay}>
+        <CirclePlay size={42} color="white" />
+      </div>
+    </div>
+  );
 
-    case 'video':
-      return (
-        <div className={styles.fileVideoPreview}>
-          <video
-            src={file.s3_path}
-            onLoadedData={() => setIsLoading(false)}
-            onError={() => {
-              setPreviewError(true);
-              setIsLoading(false);
-            }}
-            style={{ display: isLoading ? 'none' : 'block' }}
-            muted
-          />
-          {isLoading && (
-            <div className={styles.fileIconFallback}>
-              {getFallbackIcon()}
-            </div>
-          )}
-          <div className={styles.fileVideoOverlay}>
-            <Film size={24} color="white" />
-          </div>
-        </div>
-      );
 
-    default:
-      return (
-        <div className={styles.fileIconFallback}>
-          {getFallbackIcon()}
-        </div>
-      );
-  }
+  default:
+    return <img src="/Imagen.svg" alt="Archivo" className={styles.themeIcon1} />;
+}
+
 };
-const getFallbackIcon = () => {
-  switch (fileType) {
-    case 'image': return <ImageIcon size={48} color="#10b981" />;
-    case 'video': return <Film size={48} color="#ef4444" />;
-    case 'audio': return <Music size={48} color="#f59e0b" />;
-    case 'pdf': 
-    case 'document': return <FileText size={48} color="#3b82f6" />;
-    default: return <FileText size={48} color="#6b7280" />;
-  }
-};
+
 
 
   // Cerrar menú cuando se hace clic fuera
@@ -182,7 +186,7 @@ const getFallbackIcon = () => {
       onDoubleClick={handleCardDoubleClick}
     >
       <div className={styles.themeContent}>
-        <div className={styles.themeIconContainer}>
+        <div className={styles.themeIcon1Container}>
   {renderPreview()}
 </div>
         <h3 className={styles.themeName}>{file.file_name}</h3>

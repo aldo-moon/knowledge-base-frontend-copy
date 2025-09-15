@@ -26,6 +26,7 @@ const parseSlugFromUrl = () => {
       isCreatingTheme: false,
       isViewingTheme: false,
       activeSection: 'Contenedor'
+      
     };
   }
 
@@ -53,6 +54,11 @@ const parseSlugFromUrl = () => {
     activeSection = 'theme-detail';
     return { folderId, themeId, isCreatingTheme, isViewingTheme, activeSection };
   }
+
+  if (slug[0] === 'papelera') {
+  activeSection = 'Papelera';
+  return { folderId, themeId, isCreatingTheme, isViewingTheme, activeSection };
+}
 
   // Verificación para folder (lógica existente)
   if (slug[0] === 'folder' && slug[1]) {
@@ -89,6 +95,9 @@ const parseSlugFromUrl = () => {
       case 'Contenedor':
       default:
         url = '/base-conocimientos';
+        break;
+        case 'Papelera':
+        url = '/base-conocimientos/papelera';
         break;
     }
     
@@ -315,6 +324,8 @@ const parseSlugFromUrl = () => {
         return `${baseUrl}/base-conocimientos`;
       }
       return `${baseUrl}/base-conocimientos/folder/${itemId}`;
+
+      
     } else {
       return currentContext.folderId !== "68acb06886d455d16cceef05"
         ? `${baseUrl}/base-conocimientos/folder/${currentContext.folderId}/theme/${itemId}`

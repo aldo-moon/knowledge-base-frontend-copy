@@ -1,6 +1,6 @@
 // components/BaseConocimientos/Files/FilePreview.tsx
 import { useState, useRef, useEffect } from 'react';
-import { Download, ExternalLink, FileText, Film, Music, MoreHorizontal, Archive, Code, Image as ImageIcon } from 'lucide-react';
+import { Download, ExternalLink, FileText, CirclePlay, Music, MoreHorizontal, Archive, Code, Image as ImageIcon } from 'lucide-react';
 import styles from './../../../styles/base-conocimientos.module.css';
 
 interface AttachedFile {
@@ -184,33 +184,23 @@ useEffect(() => {
               </div>
             )}
             <div className={styles.videoOverlay}>
-              <Film size={32} color="white" />
+              <CirclePlay size={42} color="white" />
             </div>
           </div>
         );
 
-      case 'pdf':
+            case 'pdf':
         return (
-          <div className={styles.pdfPreview}>
-            <iframe
-              src={`${file.s3_path}#toolbar=0&navpanes=0&scrollbar=0`}
-              onLoad={() => setIsLoading(false)}
-              onError={() => {
-                setPreviewError(true);
-                setIsLoading(false);
-              }}
-              style={{ display: isLoading ? 'none' : 'block' }}
-            />
-            {isLoading && (
-              <div className={styles.previewLoading}>
-                <div className={styles.fileIconContainer} style={{ color: getFileColor() }}>
-                  {getFileIcon()}
-                </div>
-              </div>
-            )}
-          </div>
+            <div className={styles.filePreviewFallback}>
+            <div className={styles.fileIconContainer} style={{ color: '#dc2626' }}>
+                <FileText size={24} />
+            </div>
+            <div className={styles.fileTypeLabel}>
+                PDF - {file.file_name}
+            </div>
+            </div>
         );
-
+        
       default:
         return (
           <div className={styles.filePreviewFallback}>
