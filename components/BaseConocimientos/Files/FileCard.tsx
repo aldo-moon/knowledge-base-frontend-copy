@@ -114,7 +114,7 @@ switch (fileType) {
 
 case 'video':
   return (
-    <div className={styles.videoPreview}>
+    <div className={styles.videoPreview1}>
       <video
         src={fullFileData.s3_path}
         onLoadedData={() => setIsLoading(false)}

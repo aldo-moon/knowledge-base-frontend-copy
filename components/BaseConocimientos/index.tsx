@@ -38,6 +38,7 @@ import { temaService } from '../../services/temaService';
 import { archivoService } from '../../services/archivoService';
 import { favoritoService } from '../../services/favoritoService';
 import { usuarioService } from '../../services/usuarioService';
+import papeleraService from '../../services/papeleraService';
 
 // Importar hook de routing
 import { useBaseConocimientosRouter } from '../../hooks/useBaseConocimientosRouter';
@@ -96,7 +97,7 @@ const BaseConocimientos = () => {
     navigateToCreateTheme,
     navigateBackFromTheme,
     navigateToSection,
-    navigateToThemeDetail,        // NUEVO
+    navigateToThemeDetail,      
     navigateBackFromThemeDetail,
     updateSearchFilters,
     getFiltersFromUrl,
@@ -151,6 +152,15 @@ const BaseConocimientos = () => {
 });
 const [favoritesContentLoading, setFavoritesContentLoading] = useState(false);
 const [favoritesContentError, setFavoritesContentError] = useState(null);
+const [trashContent, setTrashContent] = useState({
+  items: [],
+  folders: [],
+  themes: [],
+  files: []
+});
+const [trashContentLoading, setTrashContentLoading] = useState(false);
+const [trashContentError, setTrashContentError] = useState(null);
+
 
   // Inicializar desde URL al montar el componente
  useEffect(() => {
@@ -323,16 +333,13 @@ const handleThemeFormSubmit = async (formData) => {
       puesto_id: formData.position,
       folder_id: currentFolderId,
       author_topic_id: CURRENT_USER_ID,
-      keywords: formData.tags ? [formData.tags] : [],
-      files_attachment_id: formData.fileIds || [] // ⭐ AGREGAR IDs de archivos
+      keywords: Array.isArray(formData.tags) ? formData.tags : [],
+      files_attachment_id: formData.fileIds || [] 
     };
 
-    console.log('📁 Tema con archivos adjuntos:', temaCompleto);
-    console.log('🔗 IDs de archivos:', formData.fileIds);
     
     // Crear el tema usando el servicio
     const nuevoTema = await temaService.createTema(temaCompleto);
-    console.log('✅ Tema creado exitosamente:', nuevoTema);
     
     // Limpiar estados
     setThemeTitle('');
@@ -483,25 +490,26 @@ const handleCreateFolder = async (folderName) => {
   }
 };
 
-  const handleDeleteFolder = async () => {
-    if (folderToDelete) {
-      try {
-        await carpetaService.deleteCarpeta(folderToDelete._id);
-        
-        setFolders(folders.filter(folder => folder._id !== folderToDelete._id));
-        
-        setIsDeleteModalOpen(false);
-        setFolderToDelete(null);
-        await loadCarpetas(); 
-        await loadSidebarFolders(); 
-        await refreshUserData();
-        await loadUserFavorites();
-        await loadFavoritesContent();
-      } catch (error) {
-        console.error('Error deleting folder:', error);
-      }
+const handleDeleteFolder = async () => {
+  if (folderToDelete) {
+    try {
+      await carpetaService.moveToTrash(folderToDelete._id, CURRENT_USER_ID);
+
+      setFolders(folders.filter(folder => folder._id !== folderToDelete._id));
+
+      setIsDeleteModalOpen(false);
+      setFolderToDelete(null);
+
+      await loadCarpetas();
+      await loadSidebarFolders();
+      await refreshUserData();
+      await loadUserFavorites();
+      await loadFavoritesContent();
+    } catch (error) {
+      console.error('Error moviendo carpeta a la papelera:', error);
     }
-  };
+  }
+};
 
     // Handler para ThemesGrid
     const handleThemeSelection = (theme: any) => {
@@ -554,32 +562,33 @@ const handleRenameTheme = async (newName: string) => {
 
 
 //  Handler para confirmar eliminación del tema
+//  Handler para confirmar "eliminación" (mover a papelera) del tema
 const handleDeleteTheme = async () => {
   if (themeToDelete) {
     try {
-      console.log(`Eliminando tema: ${themeToDelete.title_name}`);
-      await temaService.deleteTema(themeToDelete._id);
-      console.log('Tema eliminado exitosamente');
+      console.log(`Moviendo tema a papelera: ${themeToDelete.title_name}`);
+      
+      await temaService.moveToTrash(themeToDelete._id, CURRENT_USER_ID);
+      
+      console.log('Tema movido a la papelera exitosamente');
       
       // Actualizar la lista de temas (eliminar del estado local)
       setThemes(themes.filter(theme => theme._id !== themeToDelete._id));
       
-      // Cerrar modal y limpiar estado
       setIsDeleteThemeModalOpen(false);
       setThemeToDelete(null);
       
-      //recargar todo el contenido para asegurar consistencia
       await loadCarpetas();
       await refreshUserData();
       await loadUserFavorites();
       await loadFavoritesContent(); 
       
     } catch (error) {
-      console.error('Error eliminando tema:', error);
-
+      console.error('Error al mover tema a la papelera:', error);
     }
   }
 };
+
 
 // AGREGAR función para manejar doble click en temas
 const handleThemeDoubleClick = (theme: Theme) => {
@@ -881,6 +890,10 @@ const handleSectionChange = async (sectionName) => {
   if (sectionName === 'Favoritos') {
     await loadFavoritesContent();
   }
+
+  if (sectionName === 'Papelera') {
+    await loadTrashContent();
+  }
 };
 
 // Agregar esta función en tu componente principal
@@ -1121,6 +1134,102 @@ const handleToggleFileFavorite = async (fileId) => {
   }
 };
 
+
+
+
+
+
+
+const loadTrashContent = async () => {
+  try {
+    setTrashContentLoading(true);
+    setTrashContentError(null);
+    
+    console.log('🗑️ Cargando papelera para usuario:', CURRENT_USER_ID);
+    
+    // Obtener elementos de papelera del usuario
+    const trashItems = await papeleraService.getPapelerasByUser(CURRENT_USER_ID);
+    
+    console.log('🗑️ Items de papelera recibidos:', trashItems);
+    
+    // Separar por tipo - USANDO MAYÚSCULAS
+    const folderIds = trashItems.filter(item => item.type_content === 'Carpeta');
+    const themeIds = trashItems.filter(item => item.type_content === 'Tema');
+    const fileIds = trashItems.filter(item => item.type_content === 'Archivo');
+    
+    console.log('🔍 Elementos por tipo:', {
+      carpetas: folderIds.length,
+      temas: themeIds.length, 
+      archivos: fileIds.length
+    });
+    
+    // ✅ CREAR OBJETOS BÁSICOS EN LUGAR DE LLAMAR A LOS SERVICIOS
+    // porque el contenido "eliminado" puede no existir en su estado normal
+    
+// Cambiar las llamadas en loadTrashContent:
+const folders = await Promise.all(
+  folderIds.map(async (item) => {
+    try {
+      const folderData = await carpetaService.getCarpetaByIdPapelera(item.content_id);
+      return {
+        ...folderData,
+        trash_id: item._id,
+        trash_type: item.type_content
+      };
+    } catch (error) {
+      console.log(`⚠️ Carpeta ${item.content_id} no encontrada en papelera`);
+      return null;
+    }
+  })
+);
+
+const themes = await Promise.all(
+  themeIds.map(async (item) => {
+    try {
+      const themeData = await temaService.getTemaByIdPapelera(item.content_id);
+      return {
+        ...themeData,
+        trash_id: item._id,
+        trash_type: item.type_content
+      };
+    } catch (error) {
+      console.log(`⚠️ Tema ${item.content_id} no encontrado en papelera`);
+      return null;
+    }
+  })
+);
+    
+    const files = fileIds.map(item => ({
+      _id: item.content_id,
+      file_name: `Archivo eliminado`, // Nombre genérico
+      creation_date: item.expireAt || new Date().toISOString(),
+      // Agregar referencia a la papelera
+      trash_id: item._id,
+      trash_type: item.type_content
+    }));
+    
+    setTrashContent({
+      items: trashItems,
+      folders: folders,
+      themes: themes,
+      files: files
+    });
+    
+    console.log('✅ Datos de papelera procesados:', {
+      items: trashItems.length,
+      folders: folders.length,
+      themes: themes.length,
+      files: files.length
+    });
+    
+  } catch (error) {
+    console.error('❌ Error cargando papelera:', error);
+    setTrashContentError('Error al cargar la papelera');
+  } finally {
+    setTrashContentLoading(false);
+  }
+};
+
   // ============= RENDER =============
   
   return (
@@ -1203,6 +1312,15 @@ const handleToggleFileFavorite = async (fileId) => {
               onThemeDetailBack={navigateBackFromThemeDetail}
               onThemeEdit={handleThemeEditFromDetail}
               onThemeDelete={handleThemeDeleteFromDetail}
+              onRestoreItem={() => {}}
+              onPermanentDelete={() => {}}
+              onEmptyTrash={() => {}}
+              onRestoreSelected={() => {}}
+              onDeleteSelected={() => {}}
+              trashContent={trashContent}
+              trashContentLoading={trashContentLoading}
+              trashContentError={trashContentError}
+
             />
 
             {/* Details Panel - siempre visible, cambia contenido según el contexto */}

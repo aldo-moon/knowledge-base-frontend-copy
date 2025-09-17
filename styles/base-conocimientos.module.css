@@ -770,7 +770,6 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 0.5rem;
-  height: 4rem; 
 }
 
 
@@ -786,6 +785,7 @@
   justify-content: space-between;
   width: 100%;
   gap: 1rem; 
+  margin-bottom: 1rem;
 }
 
 .contentHeaderLeft {
@@ -818,11 +818,11 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: -5.5rem;
+  margin-top: 0.5rem;
   animation: filtersSlideIn 0.3s ease-out;
   max-width: 26.7rem;
   position: absolute;
-  right: 23.5%;
+  right: 24%;
 }
 
 /* Animación de entrada de filtros */
@@ -2559,7 +2559,7 @@ font-size: 1rem;
 
 .themesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
 }
 
@@ -2678,7 +2678,7 @@ font-size: 1rem;
 
 .filesGrid1 {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(192px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(193px, 1fr));
   gap: 16px;
   padding: 16px 0;
 }
@@ -3187,10 +3187,8 @@ font-size: 1rem;
 
 /* Estilos para las imágenes con su propio rectángulo */
 .themeContent1 img {
-  max-width: 200px;
-  min-height: 180px;
-  width: auto;
-  height: auto;
+  width: 200px;
+  height: 170px;
   border-radius: 0.5rem;
   object-fit: contain;
   display: block;
@@ -3315,6 +3313,7 @@ font-size: 1rem;
   height: auto;
   display: inline-grid;
   margin-left: 1rem;
+  justify-items: center;
 }
 
 .themeContent1 :global(.imageCaption) {
@@ -3885,6 +3884,8 @@ max-width: 300px;
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  border-radius: 0.75rem;
+
 }
 
 .filePreviewCard:hover .imagePreview img {
@@ -3900,8 +3901,22 @@ max-width: 300px;
 }
 
 .videoPreview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.75rem;
+}
+
+.videoPreview1 {
   width: 10rem;
   height: 7.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.videoPreview1 video {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   border-radius: 0.75rem;
 }
@@ -4256,46 +4271,13 @@ max-width: 300px;
   z-index: 1000;
 }
 
-.confirmModal {
-  background: #27293d;
-  border-radius: 1rem;
-  border: 1px solid #3b3f5f;
-  max-width: 400px;
-  width: 90%;
-  overflow: hidden;
-}
 
-.modalHeader {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.5rem 1.5rem 1rem 1.5rem;
-}
 
-.modalHeader h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: white;
-  margin: 0;
-}
 
 .warningIcon {
   color: #f59e0b;
 }
 
-.modalBody {
-  padding: 0 1.5rem 1.5rem 1.5rem;
-}
-
-.modalBody p {
-  color: #8b8d98;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.modalBody strong {
-  color: white;
-}
 
 .modalActions {
   display: flex;
@@ -4434,3 +4416,224 @@ max-width: 300px;
 }
 
 
+
+
+
+
+
+
+
+
+
+/* Estilos para el sistema de Tags - Agregar a base-conocimientos.module.css */
+
+/* Helper text para labels */
+.formHelperText {
+  font-size: 0.75rem;
+  color: #8b8d98;
+  font-weight: 400;
+  margin-left: 0.5rem;
+}
+
+/* Contenedor del input de tags */
+.tagInputContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tagInputContainer.tagInputError .tagInput {
+  border-color: #ef4444;
+}
+
+/* Input para escribir tags */
+.tagInput {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.5rem;
+  background: #1e1e2f;
+  color: white;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.tagInput:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.tagInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tagInput::placeholder {
+  color: #6b7280;
+}
+
+/* Botón para agregar tag */
+.addTagButton {
+  padding: 0.75rem 1rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.addTagButton:hover:not(:disabled) {
+  background: #5b5aef;
+  transform: translateY(-1px);
+}
+
+.addTagButton:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Contenedor de tags agregados */
+.tagsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #27293d;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.5rem;
+  min-height: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Chip individual de tag */
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: #6366f1;
+  color: white;
+  border-radius: 1rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  animation: tagSlideIn 0.2s ease-out;
+}
+
+@keyframes tagSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Botón para eliminar tag */
+.removeTagButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.removeTagButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* Información de tags */
+.tagInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #8b8d98;
+  margin-top: 0.25rem;
+}
+
+.tagCount {
+  color: #6b7280;
+}
+
+.tagLimit {
+  color: #f59e0b;
+  font-weight: 500;
+}
+
+/* Estados especiales */
+.tagsContainer:empty::before {
+  content: 'No hay tags agregados';
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tagInputContainer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .addTagButton {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .tagsContainer {
+    gap: 0.375rem;
+  }
+  
+  .tagChip {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .tagInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+/* Variantes de color para tags */
+.tagChip:nth-child(5n+1) { background: #6366f1; }
+.tagChip:nth-child(5n+2) { background: #10b981; }
+.tagChip:nth-child(5n+3) { background: #f59e0b; }
+.tagChip:nth-child(5n+4) { background: #ef4444; }
+.tagChip:nth-child(5n+5) { background: #8b5cf6; }
+
+/* Efecto hover para el contenedor completo */
+.tagInputContainer:hover .tagInput:not(:focus) {
+  border-color: #4b5563;
+}
+
+/* Focus dentro del contenedor de tags */
+.tagsContainer:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}

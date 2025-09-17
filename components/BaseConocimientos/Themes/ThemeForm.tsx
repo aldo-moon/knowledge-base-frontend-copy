@@ -18,8 +18,9 @@ interface ThemeFormData {
   area: string;
   position: string;
   files: File[];
-  uploadedFiles: { id: string; name: string }[]; // Para archivos ya subidos
-  tags: string;
+  uploadedFiles: { id: string; name: string }[];
+  tags: string[];  
+  currentTag: string;  
   aiModel: string;
   suggestInHelpDesk: boolean;
 }
@@ -42,8 +43,9 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
     area: '',
     position: '',
     files: [],
-    uploadedFiles: [], // Archivos que ya están en el servidor
-    tags: '',
+    uploadedFiles: [],
+    tags: [],  
+    currentTag: '',  
     aiModel: '',
     suggestInHelpDesk: false
   });
@@ -55,8 +57,41 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
     tags: ''
   });
 
-  // Función de validación
-  const validateForm = () => {
+  // Funciones para manejar tags:
+  const addTag = () => {
+    if (formData.currentTag.trim() && !formData.tags.includes(formData.currentTag.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, prev.currentTag.trim()],
+        currentTag: ''
+      }));
+      
+      // Limpiar error si había
+      if (errors.tags) {
+        setErrors(prev => ({
+          ...prev,
+          tags: ''
+        }));
+      }
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  const handleTagInputKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag();
+    }
+  };
+
+    // Función de validación
+    const validateForm = () => {
     const newErrors = {
       priority: '',
       area: '',
@@ -76,8 +111,9 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
       newErrors.position = 'El puesto es obligatorio';
     }
 
-    if (!formData.tags || formData.tags === '') {
-      newErrors.tags = 'Los tags son obligatorios';
+    // ✅ CAMBIAR validación de tags:
+    if (formData.tags.length === 0) {
+      newErrors.tags = 'Debe agregar al menos un tag';
     }
 
     setErrors(newErrors);
@@ -223,17 +259,19 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
     }
   };
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      // Incluir IDs de archivos subidos en los datos del formulario
-      const formDataWithFiles = {
-        ...formData,
-        fileIds: formData.uploadedFiles.map(file => file.id) // Agregar IDs de archivos
-      };
-      
-      onSubmit?.(formDataWithFiles);
-    }
-  };
+const handleSubmit = () => {
+  if (validateForm()) {
+    const formDataWithFiles = {
+      ...formData,
+      fileIds: formData.uploadedFiles.map(file => file.id),
+      // ✅ ASEGURAR que tags sea un array simple
+      tags: formData.tags // No modificar aquí
+    };
+    
+    console.log('🏷️ Tags que se envían:', formData.tags); // Para debug
+    onSubmit?.(formDataWithFiles);
+  }
+};
 
   return (
     <div className={styles.topicFormContent}>
@@ -410,19 +448,61 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
 
         {/* Tags */}
         <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Tags</label>
-          <select 
-            className={`${styles.formSelect} ${errors.tags ? styles.formSelectError : ''}`}
-            value={formData.tags}
-            onChange={(e) => handleInputChangeWithValidation('tags', e.target.value)}
-          >
-            <option value="">Seleccionar tags</option>
-            <option value="importante">Importante</option>
-            <option value="urgente">Urgente</option>
-            <option value="proyecto">Proyecto</option>
-          </select>
-          {errors.tags && <span className={styles.errorMessage}>{errors.tags}</span>}
+        <label className={styles.formLabel}>
+          Tags <span className={styles.formHelperText}></span>
+        </label>
+        
+        {/* Input para agregar tags */}
+        <div className={`${styles.tagInputContainer} ${errors.tags ? styles.tagInputError : ''}`}>
+          <input
+            type="text"
+            className={styles.tagInput}
+            value={formData.currentTag}
+            onChange={(e) => handleInputChange('currentTag', e.target.value)}
+            onKeyPress={handleTagInputKeyPress}
+            onBlur={() => {
+              if (formData.currentTag.trim()) {
+                addTag();
+              }
+            }}
+            placeholder="Escribe un tag y presiona Enter..."
+            disabled={formData.tags.length >= 10} // Límite de 10 tags
+          />
+          
+         
         </div>
+        
+        {/* Mostrar tags agregados */}
+        {formData.tags.length > 0 && (
+          <div className={styles.tagsContainer}>
+            {formData.tags.map((tag, index) => (
+              <span key={index} className={styles.tagChip}>
+                {tag}
+                <button
+                  type="button"
+                  className={styles.removeTagButton}
+                  onClick={() => removeTag(tag)}
+                  title="Eliminar tag"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        
+        {/* Información adicional */}
+        <div className={styles.tagInfo}>
+          <span className={styles.tagCount}>
+            {formData.tags.length}/10 tags
+          </span>
+          {formData.tags.length >= 10 && (
+            <span className={styles.tagLimit}>Límite alcanzado</span>
+          )}
+        </div>
+        
+        {errors.tags && <span className={styles.errorMessage}>{errors.tags}</span>}
+      </div>
 
         {/* Alimentar AI */}
         <div className={styles.formGroup}>

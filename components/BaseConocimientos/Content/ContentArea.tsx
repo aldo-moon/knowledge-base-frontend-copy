@@ -88,8 +88,8 @@ interface ContentAreaProps {
   
   
   //  Vista activa
-  activeView: 'folder' | 'user-content' | 'favorites';
-  
+  activeView: 'folder' | 'user-content' | 'favorites' | 'trash';  
+
   onFileSelect: (file: File) => void;
   onFileDoubleClick?: (file: File) => void;
   onFileMenuAction?: (action: string, file: File) => void;
@@ -141,8 +141,7 @@ interface ContentAreaProps {
   onRestoreSelected?: (papeleraIds: string[]) => void;
   onDeleteSelected?: (papeleraIds: string[]) => void;
   
-  // Actualizar activeView para incluir 'trash'
-  activeView: 'folder' | 'user-content' | 'favorites' | 'trash';
+
 
 }
 
@@ -270,7 +269,7 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
     );
   }
 
-  // 🆕 Si la vista activa es "favorites", mostrar FavoritesContentView
+  //  Si la vista activa es "favorites", mostrar FavoritesContentView
   if (activeView === 'favorites') {
 
   
@@ -306,7 +305,41 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
     );
   }
 
-  
+  if (activeView === 'trash') {
+      console.log('🎯 Renderizando TrashContentView con:', {
+    items: trashContent?.items?.length,
+    folders: trashContent?.folders?.length,
+    themes: trashContent?.themes?.length,
+    files: trashContent?.files?.length
+  });
+    return (
+      <TrashContentView
+        trashItems={trashContent?.items || []}
+        trashFolders={trashContent?.folders || []}
+        trashThemes={trashContent?.themes || []}
+        trashFiles={trashContent?.files || []}
+        loading={trashContentLoading}
+        error={trashContentError}
+        areFiltersVisible={areFiltersVisible}
+        activeContentFilters={activeContentFilters}
+        currentSortBy={currentSortBy}
+        onToggleFiltersVisibility={onToggleFiltersVisibility}
+        onFilterClick={onFilterClick}
+        onSortOptionClick={onSortOptionClick}
+        onRestoreItem={onRestoreItem || (() => {})}
+        onPermanentDelete={onPermanentDelete || (() => {})}
+        onEmptyTrash={onEmptyTrash || (() => {})}
+        onRestoreSelected={onRestoreSelected || (() => {})}
+        onDeleteSelected={onDeleteSelected || (() => {})}
+        onThemeSelect={onThemeSelect}
+        onFolderSelect={onFolderSelect}
+        onFileSelect={onFileSelect}
+        
+      />
+    );
+  }
+
+
 
   // Vista normal de carpetas y temas (navegación por carpetas)
   return (

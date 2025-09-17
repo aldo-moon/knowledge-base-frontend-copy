@@ -219,23 +219,29 @@ const processImagesWithCaptions = (htmlContent: string): string => {
       });
     };
 
-  const getPriorityText = (priority?: number) => {
-    switch (priority) {
-      case 2: return 'Alta';
-      case 1: return 'Media';
-      case 0: return 'Baja';
-      default: return 'No definida';
-    }
-  };
+    const getPriorityText = (priority?: number | string) => {
+      // Convertir a número si es string
+      const priorityNum = typeof priority === 'string' ? parseInt(priority) : priority;
+      
+      switch (priorityNum) {
+        case 2: return 'Alta';
+        case 1: return 'Media';
+        case 0: return 'Baja';
+        default: return 'No definida';
+      }
+    };
 
-  const getPriorityColor = (priority?: number) => {
-    switch (priority) {
-      case 2: return '#dc2626'; // Rojo
-      case 1: return '#f59e0b'; // Amarillo
-      case 0: return '#10b981'; // Verde
-      default: return '#6b7280'; // Gris
-    }
-  };
+    const getPriorityColor = (priority?: number | string) => {
+      // Convertir a número si es string
+      const priorityNum = typeof priority === 'string' ? parseInt(priority) : priority;
+      
+      switch (priorityNum) {
+        case 2: return '#dc2626'; // Rojo
+        case 1: return '#f59e0b'; // Amarillo
+        case 0: return '#10b981'; // Verde
+        default: return '#6b7280'; // Gris
+      }
+    };
 
   if (loading) {
     return (

@@ -17,12 +17,18 @@ export const papeleraService = {
   // Obtener papeleras por usuario (filtrado en frontend)
   getPapelerasByUser: async (userId) => {
     try {
-      const response = await api.get('/papeleras');
-      // Filtrar por usuario en frontend si el backend no lo hace
-      const userPapeleras = response.data.filter(item => item.user_bin_id === userId);
-      return userPapeleras;
+      // Usar el endpoint con el ID del usuario
+      const response = await api.get(`/papeleras/${userId}`);
+      return response.data || []; // El backend ya retorna solo las papeleras del usuario
     } catch (error) {
       console.error("❌ Error al obtener papeleras del usuario:", error);
+      console.error("❌ Detalles del error:", error.response?.data);
+      
+      // Si es 404 (papelera vacía), retornar array vacío
+      if (error.response?.status === 404) {
+        return [];
+      }
+      
       throw error;
     }
   },

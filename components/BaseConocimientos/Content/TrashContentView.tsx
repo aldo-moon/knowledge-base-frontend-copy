@@ -97,6 +97,13 @@ export const TrashContentView: React.FC<TrashContentViewProps> = ({
   onFolderSelect,
   onFileSelect
 }) => {
+      console.log('🗂️ TrashContentView recibió:', {
+    trashItems: trashItems?.length,
+    trashFolders: trashFolders?.length,
+    trashThemes: trashThemes?.length,
+    trashFiles: trashFiles?.length
+  });
+
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [showConfirmEmpty, setShowConfirmEmpty] = useState(false);
 
@@ -130,9 +137,10 @@ export const TrashContentView: React.FC<TrashContentViewProps> = ({
   // Handlers para acciones de papelera
   const handleTrashMenuAction = (action: string, content: any, type: string) => {
     // Buscar el item de papelera correspondiente
-    const trashItem = trashItems.find(item => 
-      item.content_id === content._id && item.type_content === type
-    );
+const trashItem = trashItems.find(item => 
+  item.content_id === content._id && 
+  item.type_content.toLowerCase() === type.toLowerCase()
+);
     
     if (!trashItem) return;
 
@@ -170,8 +178,14 @@ export const TrashContentView: React.FC<TrashContentViewProps> = ({
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <p>Cargando papelera...</p>
+        
+     <div className={styles.foldersSection}>
+        <div className={styles.contentHeader}>
+          <h2 className={styles.sectionTitle1}>Papelera</h2>
+        </div>
+        <div className={styles.loadingContainer}>
+          <p>Cargando papelera...</p>
+        </div>
       </div>
     );
   }
@@ -185,9 +199,9 @@ export const TrashContentView: React.FC<TrashContentViewProps> = ({
   }
 
   return (
-    <div className={styles.userContentContainer}>
+    <div className={styles.foldersSection}>
       {/* Header con información de papelera */}
-      <div className={styles.trashHeader}>
+{/*       <div className={styles.trashHeader}>
         <div className={styles.trashHeaderLeft}>
           <div className={styles.trashIcon}>
             <Trash2 size={24} />
@@ -233,7 +247,7 @@ export const TrashContentView: React.FC<TrashContentViewProps> = ({
             </button>
           )}
         </div>
-      </div>
+      </div> */}
 
       {/* Filtros */}
       <div className={styles.contentHeader}>
@@ -266,12 +280,12 @@ export const TrashContentView: React.FC<TrashContentViewProps> = ({
           <div className={styles.trashInfoBanner}>
             <Info size={16} />
             <span>
-              Los elementos en la papelera pueden ser restaurados a su ubicación original o eliminados permanentemente.
+              Los elementos de la papelera se borrarán de forma definitiva después de 30 días
             </span>
           </div>
 
-          {/* Selector de todos */}
-          <div className={styles.selectAllContainer}>
+         
+      {/*     <div className={styles.selectAllContainer}>
             <label className={styles.selectAllLabel}>
               <input
                 type="checkbox"
@@ -281,7 +295,7 @@ export const TrashContentView: React.FC<TrashContentViewProps> = ({
               />
               Seleccionar todo ({stats.total})
             </label>
-          </div>
+          </div> */}
 
           <div className={styles.contentSections}>
             {/* Carpetas en papelera */}
