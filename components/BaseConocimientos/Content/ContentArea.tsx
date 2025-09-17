@@ -306,32 +306,7 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
     );
   }
 
-   if (activeView === 'trash') {
-    return (
-      <TrashContentView
-        trashItems={trashContent?.items || []}
-        trashFolders={trashContent?.folders || []}
-        trashThemes={trashContent?.themes || []}
-        trashFiles={trashContent?.files || []}
-        loading={trashContentLoading}
-        error={trashContentError}
-        areFiltersVisible={areFiltersVisible}
-        activeContentFilters={activeContentFilters}
-        currentSortBy={currentSortBy}
-        onToggleFiltersVisibility={onToggleFiltersVisibility}
-        onFilterClick={onFilterClick}
-        onSortOptionClick={onSortOptionClick}
-        onRestoreItem={onRestoreItem}
-        onPermanentDelete={onPermanentDelete}
-        onEmptyTrash={onEmptyTrash}
-        onRestoreSelected={onRestoreSelected}
-        onDeleteSelected={onDeleteSelected}
-        onThemeSelect={onThemeSelect}
-        onFolderSelect={onFolderSelect}
-        onFileSelect={onFileSelect}
-      />
-    );
-  }
+  
 
   // Vista normal de carpetas y temas (navegación por carpetas)
   return (

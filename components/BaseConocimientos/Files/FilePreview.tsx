@@ -1,6 +1,6 @@
 // components/BaseConocimientos/Files/FilePreview.tsx
 import { useState, useRef, useEffect } from 'react';
-import { Download, ExternalLink, FileText, CirclePlay, Music, MoreHorizontal, Archive, Code, Image as ImageIcon } from 'lucide-react';
+import { Download, ExternalLink, FileText, CirclePlay, Film, Music, MoreHorizontal, Archive, Code, Image as ImageIcon } from 'lucide-react';
 import styles from './../../../styles/base-conocimientos.module.css';
 
 interface AttachedFile {
@@ -193,11 +193,9 @@ useEffect(() => {
         return (
             <div className={styles.filePreviewFallback}>
             <div className={styles.fileIconContainer} style={{ color: '#dc2626' }}>
-                <FileText size={24} />
+                <FileText size={45} />
             </div>
-            <div className={styles.fileTypeLabel}>
-                PDF - {file.file_name}
-            </div>
+            
             </div>
         );
         

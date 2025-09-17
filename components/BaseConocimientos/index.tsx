@@ -885,22 +885,19 @@ const handleSectionChange = async (sectionName) => {
 
 // Agregar esta función en tu componente principal
 const getActiveView = () => {
-  // Si está creando tema, usar vista normal
   if (isCreatingTheme) {
     return 'folder';
   }
 
-  // Vista específica según la sección activa
   switch (activeSection) {
     case 'theme-detail':
       return 'theme-detail';
-
     case 'Mis archivos':
       return 'user-content';
-
     case 'Favoritos':
       return 'favorites';
-
+    case 'Papelera':  // ← AGREGAR ESTO
+      return 'trash';
     default:
       return 'folder';
   }

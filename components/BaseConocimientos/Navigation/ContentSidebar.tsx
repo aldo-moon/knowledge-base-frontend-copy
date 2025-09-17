@@ -104,9 +104,9 @@ export const ContentSidebar: React.FC<ContentSidebarProps> = ({
     onItemClick?.(item);
     
     // Si se hace clic en una sección principal, cambiar la vista
-    if (item.label === 'Mis archivos' || item.label === 'Contenedor') {
-      onSectionChange?.(item.label);
-    }
+if (item.label === 'Mis archivos' || item.label === 'Contenedor' || item.label === 'Favoritos' || item.label === 'Papelera') {
+  onSectionChange?.(item.label);
+}
   };
 
   const handleExpandClick = (itemLabel: string, event: React.MouseEvent) => {
