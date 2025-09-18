@@ -11,7 +11,8 @@ interface ThemeFormProps {
   onCancel?: () => void;
   currentFolderId?: string;
   userId?: string;
-}
+  isEditMode?: boolean;
+  themeToEdit?: any;}
 
 interface ThemeFormData {
   priority: string;
@@ -29,7 +30,9 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
   onSubmit,
   onCancel,
   currentFolderId = "68acb06886d455d16cceef05",
-  userId = "68adc29785d92b4c84e01c5b"
+  userId = "68adc29785d92b4c84e01c5b",
+  isEditMode = false,
+  themeToEdit = null
 }) => {
 
   const [areas, setAreas] = useState([]);
@@ -37,15 +40,27 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
   const [loadingData, setLoadingData] = useState(true);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  
+  // ✅ FUNCIÓN HELPER PARA CONVERTIR PRIORIDAD
+  const getPriorityText = (priority?: number | string) => {
+    const priorityNum = typeof priority === 'string' ? parseInt(priority) : priority;
+    switch (priorityNum) {
+      case 2: return 'Alta';
+      case 1: return 'Normal';
+      case 0: return 'Baja';
+      default: return '';
+    }
+  };
 
+  // ✅ ESTADO INICIAL BASADO EN MODO EDICIÓN:
   const [formData, setFormData] = useState<ThemeFormData>({
-    priority: '',
-    area: '',
-    position: '',
+    priority: isEditMode ? getPriorityText(themeToEdit?.priority) : '',
+    area: isEditMode ? (themeToEdit?.area_id?._id || themeToEdit?.area_id || '') : '',
+    position: isEditMode ? (themeToEdit?.puesto_id?._id || themeToEdit?.puesto_id || '') : '',
     files: [],
-    uploadedFiles: [],
-    tags: [],  
-    currentTag: '',  
+    uploadedFiles: [], // Los archivos existentes se cargarán después
+    tags: isEditMode ? (themeToEdit?.keywords || []) : [],
+    currentTag: '',
     aiModel: '',
     suggestInHelpDesk: false
   });
@@ -119,6 +134,43 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
     setErrors(newErrors);
     return Object.values(newErrors).every(error => error === '');
   };
+
+// ✅ AGREGAR ESTE useEffect para cargar archivos existentes en modo edición
+useEffect(() => {
+  if (isEditMode && themeToEdit?.files_attachment_id) {
+    const loadExistingFiles = async () => {
+      try {
+        const existingFiles = await Promise.all(
+          themeToEdit.files_attachment_id.map(async (fileId: string) => {
+            try {
+              const fileData = await archivoService.getArchivoById(fileId);
+              return {
+                id: fileData._id,
+                name: fileData.file_name || 'Archivo sin nombre'
+              };
+            } catch (error) {
+              return {
+                id: fileId,
+                name: 'Archivo no encontrado'
+              };
+            }
+          })
+        );
+
+        setFormData(prev => ({
+          ...prev,
+          uploadedFiles: existingFiles
+        }));
+
+      } catch (error) {
+        console.error('Error cargando archivos existentes:', error);
+      }
+    };
+
+    loadExistingFiles();
+  }
+}, [isEditMode, themeToEdit]);
+
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -541,7 +593,7 @@ const handleSubmit = () => {
             cursor: uploadingFiles ? 'not-allowed' : 'pointer'
           }}
         >
-          {uploadingFiles ? 'SUBIENDO...' : 'CREAR'}
+          {uploadingFiles ? 'SUBIENDO...' : (isEditMode ? 'ACTUALIZAR' : 'CREAR')}
         </button>
       </form>
     </div>

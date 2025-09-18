@@ -137,6 +137,10 @@ const BaseConocimientos = () => {
   const [themeTitle, setThemeTitle] = useState('');
   const [themeDescription, setThemeDescription] = useState('');
 
+  // Agregar este estado junto con los otros estados
+const [themeToEdit, setThemeToEdit] = useState<Theme | null>(null);
+const [isEditingTheme, setIsEditingTheme] = useState(false);
+
   const [userContent, setUserContent] = useState({
     folders: [],
     themes: [],
@@ -171,6 +175,31 @@ const [trashContentError, setTrashContentError] = useState(null);
   
   initialize();
 }, [currentFolderId]);
+
+// En tu componente principal (index.tsx), agregar este useEffect:
+
+useEffect(() => {
+  // Cargar datos cuando cambie activeSection o al inicializar
+  const initializeSectionData = async () => {
+    if (activeSection === 'Mis archivos') {
+      setUserContentLoading(true);
+      await refreshUserData();
+      setUserContentLoading(false);
+    }
+    
+    if (activeSection === 'Favoritos') {
+      await loadFavoritesContent();
+    }
+    
+    // ✅ AGREGAR ESTO:
+    if (activeSection === 'Papelera') {
+      await loadTrashContent();
+    }
+  };
+
+  initializeSectionData();
+}, [activeSection]); // Ejecutar cuando cambie activeSection
+
 
   // Estados de datos
   const [folders, setFolders] = useState([]);
@@ -334,28 +363,38 @@ const handleThemeFormSubmit = async (formData) => {
       folder_id: currentFolderId,
       author_topic_id: CURRENT_USER_ID,
       keywords: Array.isArray(formData.tags) ? formData.tags : [],
-      files_attachment_id: formData.fileIds || [] 
+      files_attachment_id: formData.fileIds || []
     };
 
+    console.log('📁 Tema completo:', temaCompleto);
     
-    // Crear el tema usando el servicio
-    const nuevoTema = await temaService.createTema(temaCompleto);
+    // ✅ AGREGAR LÓGICA PARA MODO EDICIÓN:
+    let resultado;
+    
+    if (isEditingTheme && themeToEdit) {
+      // MODO EDICIÓN: Actualizar tema existente
+      console.log('🖊️ Actualizando tema existente:', themeToEdit._id);
+      resultado = await temaService.updateTema(themeToEdit._id, temaCompleto);
+      console.log('✅ Tema actualizado exitosamente:', resultado);
+    } else {
+      // MODO CREACIÓN: Crear nuevo tema
+      console.log('🆕 Creando nuevo tema');
+      resultado = await temaService.createTema(temaCompleto);
+      console.log('✅ Tema creado exitosamente:', resultado);
+    }
     
     // Limpiar estados
     setThemeTitle('');
     setThemeDescription('');
-    // Eliminé: setIsCreatingTheme(false); ← ESTA LÍNEA CAUSABA EL ERROR
+    setIsEditingTheme(false);  // ✅ AGREGAR ESTO
+    setThemeToEdit(null);      // ✅ AGREGAR ESTO
     
     // Volver a la vista anterior y recargar contenido
     navigateBackFromTheme(currentFolderId);
-    await loadCarpetas(); // Recargar para mostrar el nuevo tema
+    await loadCarpetas();
     
   } catch (error) {
-    console.error('❌ Error creando tema:', error);
-    
-    // Aquí puedes mostrar un mensaje de error al usuario
-    // Por ejemplo, con un sistema de notificaciones:
-    // showErrorNotification('Error al crear el tema. Inténtalo de nuevo.');
+    console.error('❌ Error procesando tema:', error);
   }
 };
 
@@ -1230,6 +1269,30 @@ const themes = await Promise.all(
   }
 };
 
+
+// Agregar esta función junto con tus otros handlers
+const handleThemeEdit = (theme: Theme) => {
+  console.log('🖊️ Editando tema:', theme);
+  
+  // Guardar tema a editar en estado
+  setThemeToEdit(theme);
+  setIsEditingTheme(true);
+  
+  // Pre-llenar datos en el editor
+  setThemeTitle(theme.title_name);
+  setThemeDescription(theme.description || '');
+  
+  // Navegar a modo edición (usando la función que ya tienes)
+  navigateToEditTheme(theme._id);
+};
+
+// Agregar esta función junto con tus otras funciones de navegación
+const navigateToEditTheme = (themeId: string) => {
+  // Por ahora, puedes reutilizar la navegación existente
+  // Más adelante agregaremos la ruta específica
+  navigateToCreateTheme(currentFolderId);
+};
+
   // ============= RENDER =============
   
   return (
@@ -1320,6 +1383,7 @@ const themes = await Promise.all(
               trashContent={trashContent}
               trashContentLoading={trashContentLoading}
               trashContentError={trashContentError}
+              onThemeEdit={handleThemeEdit}  // ✅ AGREGAR ESTA LÍNEA
 
             />
 
@@ -1333,6 +1397,8 @@ const themes = await Promise.all(
                 selectedFolderDetails={selectedFolderDetails}
                 selectedTemaId={selectedTemaId}
                 isCreatingNewTopic={isCreatingTheme}
+                isEditingTheme={isEditingTheme}
+                themeToEdit={themeToEdit}
               >
               {isCreatingTheme && (
                   <ThemeForm 
@@ -1340,6 +1406,8 @@ const themes = await Promise.all(
                     onCancel={handleThemeFormCancel}
                     currentFolderId={currentFolderId || "68acb06886d455d16cceef05"}
                     userId={CURRENT_USER_ID}
+                    isEditMode={isEditingTheme}
+                    themeToEdit={themeToEdit}
                   />
                 )}
               </DetailsPanel>

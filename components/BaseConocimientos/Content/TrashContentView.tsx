@@ -201,7 +201,7 @@ const trashItem = trashItems.find(item =>
   return (
     <div className={styles.foldersSection}>
       {/* Header con información de papelera */}
-{/*       <div className={styles.trashHeader}>
+       <div className={styles.trashHeader}>
         <div className={styles.trashHeaderLeft}>
           <div className={styles.trashIcon}>
             <Trash2 size={24} />
@@ -247,7 +247,7 @@ const trashItem = trashItems.find(item =>
             </button>
           )}
         </div>
-      </div> */}
+      </div> 
 
       {/* Filtros */}
       <div className={styles.contentHeader}>
@@ -285,7 +285,7 @@ const trashItem = trashItems.find(item =>
           </div>
 
          
-      {/*     <div className={styles.selectAllContainer}>
+        <div className={styles.selectAllContainer}>
             <label className={styles.selectAllLabel}>
               <input
                 type="checkbox"
@@ -295,7 +295,7 @@ const trashItem = trashItems.find(item =>
               />
               Seleccionar todo ({stats.total})
             </label>
-          </div> */}
+          </div> 
 
           <div className={styles.contentSections}>
             {/* Carpetas en papelera */}

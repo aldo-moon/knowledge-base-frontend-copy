@@ -101,6 +101,8 @@ interface ThemeEditorProps {
   description: string;
   onTitleChange: (title: string) => void;
   onDescriptionChange: (description: string) => void;
+    isEditMode?: boolean;
+  themeToEdit?: Theme;
 }
 
 interface ThemeData {
@@ -114,8 +116,12 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
   title,
   description,
   onTitleChange,
-  onDescriptionChange
+  onDescriptionChange,
+  isEditMode = false,
+  themeToEdit
 }) => {
+  const initialTitle = isEditMode ? themeToEdit?.title_name || '' : title;
+  const initialDescription = isEditMode ? themeToEdit?.description || '' : description;
 
   const handleSave = () => {
     if (title.trim() && description.trim()) {

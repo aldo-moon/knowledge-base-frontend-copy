@@ -16,6 +16,18 @@ export const useBaseConocimientosRouter = () => {
     { id: "68acb06886d455d16cceef05", name: "Contenedor" }
   ]);
 
+  const navigateToEditTheme = (themeId: string) => {
+  const currentQuery = { ...router.query };
+  delete currentQuery.slug;
+  
+  const url = `/base-conocimientos/edit-theme/${themeId}`;
+  const queryString = Object.keys(currentQuery).length > 0 
+    ? '?' + Object.entries(currentQuery).map(([k, v]) => `${k}=${v}`).join('&')
+    : '';
+  
+  router.push(url + queryString, undefined, { shallow: true });
+};
+
   // Parsear la URL desde el slug
 // Parsear la URL desde el slug
 const parseSlugFromUrl = () => {
@@ -74,6 +86,15 @@ const parseSlugFromUrl = () => {
 
   if (slug.includes('new-theme')) {
     isCreatingTheme = true;
+  }
+
+  // En parseSlugFromUrl, agregar:
+  if (slug[0] === 'edit-theme' && slug[1]) {
+    themeId = slug[1] as string;
+    isCreatingTheme = true; // Reutilizar el mismo estado
+    isEditingTheme = true;  // Nuevo estado
+    activeSection = 'edit-theme';
+    return { folderId, themeId, isCreatingTheme, isViewingTheme, activeSection, isEditingTheme };
   }
 
   return { folderId, themeId, isCreatingTheme, isViewingTheme, activeSection };
