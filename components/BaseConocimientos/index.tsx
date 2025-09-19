@@ -30,7 +30,7 @@ import DeleteFileModal from './Modals/DeleteFileModal';
 import FilesGrid from './Files/FilesGrid';
 import ThemeDetailView from './Content/ThemeDetailView';
 import ThemeCommentsPanel from './Details/ThemeCommentsPanel';
-
+import { AuthModal } from './Auth/AuthButton';
 
 // Importar servicios
 import { carpetaService } from '../../services/carpetaService';
@@ -39,6 +39,7 @@ import { archivoService } from '../../services/archivoService';
 import { favoritoService } from '../../services/favoritoService';
 import { usuarioService } from '../../services/usuarioService';
 import papeleraService from '../../services/papeleraService';
+import { authService } from '../../services/authService';
 
 // Importar hook de routing
 import { useBaseConocimientosRouter } from '../../hooks/useBaseConocimientosRouter';
@@ -115,6 +116,10 @@ const BaseConocimientos = () => {
   const handleCancelDelete = () => closeModal(setIsDeleteModalOpen, () => setFolderToDelete(null));
   const handleCancelThemeDelete = () => closeModal(setIsDeleteThemeModalOpen, () => setThemeToDelete(null));
   const [fileFavorites, setFileFavorites] = useState(new Set());
+
+  const [showAuthModal, setShowAuthModal] = useState(false);
+const [isAuthenticated, setIsAuthenticated] = useState(false);
+const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     // Estados para componentes modulares
   const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
@@ -213,7 +218,47 @@ useEffect(() => {
   const [error, setError] = useState(null);
   const [sidebarFolders, setSidebarFolders] = useState({});
   const [expandedSidebarItems, setExpandedSidebarItems] = useState({});
-  const CURRENT_USER_ID = "68adc29785d92b4c84e01c5b";
+  const CURRENT_USER_ID = currentUserId || "68af79255f7ce33d86fc641e";
+  const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
+
+
+// Verificar autenticación al cargar
+useEffect(() => {
+  const checkAuth = async () => {
+    if (authService.isAuthenticated()) {
+      setIsAuthenticated(true);
+      setCurrentUserId(authService.getCurrentUserId());
+    } else {
+      setShowAuthModal(true); // Mostrar modal si no está autenticado
+    }
+  };
+  
+  checkAuth();
+}, []);
+
+
+const handleAuthSuccess = (userId: string) => {
+  setIsAuthenticated(true);
+  setCurrentUserId(userId);
+  setShowAuthModal(false);
+  console.log('✅ Usuario autenticado:', userId);
+  
+  // Recargar datos si es necesario
+  Promise.all([
+    loadUserFavorites?.(),
+    loadSidebarFolders?.(),
+    refreshUserData?.()
+  ]).catch(console.error);
+};
+
+const handleCloseModal = () => {
+  setShowAuthModal(false);
+  // Permitir usar la app sin autenticar (modo limitado)
+};
 
   // ============= HANDLERS PARA COMPONENTES MODULARES =============
   
@@ -663,7 +708,7 @@ const handleThemeDeleteFromDetail = (theme: Theme) => {
 
 const handleToggleFolderFavorite = async (folderId: string) => {
   try {
-    const userId = "68adc29785d92b4c84e01c5b";
+    const userId = CURRENT_USER_ID;
     const isFavorite = folderFavorites.has(folderId);
 
     if (isFavorite) {
@@ -699,7 +744,7 @@ const handleToggleFolderFavorite = async (folderId: string) => {
 
 const handleToggleThemeFavorite = async (themeId: string) => {
   try {
-    const userId = "68adc29785d92b4c84e01c5b";
+    const userId = CURRENT_USER_ID;
     const isFavorite = themeFavorites.has(themeId);
     
     if (isFavorite) {
@@ -725,7 +770,7 @@ const handleToggleThemeFavorite = async (themeId: string) => {
 // Función para cargar favoritos
 const loadUserFavorites = async () => {
   try {
-    const userId = "68adc29785d92b4c84e01c5b";
+    const userId = CURRENT_USER_ID;
 
     
     const favoritesResponse = await favoritoService.getFavoritoById(userId);
@@ -952,7 +997,7 @@ const getActiveView = () => {
       return 'user-content';
     case 'Favoritos':
       return 'favorites';
-    case 'Papelera':  // ← AGREGAR ESTO
+    case 'Papelera':  
       return 'trash';
     default:
       return 'folder';
@@ -1145,7 +1190,7 @@ const handleCancelDeleteFile = () => {
 // Handler para favoritos de archivos
 const handleToggleFileFavorite = async (fileId) => {
   try {
-    const userId = "68adc29785d92b4c84e01c5b";
+    const userId = CURRENT_USER_ID;
     const isFavorite = fileFavorites.has(fileId);
     
     if (isFavorite) {
@@ -1298,10 +1343,19 @@ const navigateToEditTheme = (themeId: string) => {
 };
 
   // ============= RENDER =============
-  
+  if (!mounted) {
+  return <div>Loading...</div>;
+}
   return (
-    <div className={styles.baseConocimientos}>
-      {/* Usar componente modular HeaderSection */}
+  <div className={styles.baseConocimientos}>
+    {/* Todo tu contenido existente */}
+    
+    {/* 🆕 Solo agregar esto al final */}
+    <AuthModal
+      isOpen={showAuthModal}
+      onClose={handleCloseModal}
+      onAuthSuccess={handleAuthSuccess}
+    />      {/* Usar componente modular HeaderSection */}
       <HeaderSection />
 
       <div className={styles.mainContentWrapper}>

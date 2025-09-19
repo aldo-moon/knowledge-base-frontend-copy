@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   ChevronRight, 
   ChevronDown,
-  Loader2 
+  Loader2,
+  Home
 } from 'lucide-react';
 import styles from '../../../styles/base-conocimientos.module.css';
 import { aplicacionService } from '../../../services/aplicacionService';
@@ -34,9 +35,14 @@ interface Subseccion {
 
 interface MainSidebarProps {
   onItemClick?: (aplicacion: Aplicacion | Subseccion, isSubseccion?: boolean) => void;
+    isCollapsed?: boolean; // 🆕 Nueva prop
+  onToggleCollapse?: () => void; // 🆕 Nueva prop
 }
 
-export const MainSidebar: React.FC<MainSidebarProps> = ({ onItemClick }) => {
+
+
+export const MainSidebar: React.FC<MainSidebarProps>= ({ onItemClick }) => {
+  
   const [aplicaciones, setAplicaciones] = useState<Aplicacion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,7 +107,6 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({ onItemClick }) => {
     const scriptIdKey = subseccion.script_id.toString();
     setActiveItem(scriptIdKey);
     
-    console.log('🖱️ Click en subsección:', subseccion.nombre);
     onItemClick?.(subseccion, true);
   };
 
@@ -123,7 +128,10 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({ onItemClick }) => {
     return (
       <div className={styles.mainSidebar}>
         <div className={styles.logo}>
-          <div className={styles.logoIcon}>ZIMPLE</div>
+        <div className={styles.logoIcon}>
+          <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
+          <span>INICIO</span>
+        </div>
         </div>
         
         <nav className={styles.mainSidebarNav}>
@@ -140,8 +148,11 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({ onItemClick }) => {
   if (error) {
     return (
       <div className={styles.mainSidebar}>
-        <div className={styles.logo}>
-          <div className={styles.logoIcon}>ZIMPLE</div>
+         <div className={styles.logo}>
+        <div className={styles.logoIcon}>
+          <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
+          <span>INICIO</span>
+        </div>
         </div>
         
         <nav className={styles.mainSidebarNav}>
@@ -162,8 +173,11 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({ onItemClick }) => {
   return (
     <div className={styles.mainSidebar}>
       <div className={styles.logo}>
-        <div className={styles.logoIcon}>ZIMPLE</div>
-      </div>
+        <div className={styles.logoIcon}>
+          <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
+          <span>INICIO</span>
+        </div>
+        </div>
       
       <nav className={styles.mainSidebarNav}>
         {aplicaciones.map((aplicacion) => (

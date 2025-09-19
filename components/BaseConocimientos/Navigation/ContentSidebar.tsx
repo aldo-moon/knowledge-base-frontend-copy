@@ -8,7 +8,9 @@ import {
   Trash2, 
   Folder,
   ChevronRight, 
-  ChevronDown 
+  ChevronDown,
+  FileBox,
+  LayoutTemplate
 } from 'lucide-react';
 import styles from './../../../styles/base-conocimientos.module.css';
 
@@ -27,30 +29,32 @@ interface SubfolderItem {
 interface ContentSidebarProps {
   sidebarFolders: Record<string, SubfolderItem[]>;
   expandedSidebarItems: Record<string, boolean>;
-  activeSection: string; // 🆕 Nuevo prop para sección activa
+  activeSection: string; // Prop para sección activa
   onItemClick?: (item: SidebarItem) => void;
   onSubfolderClick?: (folderId: string, folderName: string) => void;
   onExpandClick?: (itemLabel: string) => void;
   onSubfolderExpand?: (folderId: string, folderName: string, event: React.MouseEvent) => void;
-  onSectionChange?: (sectionName: string) => void; // 🆕 Nuevo prop
+  onSectionChange?: (sectionName: string) => void; 
 }
 
 export const ContentSidebar: React.FC<ContentSidebarProps> = ({
   sidebarFolders,
   expandedSidebarItems,
-  activeSection, // 🆕
+  activeSection,
   onItemClick,
   onSubfolderClick,
   onExpandClick,
   onSubfolderExpand,
-  onSectionChange // 🆕
+  onSectionChange 
 }) => {
   const sidebarItems: SidebarItem[] = [
     { icon: Container, label: 'Contenedor', expandable: true },
     { icon: Archive, label: 'Mis archivos', expandable: true },
     { icon: Star, label: 'Favoritos', expandable: true },
     { icon: Clock, label: 'Recientes', expandable: false },
-    { icon: Trash2, label: 'Papelera', expandable: false }
+    { icon: Trash2, label: 'Papelera', expandable: false },
+    { icon: FileBox, label: 'Modelos', expandable: false },
+    { icon: LayoutTemplate, label: 'Secciones', expandable: false }
   ];
 
   // Renderizar subcarpetas de forma recursiva
@@ -99,7 +103,7 @@ export const ContentSidebar: React.FC<ContentSidebarProps> = ({
     </div>
   );
 
-  // 🆕 Handler para click en item principal
+  // Handler para click en item principal
   const handleItemClick = (item: SidebarItem) => {
     onItemClick?.(item);
     
@@ -122,7 +126,7 @@ if (item.label === 'Mis archivos' || item.label === 'Contenedor' || item.label =
             <button
               className={`${styles.sidebarNavItem} ${
                 activeSection === item.label ? styles.active : ''
-              }`} // 🆕 Usar activeSection para determinar el estado activo
+              }`} // Usar activeSection para determinar el estado activo
               onClick={() => handleItemClick(item)}
             >
               <item.icon size={20} />

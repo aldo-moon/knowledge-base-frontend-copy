@@ -4683,19 +4683,27 @@ max-width: 300px;
 }
 
 .logoIcon {
-  width: 2.5rem;
+  width: 15rem; /* 🆕 Cambiar de 2.5rem a auto */
+  min-width: 4rem; /* 🆕 Agregar min-width */
   height: 2.5rem;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 0.5rem;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 2.5rem; /* 🆕 Agregar gap */
   font-weight: 700;
-  font-size: 0.875rem;
+  font-size: 0.8rem; /* 🆕 Hacer texto más pequeño */
   color: white;
   backdrop-filter: blur(10px);
-  flex-shrink: 0;
+  padding: 0 0.75rem; /* 🆕 Agregar padding */
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3); /* 🆕 Línea separadora */
 }
+
+.logoIcon span {
+  white-space: nowrap; /* 🆕 Para que no se rompa el texto */
+}
+
+
+
 
 /* Navegación principal */
 .mainSidebarNav {

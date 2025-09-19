@@ -51,6 +51,8 @@ export const ThemeDetailView: React.FC<ThemeDetailViewProps> = ({
   const [viewsCount, setViewsCount] = useState<number>(0);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
   const [attachments, setAttachments] = useState<{images: string[], documents: string[]}>({
   images: [],
   documents: []
@@ -181,6 +183,11 @@ const processImagesWithCaptions = (htmlContent: string): string => {
     loadTheme();
   }, [themeId]);
 
+  useEffect(() => {
+  const userId = localStorage.getItem('user_id');
+  setCurrentUserId(userId);
+}, []);
+
     const loadTheme = async () => {
     try {
         setLoading(true);
@@ -294,7 +301,7 @@ const processImagesWithCaptions = (htmlContent: string): string => {
             </button>
           )}
           
-          {onEdit && (
+          {onEdit && currentUserId && theme?.author_topic_id?._id === currentUserId && (
             <button
               className={styles.actionButton}
               onClick={() => onEdit(theme)}
@@ -304,7 +311,7 @@ const processImagesWithCaptions = (htmlContent: string): string => {
             </button>
           )}
           
-          {onDelete && (
+          {onDelete && currentUserId && theme?.author_topic_id?._id === currentUserId && (
             <button
               className={styles.actionButton}
               onClick={() => onDelete(theme)}
