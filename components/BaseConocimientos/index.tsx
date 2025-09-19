@@ -223,22 +223,26 @@ useEffect(() => {
   };
 
   // Handler para NewButton
-  const handleNewButtonAction = (action: string) => {
-    switch(action) {
-      case 'new-folder':
-        setIsNewFolderModalOpen(true);
-        break;
-      case 'new-topic':
-        navigateToCreateTheme(currentFolderId);
-
-        break;
-      case 'multimedia':
-        setIsMultimediaModalOpen(true);
-        break;
-      default:
-        console.log(`Acción no implementada: ${action}`);
-    }
-  };
+const handleNewButtonAction = (action: string) => {
+  switch(action) {
+    case 'new-folder':
+      setIsNewFolderModalOpen(true);
+      break;
+    case 'new-topic':
+      setIsEditingTheme(false);
+      setThemeToEdit(null);
+      setThemeTitle('');
+      setThemeDescription('');
+      
+      navigateToCreateTheme(currentFolderId);
+      break;
+    case 'multimedia':
+      setIsMultimediaModalOpen(true);
+      break;
+    default:
+      console.log(`Acción no implementada: ${action}`);
+  }
+};
 
   // Handler para SearchSection
   const handleSearchChange = (term: string) => {

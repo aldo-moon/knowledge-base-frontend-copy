@@ -31,7 +31,7 @@ interface TemaDetails {
 // Props del panel
 interface DetailsPanelProps {
   selectedFolderDetails?: FolderDetails | null;
-  selectedTemaId?: string | null; // 👈 Nuevo: ID del tema seleccionado
+  selectedTemaId?: string | null; 
   isCreatingNewTopic?: boolean;
   children?: React.ReactNode;
 }
@@ -43,6 +43,9 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({
   children
 }) => {
   const [temaDetails, setTemaDetails] = useState<TemaDetails | null>(null);
+
+  // Función para convertir prioridad numérica a texto
+
 
   // Cuando cambie el ID del tema seleccionado, se hace fetch
   useEffect(() => {
@@ -62,6 +65,17 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({
   if (children) {
     return <div className={styles.detailsPanel}>{children}</div>;
   }
+
+const getPriorityText = (priorityNum) => {
+  const priority = Number(priorityNum);
+  
+  switch (priority) {
+    case 2: return 'Alta';
+    case 1: return 'Media';
+    case 0: return 'Baja';
+    default: return 'No definida';
+  }
+};
 
   // Caso: mostrar detalles de carpeta
   if (selectedFolderDetails) {
@@ -131,7 +145,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Prioridad:</span>
-              <span className={styles.detailValue}>{temaDetails.priority}</span>
+<span className={styles.detailValue}>{getPriorityText(temaDetails.priority)}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Palabras clave:</span>

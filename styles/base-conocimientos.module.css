@@ -50,90 +50,20 @@
   display: flex;
   flex: 1;
   padding: 0 0 0 1rem;
+  position: relative; /* Agregar esto */
 
 }
 
 /* Main Navigation Sidebar */
-.mainSidebar {
-  width: 5%;
-  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1.5rem 0;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  border-radius: 0.5rem;
-  height: 53.5rem;
-}
-
-.logo {
-  margin-bottom: 2rem;
-}
-
-.logoIcon {
-  width: 2.5rem;
-  height: 2.5rem;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
-  color: white;
-  backdrop-filter: blur(10px);
-}
-
-.mainSidebarNav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: 100%;
-  align-items: center;
-}
-
-.mainSidebarItem {
-  width: 2.5rem;
-  height: 2.5rem;
-  border: none;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.7);
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.mainSidebarItem:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  transform: translateX(2px);
-}
-
-.mainSidebarActive {
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
 
 
-.mainSidebarItem {
-  width: 100%; 
-  height: auto;
-  padding: .5rem    .5em;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  justify-content: flex-start;
-  flex-direction: column ;
-}
 
-.mainSidebarLabel {
-  font-size: 0.875rem;
-  color: white;
-}
+
+
+
+
+
+
 
 
 /* Main Content Area */
@@ -156,7 +86,7 @@
   padding: 1rem;
   display: flex;
   align-items: center;
-  margin-left: 0.5rem;
+  margin-left: 5rem;
   position: relative;
   min-height: 5.5rem; 
   gap: 1rem;
@@ -407,8 +337,7 @@
 /* Contenedor del botón con dropdown */
 .newButtonContainer {
   position: relative;
-  z-index: 1001;
-  width: 17%;
+  width: 16.6%;
 }
 
 /* Botón Nuevo con animaciones (versión actualizada) */
@@ -684,6 +613,25 @@
   transform: translateX(4px);
 }
 
+.expandButton {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+.expandButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
 .subfolderItemfoldername{
   text-overflow: ellipsis;
   overflow: hidden;
@@ -712,11 +660,13 @@
 
 /* Sidebar - Ahora a la izquierda */
 .sidebar {
-  width: 17%;
+  width: 16%;
   height: 46.5rem;
   background-color: #27293d;
   padding: 1.5rem;
   border-radius: 1.5rem;
+  margin-left: 4.5rem;
+
 }
 
 .sidebarNav {
@@ -3356,7 +3306,7 @@ max-width: 300px;
 
 /* Panel principal de comentarios */
 .commentsPanel {
-  width: 17%;
+  width: 18%;
   height: 46.5rem;
   background-color: #27293d;
   padding: 1.5rem;
@@ -4636,4 +4586,418 @@ max-width: 300px;
 .tagsContainer:focus-within {
   border-color: #6366f1;
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* MAIN SIDEBAR - EXPANDIBLE CON HOVER */
+/* ========================================= */
+
+/* Main Navigation Sidebar - Estado colapsado por defecto */
+.mainSidebar {
+  width: 5rem; /* Ancho fijo cuando está colapsado */
+  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  height: 53.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute; /* Cambiar de relative a absolute */
+  left: 0; /* Agregar esto */
+  top: 0; /* Agregar esto */  overflow: visible; /* Cambiar de hidden a visible */
+  z-index: 100;
+  margin-left: 1rem;
+    overflow: hidden; /* Cambiar a hidden para ocultar contenido que se sale */
+
+}
+
+/* Sidebar expandido al hacer hover - OVERLAY */
+.mainSidebar:hover {
+  width: 17rem; /* Mantener esto */
+  position: absolute; /* Mantener esto */
+  left: 0; /* Cambiar de 1rem a 0 */
+  top: 0; /* Mantener esto */
+  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
+  z-index: 1000; /* Z-index alto para estar encima de todo */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);  
+  overflow-y: auto; /* Solo scroll vertical */
+  overflow-x: hidden; /* Sin scroll horizontal */
+}
+
+
+.mainSidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mainSidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.mainSidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.mainSidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Logo container */
+.logo {
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 1rem;
+  transition: all 0.3s ease;
+}
+
+.logoIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: white;
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+
+/* Navegación principal */
+.mainSidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem; /* Gap más pequeño entre items */
+  width: 100%;
+  align-items: flex-start;
+  padding: 0 0.375rem; /* Padding lateral más pequeño */
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Agregar esta línea */
+
+}
+
+
+
+/* Wrapper para cada item (incluyendo subsecciones) */
+.mainSidebarItemWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Item principal del sidebar */
+.mainSidebarItem {
+  width: 100%;
+  min-height: 2.5rem; /* Reducido de 3rem */
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.5rem 1.75rem; /* Padding más compacto */
+  gap: 0.5rem; /* Gap reducido */
+  position: relative;
+  text-align: left;
+  overflow: hidden;
+}
+
+.mainSidebarItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: translateX(2px);
+}
+
+/* Item activo */
+.mainSidebarActive {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Contenedor del icono */
+.sidebarIcon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Label del item principal */
+.mainSidebarLabel {
+  font-size: 0.8rem; /* Tamaño de fuente más pequeño */
+  color: inherit;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+  flex: 1; /* Toma el espacio disponible */
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mostrar labels al hacer hover */
+.mainSidebar:hover .mainSidebarLabel {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+
+
+.mainSidebar:hover .expandButton {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.expandButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+/* Subsecciones */
+.mainSidebarSubsections {
+  width: 100%;
+  margin-left: 0.5rem;
+  margin-top: 0.25rem;
+  border-left: 2px solid rgba(255, 255, 255, 0.1);
+  padding-left: 0.5rem;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Mostrar subsecciones al hacer hover en el sidebar */
+.mainSidebar:hover .mainSidebarSubsections {
+  opacity: 1;
+  max-height: 500px;
+}
+
+/* Item de subsección */
+.mainSidebarSubitem {
+  width: 100%;
+  min-height: 2rem; /* Más pequeño que el item principal */
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.375rem 0.5rem; /* Padding más compacto */
+  gap: 0.375rem; /* Gap más pequeño */
+  text-align: left;
+  margin-bottom: 0.125rem; /* Margin más pequeño */
+}
+
+.mainSidebarSubitem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  transform: translateX(4px);
+}
+
+/* Subsección activa */
+.mainSidebarSubitemActive {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+}
+
+/* Label de subsección */
+.mainSidebarSublabel {
+  font-size: 0.75rem; /* Más pequeño que el label principal */
+  color: inherit;
+  white-space: nowrap;
+  font-weight: 400;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mainSidebar:hover .mainSidebarSublabel {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Estados de carga y error */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+}
+
+.errorContainer {
+  color: #f87171;
+}
+
+.retryButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+}
+
+.retryButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Footer del sidebar */
+.mainSidebarFooter {
+  margin-top: auto;
+  padding: 1rem;
+  width: 100%;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease 0.2s; /* Delay para mejor experiencia */
+}
+
+.mainSidebar:hover .mainSidebarFooter {
+  opacity: 1;
+}
+
+.mainSidebarFooter small {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+}
+
+/* Animación para iconos tim-icons */
+.sidebar-icon {
+  transition: transform 0.2s ease;
+}
+
+.mainSidebarItem:hover .sidebar-icon,
+.mainSidebarSubitem:hover .sidebar-icon {
+  transform: scale(1.1);
+}
+
+/* Responsive Design para overlay */
+@media (max-width: 768px) {
+  .mainSidebar {
+    width: 3rem; /* Más estrecho en mobile */
+  }
+  
+  .mainSidebar:hover {
+    width: 12rem; /* Más compacto en mobile */
+    left: 0.5rem; /* Ajustar posición */
+  }
+  
+  .logoIcon {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.75rem;
+  }
+  
+  .mainSidebarItem {
+    min-height: 2rem;
+    padding: 0.375rem 0.5rem;
+  }
+  
+  .mainSidebarLabel,
+  .mainSidebarSublabel {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainSidebar {
+    width: 2.5rem; /* Muy compacto en mobile pequeño */
+  }
+  
+  .mainSidebar:hover {
+    width: 10rem; /* Aún más compacto */
+    left: 0.25rem;
+  }
+  
+  .logoIcon {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.65rem;
+  }
+  
+  .mainSidebarItem {
+    min-height: 1.75rem;
+    padding: 0.25rem 0.375rem;
+  }
+  
+  .mainSidebarLabel,
+  .mainSidebarSublabel {
+    font-size: 0.7rem;
+  }
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .mainSidebar,
+  .mainSidebarLabel,
+  .mainSidebarSublabel,
+  .mainSidebarSubsections,
+  .expandButton {
+    transition: none;
+  }
+}
+
+/* Focus states para accesibilidad */
+.mainSidebarItem:focus,
+.mainSidebarSubitem:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Hover effect mejorado */
+.mainSidebar:hover {
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
 }

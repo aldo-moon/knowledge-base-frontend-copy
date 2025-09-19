@@ -22,12 +22,23 @@ function MyApp({ Component, pageProps }: AppProps) {
           <link rel="manifest" href="/manifest.json" />
           <link rel="icon" sizes="76x76" type="image/png" href="/favicon.png" />
           <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon.png" />
+          {/* 🆕 Font Awesome CSS */}
+          <link 
+            rel="stylesheet" 
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+            crossOrigin="anonymous"
+            referrerPolicy="no-referrer"
+          />
           <title>Base de Conocimientos</title>
         </Head>
         <Component {...pageProps} />
       </>
     );
   }
+
+  // Para otras rutas que no sean base-conocimientos
+  return <Component {...pageProps} />;
 }
 
 export default MyApp;
