@@ -218,7 +218,7 @@ useEffect(() => {
   const [error, setError] = useState(null);
   const [sidebarFolders, setSidebarFolders] = useState({});
   const [expandedSidebarItems, setExpandedSidebarItems] = useState({});
-  const CURRENT_USER_ID = currentUserId || "68af79255f7ce33d86fc641e";
+  const CURRENT_USER_ID = currentUserId;
   const [mounted, setMounted] = useState(false);
 
 useEffect(() => {
@@ -417,7 +417,6 @@ const handleThemeFormSubmit = async (formData) => {
 
     console.log('📁 Tema completo:', temaCompleto);
     
-    // ✅ AGREGAR LÓGICA PARA MODO EDICIÓN:
     let resultado;
     
     if (isEditingTheme && themeToEdit) {
@@ -435,9 +434,8 @@ const handleThemeFormSubmit = async (formData) => {
     // Limpiar estados
     setThemeTitle('');
     setThemeDescription('');
-    setIsEditingTheme(false);  // ✅ AGREGAR ESTO
-    setThemeToEdit(null);      // ✅ AGREGAR ESTO
-    
+    setIsEditingTheme(false);  
+    setThemeToEdit(null);          
     // Volver a la vista anterior y recargar contenido
     navigateBackFromTheme(currentFolderId);
     await loadCarpetas();
@@ -840,17 +838,24 @@ const loadUserFavorites = async () => {
   // Cargar favoritos al inicio
 useEffect(() => {
   const initializeData = async () => {
-      await Promise.all([
-      loadUserFavorites(),     // Carga estados de favoritos
-      loadSidebarFolders(),    // Carga sidebar
-      refreshUserData(),       // Carga contenido del usuario  
-      loadFavoritesContent()   // Carga contenido completo de favoritos
+    // ✅ Solo ejecutar si el usuario está autenticado
+    if (!currentUserId) {
+      console.log('⏳ Esperando autenticación del usuario...');
+      return;
+    }
+    
+    console.log('🚀 Iniciando carga de datos para usuario:', currentUserId);
+    
+    await Promise.all([
+      loadUserFavorites(),     
+      loadSidebarFolders(),    
+      refreshUserData(),       
+      loadFavoritesContent()   
     ]);
   };
   
   initializeData();
-}, []);
-
+}, [currentUserId]);
 
 
 
@@ -895,32 +900,38 @@ const handleMultimediaUpload = async (files: FileList) => {
 };
 
 
-  const loadCarpetas = async () => {
-    
-     console.log('Loading content for folder:', currentFolderId);
+const loadCarpetas = async () => {
+  console.log('Loading content for folder:', currentFolderId);
+  console.log('🔍 CURRENT_USER_ID en loadCarpetas:', CURRENT_USER_ID); // ← AGREGAR ESTO
+  console.log('🔍 Tipo de CURRENT_USER_ID:', typeof CURRENT_USER_ID); // ← Y ESTO
+  
   try {
     setLoading(true);
     
     const carpetas = await carpetaService.getFolderContent(currentFolderId);
-    console.log('Loaded carpetas:', carpetas.length);
     setFolders(carpetas);
       
-      const temas = await temaService.getTemasByFolder(currentFolderId);
-      setThemes(temas);
-
-      const archivos = await archivoService.getFilesByFolderId(currentFolderId);
-    setFiles(archivos);
-    } catch (error) {
-      console.error('Error loading content:', error);
-      setFolders([]);
+    // ✅ Agregar validación antes de llamar al servicio
+    if (!CURRENT_USER_ID) {
+      console.error('❌ No se puede cargar temas: CURRENT_USER_ID es null');
       setThemes([]);
-      setFiles([]);
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+    
+    const temas = await temaService.getTemasByFolder(currentFolderId, CURRENT_USER_ID);
+    setThemes(temas);
 
-
+    const archivos = await archivoService.getFilesByFolderId(currentFolderId);
+    setFiles(archivos);
+  } catch (error) {
+    console.error('Error loading content:', error);
+    setFolders([]);
+    setThemes([]);
+    setFiles([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const loadSidebarFolders = async () => {
     try {
@@ -1113,7 +1124,7 @@ const handleFileMenuAction = (action, file) => {
 };
 
 
-////////////////////////////  Handler para RENOMBRAR Y ELIMINAR //// ////////////////////////////////
+////////////////////////////  Handler para RENOMBRAR Y ELIMINAR //// /////////////////////////////////////////////////////
 
 const handleRenameFile = async (newName) => {
   try {
@@ -1360,8 +1371,10 @@ const navigateToEditTheme = (themeId: string) => {
 
       <div className={styles.mainContentWrapper}>
         {/* Usar componente modular MainSidebar */}
-        <MainSidebar onItemClick={handleSidebarItemClick} />
-
+<MainSidebar 
+  onItemClick={handleSidebarItemClick}
+  currentUserId={currentUserId} // ← Solo agregar esta línea
+/>
         <div className={styles.mainContent}>
           {/* Search and New Button Area */}
           <div className={styles.searchContainer}>

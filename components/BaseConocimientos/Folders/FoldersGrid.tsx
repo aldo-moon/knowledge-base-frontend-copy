@@ -34,6 +34,9 @@ export const FoldersGrid: React.FC<FoldersGridProps> = ({
   onToggleFolderFavorite 
 
 }) => {
+
+  // Donde pases las carpetas a FoldersGrid o similar:
+console.log('📁 Pasando folders a FoldersGrid:', folders);
   if (loading) {
     return (
       <div className={styles.foldersSection}>
@@ -57,8 +60,10 @@ export const FoldersGrid: React.FC<FoldersGridProps> = ({
       </div>
     );
   }
+console.log('🎯 FoldersGrid va a renderizar:', folders?.length, 'carpetas');
 
   return (
+    
     <div className={styles.contentSection}>
       <h3 className={styles.sectionTitle}>Carpetas</h3>
       <div className={styles.foldersGrid}>

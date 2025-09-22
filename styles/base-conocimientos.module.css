@@ -4694,7 +4694,7 @@ max-width: 300px;
   font-size: 0.8rem; /* 🆕 Hacer texto más pequeño */
   color: white;
   backdrop-filter: blur(10px);
-  padding: 0 0.75rem; /* 🆕 Agregar padding */
+  padding: 0 1.40rem; /* 🆕 Agregar padding */
   border-bottom: 2px solid rgba(255, 255, 255, 0.3); /* 🆕 Línea separadora */
 }
 
@@ -4709,7 +4709,7 @@ max-width: 300px;
 .mainSidebarNav {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* Gap más pequeño entre items */
+  gap: 1rem; /* Gap más pequeño entre items */
   width: 100%;
   align-items: flex-start;
   padding: 0 0.375rem; /* Padding lateral más pequeño */
@@ -4805,7 +4805,7 @@ max-width: 300px;
 .mainSidebarSubsections {
   width: 100%;
   margin-left: 0.5rem;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
   border-left: 2px solid rgba(255, 255, 255, 0.1);
   padding-left: 0.5rem;
   opacity: 0;

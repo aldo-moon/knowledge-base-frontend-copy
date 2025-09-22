@@ -27,8 +27,13 @@ export const ThemeCommentsPanel: React.FC<ThemeCommentsPanelProps> = ({ themeId 
   const [error, setError] = useState<string | null>(null);
 
   // ID del usuario actual - ajusta según tu implementación
-  const CURRENT_USER_ID = "66de69ba7b59f3a6ce60aad1"; // Tu ID de usuario
+const [currentUserId, setCurrentUserId] = useState(null);
 
+// Y agrega este useEffect:
+useEffect(() => {
+  const userId = localStorage.getItem('user_id');
+  setCurrentUserId(userId);
+}, []);
   useEffect(() => {
     loadComments();
   }, [themeId]);
@@ -64,11 +69,12 @@ export const ThemeCommentsPanel: React.FC<ThemeCommentsPanelProps> = ({ themeId 
     try {
       setSubmitting(true);
       
-      const commentData = {
-        message: commentText.trim(),
-        comment_user_id: CURRENT_USER_ID,
-        topic_id: themeId
-      };
+      // En handleSubmitComment:
+        const commentData = {
+          message: commentText.trim(),
+          comment_user_id: currentUserId, // ← Cambio aquí
+          topic_id: themeId
+        };
 
       await comentarioService.createComentario(commentData);
       
@@ -140,10 +146,10 @@ const formatDate = (dateString: string) => {
           disabled={submitting}
         />
         
-        <button
-          className={styles.publishButton}
+        <button 
           onClick={handleSubmitComment}
-          disabled={!commentText.trim() || submitting}
+          disabled={!commentText.trim() || submitting || !currentUserId} 
+          className={styles.submitButton}
         >
           {submitting ? (
             <>

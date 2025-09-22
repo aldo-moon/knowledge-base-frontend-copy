@@ -55,5 +55,20 @@ export const puestoService = {
       console.error("Error al eliminar puesto:", error);
       throw error;
     }
+  },
+
+// Obtener puestos por área (POST)
+getPuestosByArea: async (areaId) => {
+  try {
+    const response = await api.post(`/puestos/get_by_area/${areaId}`, {
+      id_area: areaId
+    });
+    return response.data || [];
+  } catch (error) {
+    console.error("❌ Error al obtener puestos por área:", error);
+    throw error;
   }
+},
+
+
 };

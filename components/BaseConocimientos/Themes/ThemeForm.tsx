@@ -91,6 +91,19 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
     }
   };
 
+  const loadPuestosByArea = async (areaId) => {
+  try {
+    setPuestos([]); // Limpiar puestos actuales
+    setLoadingData(true);
+    const puestosData = await puestoService.getPuestosByArea(areaId);
+    setPuestos(puestosData);
+  } catch (error) {
+    console.error('Error loading puestos by area:', error);
+  } finally {
+    setLoadingData(false);
+  }
+};
+
   const removeTag = (tagToRemove: string) => {
     setFormData(prev => ({
       ...prev,
@@ -350,15 +363,22 @@ const handleSubmit = () => {
           <select 
             className={`${styles.formSelect} ${errors.area ? styles.formSelectError : ''}`}
             value={formData.area}
-            onChange={(e) => handleInputChangeWithValidation('area', e.target.value)}
+            onChange={(e) => {
+              handleInputChangeWithValidation('area', e.target.value);
+              if (e.target.value) {
+                loadPuestosByArea(e.target.value);
+              } else {
+                setPuestos([]);
+              }
+            }}
             disabled={loadingData}
           >
             <option value="">
               {loadingData ? 'Cargando...' : 'Seleccionar área'}
             </option>
             {areas.map((area) => (
-              <option key={area._id} value={area._id}>
-                {area.name_area}
+              <option key={area._id} value={area.area_id}>  {/* ← CAMBIO: usar area_id */}
+                {area.nombre}
               </option>
             ))}
           </select>
@@ -377,9 +397,10 @@ const handleSubmit = () => {
             <option value="">
               {loadingData ? 'Cargando...' : 'Seleccionar puesto'}
             </option>
+            {/* En el select de puestos, cambiar el value: */}
             {puestos.map((puesto) => (
-              <option key={puesto._id} value={puesto._id}>
-                {puesto.name_role}
+              <option key={puesto._id} value={puesto.puesto_id}>
+                {puesto.nombre} - ({puesto.total_usuarios}) 
               </option>
             ))}
           </select>

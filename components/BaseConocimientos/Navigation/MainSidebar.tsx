@@ -4,7 +4,8 @@ import {
   ChevronRight, 
   ChevronDown,
   Loader2,
-  Home
+  Home,
+  ExternalLink
 } from 'lucide-react';
 import styles from '../../../styles/base-conocimientos.module.css';
 import { aplicacionService } from '../../../services/aplicacionService';
@@ -18,9 +19,12 @@ interface Aplicacion {
   tipo: number;
   grupo: string;
   script: string;
+  externo?: number;
   orden_menu: number;
   expandable: boolean;
   subsecciones: Subseccion[];
+  navegacionUrl?: string | null;
+  navegable: boolean;
 }
 
 interface Subseccion {
@@ -29,19 +33,31 @@ interface Subseccion {
   nombre: string;
   icono: string;
   script: string;
+  externo?: number;
   orden_submenu: number;
   grupo: string;
+  navegacionUrl?: string | null;
+  navegable: boolean;
 }
 
 interface MainSidebarProps {
   onItemClick?: (aplicacion: Aplicacion | Subseccion, isSubseccion?: boolean) => void;
-    isCollapsed?: boolean; // 🆕 Nueva prop
-  onToggleCollapse?: () => void; // 🆕 Nueva prop
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+  currentUserId?: string; // ← AGREGAR esta prop
 }
 
 
 
-export const MainSidebar: React.FC<MainSidebarProps>= ({ onItemClick }) => {
+interface MainSidebarProps {
+  onItemClick?: (aplicacion: Aplicacion | Subseccion, isSubseccion?: boolean) => void;
+    currentUserId // ← AGREGAR aquí
+
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+}
+
+export const MainSidebar: React.FC<MainSidebarProps> = ({ onItemClick }) => {
   
   const [aplicaciones, setAplicaciones] = useState<Aplicacion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,28 +66,38 @@ export const MainSidebar: React.FC<MainSidebarProps>= ({ onItemClick }) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
 
   // Cargar aplicaciones al montar el componente
-  useEffect(() => {
-    const cargarAplicaciones = async () => {
-      try {
-        setLoading(true);
-        const sidebarData = await aplicacionService.procesarAplicacionesParaSidebar();
-        console.log('📱 Aplicaciones cargadas:', sidebarData);
-        setAplicaciones(sidebarData);
-        
-        // Marcar como activa la primera aplicación por defecto
-        if (sidebarData.length > 0) {
-          setActiveItem(sidebarData[0].script_id.toString());
-        }
-      } catch (err) {
-        console.error('❌ Error cargando aplicaciones:', err);
-        setError('Error al cargar las aplicaciones');
-      } finally {
-        setLoading(false);
+// En MainSidebar.tsx, cambiar el useEffect:
+useEffect(() => {
+  const cargarAplicaciones = async () => {
+    try {
+      setLoading(true);
+      
+      // ✅ CAMBIO: Pasar currentUserId (necesitas recibirlo como prop)
+      const sidebarData = await aplicacionService.procesarAplicacionesParaSidebar(currentUserId);
+      
+      console.log('📱 Aplicaciones cargadas:', sidebarData);
+      setAplicaciones(sidebarData);
+      
+      if (sidebarData.length > 0) {
+        setActiveItem(sidebarData[0].script_id.toString());
       }
-    };
 
+      if (process.env.NODE_ENV === 'development') {
+        aplicacionService.mostrarEjemplosUrls();
+      }
+    } catch (err) {
+      console.error('❌ Error cargando aplicaciones:', err);
+      setError('Error al cargar las aplicaciones');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Solo cargar si currentUserId está disponible
+  if (currentUserId) {
     cargarAplicaciones();
-  }, []);
+  }
+}, [currentUserId]); // ← Agregar currentUserId como dependencia
 
   // Manejar expansión/colapso de secciones
   const handleToggleExpand = (scriptId: number, event: React.MouseEvent) => {
@@ -84,16 +110,31 @@ export const MainSidebar: React.FC<MainSidebarProps>= ({ onItemClick }) => {
     }));
   };
 
-  // Manejar click en aplicación principal
-  const handleItemClick = (aplicacion: Aplicacion) => {
-    const scriptIdKey = aplicacion.script_id.toString();
-    setActiveItem(scriptIdKey);
-    
-    console.log('🖱️ Click en aplicación:', aplicacion.nombre);
+      // ✅ FUNCIÓN ACTUALIZADA: Manejar click en aplicación principal
+      const handleItemClick = (aplicacion: Aplicacion) => {
+        const scriptIdKey = aplicacion.script_id.toString();
+        setActiveItem(scriptIdKey);
+        
+        console.log('🖱️ Click en aplicación:', aplicacion.nombre);
+        console.log('📋 Tipo:', aplicacion.tipo, '- Navegable:', aplicacion.navegable);
+
+        // Si es navegable (tipo 1), realizar navegación
+        if (aplicacion.navegable && aplicacion.navegacionUrl) {
+          console.log('🚀 Navegando a:', aplicacion.navegacionUrl);
+          window.location.href = aplicacion.navegacionUrl;
+    } else if (aplicacion.tipo === 0) {
+      // Si es tipo 0 (separador), solo expandir/colapsar
+      console.log('📋 Aplicación separadora, solo expandiendo secciones');
+    } else {
+      console.log('⚠️ Aplicación no navegable');
+    }
+
+    // Llamar al callback si existe
     onItemClick?.(aplicacion, false);
-    
-    // Si tiene subsecciones, expandir/colapsar automáticamente
+
+    // SIEMPRE expandir/colapsar si tiene subsecciones (sin importar el tipo)
     if (aplicacion.expandable && aplicacion.subsecciones.length > 0) {
+      console.log('🔄 Expandiendo/colapsando secciones para:', aplicacion.nombre);
       setExpandedItems(prev => ({
         ...prev,
         [scriptIdKey]: !prev[scriptIdKey]
@@ -101,18 +142,29 @@ export const MainSidebar: React.FC<MainSidebarProps>= ({ onItemClick }) => {
     }
   };
 
-  // Manejar click en subsección
+  // ✅ FUNCIÓN ACTUALIZADA: Manejar click en subsección
   const handleSubseccionClick = (subseccion: Subseccion, event: React.MouseEvent) => {
     event.stopPropagation();
     const scriptIdKey = subseccion.script_id.toString();
     setActiveItem(scriptIdKey);
     
+    console.log('🖱️ Click en subsección:', subseccion.nombre);
+    console.log('📋 Navegable:', subseccion.navegable);
+
+    // Realizar navegación si es navegable
+    if (subseccion.navegable && subseccion.navegacionUrl) {
+      console.log('🚀 Navegando a:', subseccion.navegacionUrl);
+      window.location.href = subseccion.navegacionUrl;
+    } else {
+      console.log('⚠️ Subsección no navegable');
+    }
+    
+    // Llamar al callback
     onItemClick?.(subseccion, true);
   };
 
   // Función para obtener el icono dinámico usando el mapper
   const renderIcono = (iconoString: string) => {
-    // Usar el mapper para convertir tim-icons a Font Awesome
     const iconClass = getIconClass(iconoString);
     
     return (
@@ -123,15 +175,29 @@ export const MainSidebar: React.FC<MainSidebarProps>= ({ onItemClick }) => {
     );
   };
 
+  // ✅ NUEVO: Renderizar indicador de navegación
+  const renderNavegacionIndicator = (item: Aplicacion | Subseccion) => {
+    if (!item.navegable) return null;
+    
+    return (
+      <span 
+        className={styles.navegacionIndicator}
+        title="Navega a la página"
+      >
+        <ExternalLink size={10} />
+      </span>
+    );
+  };
+
   // Render del estado de carga
   if (loading) {
     return (
       <div className={styles.mainSidebar}>
         <div className={styles.logo}>
-        <div className={styles.logoIcon}>
-          <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
-          <span>INICIO</span>
-        </div>
+          <div className={styles.logoIcon}>
+            <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
+            <span>INICIO</span>
+          </div>
         </div>
         
         <nav className={styles.mainSidebarNav}>
@@ -148,11 +214,11 @@ export const MainSidebar: React.FC<MainSidebarProps>= ({ onItemClick }) => {
   if (error) {
     return (
       <div className={styles.mainSidebar}>
-         <div className={styles.logo}>
-        <div className={styles.logoIcon}>
-          <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
-          <span>INICIO</span>
-        </div>
+        <div className={styles.logo}>
+          <div className={styles.logoIcon}>
+            <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
+            <span>INICIO</span>
+          </div>
         </div>
         
         <nav className={styles.mainSidebarNav}>
@@ -177,7 +243,7 @@ export const MainSidebar: React.FC<MainSidebarProps>= ({ onItemClick }) => {
           <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
           <span>INICIO</span>
         </div>
-        </div>
+      </div>
       
       <nav className={styles.mainSidebarNav}>
         {aplicaciones.map((aplicacion) => (
@@ -186,14 +252,21 @@ export const MainSidebar: React.FC<MainSidebarProps>= ({ onItemClick }) => {
             <button
               className={`${styles.mainSidebarItem} ${
                 activeItem === aplicacion.script_id.toString() ? styles.mainSidebarActive : ''
-              }`}
-              title={aplicacion.nombre}
+              } ${aplicacion.navegable ? styles.mainSidebarNavigable : ''}`}
+              title={`${aplicacion.nombre}${aplicacion.navegable ? ' (Clic para navegar)' : ''}`}
               onClick={() => handleItemClick(aplicacion)}
+              style={{
+                cursor: aplicacion.navegable || aplicacion.expandable ? 'pointer' : 'default',
+                opacity: aplicacion.tipo === 0 && !aplicacion.expandable ? 0.7 : 1
+              }}
             >
               {renderIcono(aplicacion.icono)}
-              <span className={styles.mainSidebarLabel}>{aplicacion.nombre}</span>
+              <span className={styles.mainSidebarLabel}>
+                {aplicacion.nombre}
+                {renderNavegacionIndicator(aplicacion)}
+              </span>
               
-              {/* Botón de expansión si tiene subsecciones - en la misma línea */}
+              {/* Botón de expansión si tiene subsecciones */}
               {aplicacion.expandable && aplicacion.subsecciones.length > 0 && (
                 <span
                   className={styles.expandButton}
@@ -219,12 +292,18 @@ export const MainSidebar: React.FC<MainSidebarProps>= ({ onItemClick }) => {
                     key={subseccion.script_id}
                     className={`${styles.mainSidebarSubitem} ${
                       activeItem === subseccion.script_id.toString() ? styles.mainSidebarSubitemActive : ''
-                    }`}
-                    title={subseccion.nombre}
+                    } ${subseccion.navegable ? styles.mainSidebarNavigable : ''}`}
+                    title={`${subseccion.nombre}${subseccion.navegable ? ' (Clic para navegar)' : ''}`}
                     onClick={(e) => handleSubseccionClick(subseccion, e)}
+                    style={{
+                      cursor: subseccion.navegable ? 'pointer' : 'default'
+                    }}
                   >
                     {renderIcono(subseccion.icono)}
-                    <span className={styles.mainSidebarSublabel}>{subseccion.nombre}</span>
+                    <span className={styles.mainSidebarSublabel}>
+                      {subseccion.nombre}
+                      {renderNavegacionIndicator(subseccion)}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -233,11 +312,11 @@ export const MainSidebar: React.FC<MainSidebarProps>= ({ onItemClick }) => {
         ))}
       </nav>
 
-      {/* Footer con estadísticas (opcional) */}
+      {/* Footer con estadísticas */}
       {aplicaciones.length > 0 && (
         <div className={styles.mainSidebarFooter}>
           <small>
-            {aplicaciones.length} aplicaciones cargadas
+            {aplicaciones.length} aplicaciones • {aplicaciones.reduce((count, app) => count + app.subsecciones.length, 0)} subsecciones
           </small>
         </div>
       )}

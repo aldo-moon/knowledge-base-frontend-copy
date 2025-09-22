@@ -2,6 +2,9 @@
 import api from '../utils/api';
 
 export const aplicacionService = {
+  // URL base inicial
+  BASE_URL: 'https://www.aemretail.com/navreport/',
+
   // Obtener todas las aplicaciones del endpoint
   getAllAplicaciones: async () => {
     try {
@@ -14,12 +17,80 @@ export const aplicacionService = {
     }
   },
 
-  // Procesar y estructurar las aplicaciones para el sidebar
+  // ✅ NUEVA FUNCIÓN: Generar URL de navegación según las reglas
+  generarUrlNavegacion: (aplicacion) => {
+  const { tipo, externo, script } = aplicacion;
+  
+  // Regla 1: Si tipo es 0, no hacer nada (solo separador)
+  if (tipo === 0) {
+    console.log('📋 Aplicación tipo 0 (separador):', aplicacion.nombre);
+    return null;
+  }
+
+  // Regla 2: Si tipo es 1
+  if (tipo === 1) {
+    // Subregla 2a: externo es 0 o null - usar URL base + script
+    if (externo === 0 || externo === null || externo === undefined) {
+      const url = `${aplicacionService.BASE_URL}${script}`;
+      console.log('🔗 URL generada (interno):', url);
+      return url;
+    }
+    
+    // Subregla 2b: externo es 1 - usar script como URL completa
+    if (externo === 1) {
+      const url = script;
+      console.log('🔗 URL generada (externo tipo 1):', url);
+      return url;
+    }
+    
+    // Subregla 2c: externo es 2 - usar URL base + script
+    if (externo === 2) {
+      const url = `${aplicacionService.BASE_URL}${script}`;
+      console.log('🔗 URL generada (externo tipo 2):', url);
+      return url;
+    }
+    
+    // Subregla 2d: externo es 3 - usar script como URL completa con tokens
+    if (externo === 3) {
+      const url = `${script}?TOKEN=TOKEN2`;
+      console.log('🔗 URL generada (externo con tokens):', url);
+      return url;
+    }
+  }
+
+  // Si no coincide con ninguna regla, devolver null
+  console.warn('⚠️ No se pudo generar URL para:', aplicacion);
+  return null;
+},
+
+  // ✅ NUEVA FUNCIÓN: Manejar navegación
+  navegarAplicacion: (aplicacion) => {
+    const url = aplicacionService.generarUrlNavegacion(aplicacion);
+    
+    if (!url) {
+      console.log('❌ No se puede navegar a:', aplicacion.nombre);
+      return false;
+    }
+
+    try {
+      console.log('🚀 Navegando a:', url);
+      
+      // Navegar en la misma pestaña
+      window.location.href = url;
+      return true;
+    } catch (error) {
+      console.error('❌ Error al navegar:', error);
+      return false;
+    }
+  },
+
+  // ✅ FUNCIÓN ACTUALIZADA: Procesar aplicaciones para sidebar con navegación
   procesarAplicacionesParaSidebar: async () => {
     try {
-      const response = await aplicacionService.getAllAplicaciones();
-      const aplicaciones = response.aplicaciones || [];
-
+ // ✅ DESPUÉS:
+    const response = await aplicacionService.getAplicacionesByUser(userId);
+    
+    const aplicaciones = response.aplicaciones || [];
       // Filtrar solo aplicaciones con estatus activo (estatus === 1)
       const aplicacionesActivas = aplicaciones.filter(app => app.estatus === 1);
 
@@ -38,7 +109,12 @@ export const aplicacionService = {
         if (!acc[grupo]) {
           acc[grupo] = [];
         }
-        acc[grupo].push(subseccion);
+        acc[grupo].push({
+          ...subseccion,
+          // ✅ AGREGAR: URL de navegación precomputada
+          navegacionUrl: aplicacionService.generarUrlNavegacion(subseccion),
+          navegable: aplicacionService.generarUrlNavegacion(subseccion) !== null
+        });
         return acc;
       }, {});
 
@@ -51,9 +127,13 @@ export const aplicacionService = {
         tipo: seccion.tipo,
         grupo: seccion.grupo,
         script: seccion.script,
+        externo: seccion.externo, // ✅ AGREGAR campo externo
         orden_menu: seccion.orden_menu,
         expandable: subseccionesPorGrupo[seccion.grupo]?.length > 0,
-        subsecciones: subseccionesPorGrupo[seccion.grupo] || []
+        subsecciones: subseccionesPorGrupo[seccion.grupo] || [],
+        // ✅ AGREGAR: URL de navegación para secciones principales también
+        navegacionUrl: aplicacionService.generarUrlNavegacion(seccion),
+        navegable: aplicacionService.generarUrlNavegacion(seccion) !== null
       }));
 
       return sidebarData;
@@ -63,7 +143,28 @@ export const aplicacionService = {
     }
   },
 
-  // Obtener aplicaciones por tipo
+  // ✅ FUNCIÓN DE PRUEBA: Mostrar URLs que se generarían
+  mostrarEjemplosUrls: async () => {
+    try {
+      const aplicaciones = await aplicacionService.getAllAplicaciones();
+      const apps = aplicaciones.aplicaciones || [];
+      
+      console.log('🔍 EJEMPLOS DE URLs GENERADAS:');
+      console.log('=====================================');
+      
+      apps.filter(app => app.estatus === 1).forEach(app => {
+        const url = aplicacionService.generarUrlNavegacion(app);
+        console.log(`📄 ${app.nombre}`);
+        console.log(`   - Tipo: ${app.tipo}, Externo: ${app.externo}, Script: "${app.script}"`);
+        console.log(`   - URL: ${url || 'NO NAVEGABLE (tipo 0)'}`);
+        console.log('---');
+      });
+    } catch (error) {
+      console.error('❌ Error mostrando ejemplos:', error);
+    }
+  },
+
+  // Mantener todas las funciones existentes...
   getAplicacionesByTipo: async (tipo) => {
     try {
       const response = await aplicacionService.getAllAplicaciones();
@@ -72,7 +173,6 @@ export const aplicacionService = {
       return aplicaciones
         .filter(app => app.estatus === 1 && app.tipo === tipo)
         .sort((a, b) => {
-          // Ordenar por orden_menu si es tipo 0, por orden_submenu si es tipo 1
           return tipo === 0 ? 
             a.orden_menu - b.orden_menu : 
             a.orden_submenu - b.orden_submenu;
@@ -83,7 +183,6 @@ export const aplicacionService = {
     }
   },
 
-  // Obtener subsecciones por grupo
   getSubseccionesByGrupo: async (grupo) => {
     try {
       const response = await aplicacionService.getAllAplicaciones();
@@ -98,7 +197,6 @@ export const aplicacionService = {
     }
   },
 
-  // Buscar aplicaciones por nombre
   searchAplicaciones: async (searchTerm) => {
     try {
       const response = await aplicacionService.getAllAplicaciones();
@@ -120,7 +218,6 @@ export const aplicacionService = {
     }
   },
 
-  // Obtener estadísticas de las aplicaciones
   getEstadisticasAplicaciones: async () => {
     try {
       const response = await aplicacionService.getAllAplicaciones();
@@ -132,7 +229,8 @@ export const aplicacionService = {
         inactivas: aplicaciones.filter(app => app.estatus === 0).length,
         seccionesPrincipales: aplicaciones.filter(app => app.estatus === 1 && app.tipo === 0).length,
         subsecciones: aplicaciones.filter(app => app.estatus === 1 && app.tipo === 1).length,
-        grupos: new Set(aplicaciones.map(app => app.grupo)).size
+        grupos: new Set(aplicaciones.map(app => app.grupo)).size,
+        navegables: aplicaciones.filter(app => app.estatus === 1 && app.tipo === 1).length
       };
       
       return stats;
@@ -144,12 +242,12 @@ export const aplicacionService = {
         inactivas: 0,
         seccionesPrincipales: 0,
         subsecciones: 0,
-        grupos: 0
+        grupos: 0,
+        navegables: 0
       };
     }
   },
 
-  // Validar estructura de aplicación
   validateAplicacion: (aplicacion) => {
     const requiredFields = ['nombre', 'tipo', 'grupo'];
     const missingFields = requiredFields.filter(field => 
@@ -163,7 +261,6 @@ export const aplicacionService = {
       };
     }
 
-    // Validar que tipo sea 0 o 1
     if (aplicacion.tipo !== 0 && aplicacion.tipo !== 1) {
       return {
         valid: false,
@@ -174,12 +271,9 @@ export const aplicacionService = {
     return { valid: true };
   },
 
-  // Formatear icono para uso en componentes
   formatIcono: (iconoString) => {
-    // Remover prefijos comunes y devolver solo el nombre del icono
-    if (!iconoString) return 'FileText'; // Icono por defecto
+    if (!iconoString) return 'FileText';
     
-    // Si ya es un icono de tim-icons, extraer solo la parte del nombre
     if (iconoString.includes('tim-icons')) {
       return iconoString.replace('tim-icons ', '').replace('icon-', '');
     }
@@ -187,12 +281,10 @@ export const aplicacionService = {
     return iconoString;
   },
 
-  // Obtener jerarquía completa (útil para breadcrumbs o navegación)
   getJerarquiaCompleta: async () => {
     try {
       const sidebarData = await aplicacionService.procesarAplicacionesParaSidebar();
       
-      // Crear un mapa de jerarquía
       const jerarquia = {};
       
       sidebarData.forEach(seccion => {
@@ -217,5 +309,17 @@ export const aplicacionService = {
       console.error("❌ Error al obtener jerarquía completa:", error);
       return {};
     }
-  }
+  },
+    
+  // Obtener aplicaciones por usuario con permisos
+  getAplicacionesByUser: async (userId) => {
+    try {
+      const response = await api.get(`/aplicacion/app_list_user/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error al obtener aplicaciones por usuario:", error);
+      throw error;
+    }
+  },
+
 };
