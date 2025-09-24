@@ -176,8 +176,8 @@ interface SidebarItem {
 
 interface ThemeFormData {
   priority: string;
-  area: string;
-  position: string;
+   area: string[];        // ← CAMBIO: de 'area' a 'areas' (array)
+  position: string[]; 
   tags: string[];
   fileIds?: string[];
   files: globalThis.File[]; // Archivos nativos del navegador para upload
@@ -318,14 +318,24 @@ const [trashContentLoading, setTrashContentLoading] = useState<boolean>(false);
 const [trashContentError, setTrashContentError] = useState<string | null>(null);
 
   // Inicializar desde URL al montar el componente
- useEffect(() => {
+useEffect(() => {
   const initialize = async () => {
+    // ✅ Solo ejecutar si el usuario está disponible
+    if (!currentUserId) {
+      console.log('⏳ Esperando currentUserId para inicializar...');
+      return;
+    }
+    
+    console.log('🚀 Inicializando con currentUserId:', currentUserId);
     await initializeFromUrl();
-    loadCarpetas();
+    
+    // ✅ AQUÍ está la clave: loadCarpetas ahora se ejecutará con currentUserId disponible
+    await loadCarpetas();
   };
   
   initialize();
-}, [currentFolderId]);
+}, [currentFolderId, currentUserId]); // ← Agregar currentUserId como dependencia
+
 
 // En tu componente principal (index.tsx), agregar este useEffect:
 
@@ -342,7 +352,6 @@ useEffect(() => {
       await loadFavoritesContent();
     }
     
-    // ✅ AGREGAR ESTO:
     if (activeSection === 'Papelera') {
       await loadTrashContent();
     }
@@ -557,9 +566,20 @@ const handleSubfolderClick = (folderId: string, folderName: string) => {
     // loadCarpetas();
   };
 
-  const handleThemeEditorBack = () => {
+const handleThemeEditorBack = () => {
+  // Limpiar estados de edición
+  setIsEditingTheme(false);
+  setThemeToEdit(null);
+  setThemeTitle('');
+  setThemeDescription('');
+  
+  // Si estábamos editando, volver a la vista de detalle
+  if (isEditingTheme && themeToEdit) {
+    navigateToThemeDetail(themeToEdit._id);
+  } else {
     navigateBackFromTheme(currentFolderId);
-  };
+  }
+};
 
   // Handler para ThemeForm (en el DetailsPanel) - usar navegación con routing
 const handleThemeFormSubmit = async (formData: ThemeFormData) => {
@@ -567,17 +587,17 @@ const handleThemeFormSubmit = async (formData: ThemeFormData) => {
     console.log('📝 Datos del formulario recibidos:', formData);
 
     // Construir objeto tema con archivos adjuntos
-    const temaCompleto = {
-      title_name: themeTitle,
-      description: themeDescription,
-      priority: formData.priority === 'Alta' ? 2 : formData.priority === 'Baja' ? 0 : 1,
-      area_id: formData.area,
-      puesto_id: formData.position,
-      folder_id: currentFolderId,
-      author_topic_id: CURRENT_USER_ID,
-      keywords: Array.isArray(formData.tags) ? formData.tags : [],
-      files_attachment_id: formData.fileIds || []
-    };
+const temaCompleto = {
+  title_name: themeTitle,
+  description: themeDescription,
+  priority: formData.priority === 'Alta' ? 2 : formData.priority === 'Baja' ? 0 : 1,
+  area_id: formData.area.length > 0 ? formData.area : formData.area[0] || '', // <- CAMBIO
+  puesto_id: formData.position.length > 0 ? formData.position : formData.position[0] || '', // <- CAMBIO
+  folder_id: currentFolderId,
+  author_topic_id: CURRENT_USER_ID,
+  keywords: Array.isArray(formData.tags) ? formData.tags : [],
+  files_attachment_id: formData.fileIds || []
+};
 
     console.log('📁 Tema completo:', temaCompleto);
     
@@ -610,6 +630,10 @@ const handleThemeFormSubmit = async (formData: ThemeFormData) => {
 };
 
   const handleThemeFormCancel = () => {
+    setThemeTitle('');
+    setThemeDescription('');
+    setIsEditingTheme(false);    // ✅ Limpiar estado de edición
+    setThemeToEdit(null);        // ✅ Limpiar tema en edición
     navigateBackFromTheme(currentFolderId);
   };
 
@@ -846,12 +870,7 @@ const handleThemeDoubleClick = (theme: Theme) => {
   navigateToThemeDetail(theme._id);
 };
 
-// AGREGAR handlers para acciones desde la vista detallada
-const handleThemeEditFromDetail = (theme: Theme) => {
-  // Usar la lógica existente de edición
-  setSelectedTheme(theme);
-  setIsRenameThemeModalOpen(true);
-};
+
 
 const handleThemeDeleteFromDetail = (theme: Theme) => {
   // Usar la lógica existente de eliminación
@@ -1513,9 +1532,7 @@ const navigateToEditTheme = (themeId: string) => {
 };
 
   // ============= RENDER =============
-  if (!mounted) {
-  return <div>Loading...</div>;
-}
+
   return (
   <div className={styles.baseConocimientos}>
     {/* Todo tu contenido existente */}
@@ -1575,6 +1592,7 @@ const navigateToEditTheme = (themeId: string) => {
               activeContentFilters={activeContentFilters}
               currentSortBy={currentSortBy}
               onToggleFiltersVisibility={handleToggleFiltersVisibility}
+
               onFilterClick={handleContentFilterClick}
               onSortOptionClick={handleSortOptionClick}
               onFolderSelect={handleFolderSelection}
@@ -1603,7 +1621,6 @@ const navigateToEditTheme = (themeId: string) => {
               onThemeDescriptionChange={setThemeDescription}
               viewingThemeId={currentThemeId}
               onThemeDetailBack={navigateBackFromThemeDetail}
-              onThemeEdit={handleThemeEditFromDetail}
               onThemeDelete={handleThemeDeleteFromDetail}
               onRestoreItem={() => {}}
               onPermanentDelete={() => {}}
@@ -1613,8 +1630,7 @@ const navigateToEditTheme = (themeId: string) => {
               trashContent={trashContent}
               trashContentLoading={trashContentLoading}
               trashContentError={trashContentError}
-              //onThemeEdit={handleThemeEdit}  // ✅ AGREGAR ESTA LÍNEA
-
+              onThemeEdit={handleThemeEdit}  
             />
 
             {/* Details Panel - siempre visible, cambia contenido según el contexto */}
@@ -1630,7 +1646,7 @@ const navigateToEditTheme = (themeId: string) => {
                 isEditingTheme={isEditingTheme}
                 themeToEdit={themeToEdit}
               >
-              {isCreatingTheme && (
+              {(isCreatingTheme || isEditingTheme) && (  
                   <ThemeForm 
                     onSubmit={handleThemeFormSubmit}
                     onCancel={handleThemeFormCancel}

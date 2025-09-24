@@ -1,14 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/base-conocimientos",
-        permanent: false, // false = redirección temporal (302)
-      },
-    ];
-  },
-};
+  const nextConfig = {
+    basePath: '/knowledge',
+    assetPrefix: '/knowledge/',
+    trailingSlash: true, // opcional, ayuda con subpaths
+  };
 
-module.exports = nextConfig
+module.exports = nextConfig;

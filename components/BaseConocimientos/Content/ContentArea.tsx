@@ -73,7 +73,7 @@ interface ContentAreaProps {
   onThemeTitleChange?: (title: string) => void;
   onThemeDescriptionChange?: (description: string) => void;
   showCommentsPanel?: boolean;
-  
+  isEditingTheme?: boolean;
 
   viewingThemeId?: string | null;
   onThemeDetailBack: () => void;
@@ -167,6 +167,7 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
   onToggleFileFavorite,        
   loading,
   error,
+    isEditingTheme,
   themeTitle,
   themeDescription,
   onThemeTitleChange,
@@ -242,6 +243,20 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
         description={themeDescription || ''}
 onTitleChange={onThemeTitleChange || (() => {})}
 onDescriptionChange={onThemeDescriptionChange || (() => {})}
+      />
+    );
+  }
+
+  if (isEditingTheme) {
+    return (
+      <ThemeEditor 
+        onBack={onThemeEditorBack}
+        onSave={onThemeEditorSave}
+        title={themeTitle || ''}
+        description={themeDescription || ''}
+        onTitleChange={onThemeTitleChange || (() => {})}
+        onDescriptionChange={onThemeDescriptionChange || (() => {})}
+        isEditMode={true} // ✅ Importante: pasar true para modo edición
       />
     );
   }

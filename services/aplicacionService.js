@@ -314,7 +314,7 @@ procesarAplicacionesParaSidebar: async (userId) => {  // ← Agregar userId
   // Obtener aplicaciones por usuario con permisos
   getAplicacionesByUser: async (userId) => {
     try {
-      const response = await api.get(`/aplicaciones/app_list_user/${userId}`);
+      const response = await api.get(`/aplicacions/app_list_user/${userId}`);
       return response.data;
     } catch (error) {
       console.error("❌ Error al obtener aplicaciones por usuario:", error);

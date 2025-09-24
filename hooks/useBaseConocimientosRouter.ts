@@ -20,7 +20,7 @@ export const useBaseConocimientosRouter = () => {
   const currentQuery = { ...router.query };
   delete currentQuery.slug;
   
-  const url = `/base-conocimientos/edit-theme/${themeId}`;
+  const url = `/edit-theme/${themeId}`;
   const queryString = Object.keys(currentQuery).length > 0 
     ? '?' + Object.entries(currentQuery).map(([k, v]) => `${k}=${v}`).join('&')
     : '';
@@ -111,17 +111,17 @@ const parseSlugFromUrl = () => {
     let url;
     switch (sectionName) {
       case 'Mis archivos':
-        url = '/base-conocimientos/mis-archivos';
+        url = '/mis-archivos';
         break;
       case 'Favoritos':
-        url = '/base-conocimientos/favoritos';
+        url = '/favoritos';
         break;
       case 'Contenedor':
       default:
-        url = '/base-conocimientos';
+        url = '';
         break;
         case 'Papelera':
-        url = '/base-conocimientos/papelera';
+        url = '/papelera';
         break;
     }
     
@@ -194,7 +194,7 @@ const parseSlugFromUrl = () => {
     
     if (folderId === "68acb06886d455d16cceef05") {
       router.push({
-        pathname: '/base-conocimientos',
+        pathname: '',
         query: currentQuery
       });
     } else {
@@ -202,7 +202,7 @@ const parseSlugFromUrl = () => {
         ? '?' + new URLSearchParams(currentQuery as Record<string, string>).toString()
         : '';
       
-      router.push(`/base-conocimientos/folder/${folderId}${queryString}`);
+      router.push(`/folder/${folderId}${queryString}`);
     }
   };
   
@@ -213,9 +213,9 @@ const parseSlugFromUrl = () => {
     
     let url;
     if (currentFolderId && currentFolderId !== "68acb06886d455d16cceef05") {
-      url = `/base-conocimientos/folder/${currentFolderId}/theme/${themeId}`;
+      url = `/folder/${currentFolderId}/theme/${themeId}`;
     } else {
-      url = `/base-conocimientos/theme/${themeId}`;
+      url = `/theme/${themeId}`;
     }
     
     const queryString = Object.keys(currentQuery).length > 0 
@@ -232,9 +232,9 @@ const parseSlugFromUrl = () => {
     
     let url;
     if (currentFolderId && currentFolderId !== "68acb06886d455d16cceef05") {
-      url = `/base-conocimientos/folder/${currentFolderId}/new-theme`;
+      url = `/folder/${currentFolderId}/new-theme`;
     } else {
-      url = `/base-conocimientos/new-theme`;
+      url = `/new-theme`;
     }
     
     const queryString = Object.keys(currentQuery).length > 0 
@@ -251,9 +251,9 @@ const parseSlugFromUrl = () => {
     
     let url;
     if (currentFolderId && currentFolderId !== "68acb06886d455d16cceef05") {
-      url = `/base-conocimientos/folder/${currentFolderId}`;
+      url = `/folder/${currentFolderId}`;
     } else {
-      url = `/base-conocimientos`;
+      url = ``;
     }
     
     const queryString = Object.keys(currentQuery).length > 0 
@@ -335,25 +335,25 @@ const parseSlugFromUrl = () => {
       // 🆕 URLs para secciones especiales
       switch (itemId) {
         case 'Mis archivos':
-          return `${baseUrl}/base-conocimientos/mis-archivos`;
+          return `${baseUrl}/mis-archivos`;
         case 'Favoritos':
-          return `${baseUrl}/base-conocimientos/favoritos`;
+          return `${baseUrl}/favoritos`;
         default:
-          return `${baseUrl}/base-conocimientos`;
+          return `${baseUrl}`;
       }
     }
     
     if (type === 'folder') {
       if (itemId === "68acb06886d455d16cceef05") {
-        return `${baseUrl}/base-conocimientos`;
+        return `${baseUrl}`;
       }
-      return `${baseUrl}/base-conocimientos/folder/${itemId}`;
+      return `${baseUrl}/folder/${itemId}`;
 
       
     } else {
       return currentContext.folderId !== "68acb06886d455d16cceef05"
-        ? `${baseUrl}/base-conocimientos/folder/${currentContext.folderId}/theme/${itemId}`
-        : `${baseUrl}/base-conocimientos/theme/${itemId}`;
+        ? `${baseUrl}/folder/${currentContext.folderId}/theme/${itemId}`
+        : `${baseUrl}/theme/${itemId}`;
     }
   };
 
@@ -363,7 +363,7 @@ const navigateToThemeDetail = (themeId: string) => {
   const currentQuery = { ...router.query };
   delete currentQuery.slug;
   
-  const url = `/base-conocimientos/theme-detail/${themeId}`;
+  const url = `/theme-detail/${themeId}`;
   const queryString = Object.keys(currentQuery).length > 0 
     ? '?' + new URLSearchParams(currentQuery as Record<string, string>).toString()
     : '';

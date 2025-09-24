@@ -87,7 +87,6 @@ useEffect(() => {
     }
   };
 
-  // ✅ Solo cargar si currentUserId está disponible
   if (currentUserId) {
     cargarAplicaciones();
   }

@@ -5,11 +5,10 @@ export const temaService = {
   // ✅ FUNCIÓN ACTUALIZADA: Obtener temas por carpeta con user_id en el body
   getTemasByFolder: async (folderId, userId) => {
     try {
-      const response = await api.post(`/temas/filter/prio/${folderId}`, {
-        user_id: userId
-      });
+      // ✅ CAMBIO: De POST a GET, user_id como query parameter
+      const response = await api.get(`/temas/filter/prio/${folderId}?user_id=${userId}`);
       
-      // La respuesta ahora tiene esta estructura:
+      // La respuesta mantiene la misma estructura:
       // { id_carpeta: "...", usuario: "...", content: [...] }
       return response.data.content || [];
     } catch (error) {

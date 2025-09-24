@@ -1,6 +1,6 @@
 // components/BaseConocimientos/Themes/ThemeForm.tsx
-import React, { useState, useEffect } from 'react';
-import { Upload, X, FileImage, FileText, FileVideo, Music, Archive, File } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Upload, X, FileImage, FileText, FileVideo, Music, Archive, File, Check, ChevronDown } from 'lucide-react';
 import styles from './../../../styles/base-conocimientos.module.css';
 import { areaService } from '../../../services/areaService';
 import { puestoService } from '../../../services/puestoService';
@@ -16,8 +16,8 @@ interface ThemeFormProps {
 
 interface ThemeFormData {
   priority: string;
-  area: string;
-  position: string;
+  area: string[];        // ← CAMBIO: de 'area' a 'areas' (array)
+  position: string[];  
   files: globalThis.File[]; // Archivos nativos del navegador para upload
   uploadedFiles: { id: string; name: string }[];
   tags: string[];  
@@ -42,6 +42,16 @@ interface Puesto {
   // ... otras propiedades
 }
 
+interface PuestosPorArea {
+  nombre_area: string;
+  data: {
+    _id: string;
+    puesto_id: string;
+    nombre: string;
+    total_usuarios: number;
+  }[];
+}
+
 export const ThemeForm: React.FC<ThemeFormProps> = ({
   onSubmit,
   onCancel,
@@ -56,7 +66,12 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
   const [loadingData, setLoadingData] = useState(true);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [uploadError, setUploadError] = useState('');
-  
+  const [puestosPorAreas, setPuestosPorAreas] = useState<PuestosPorArea[]>([]);
+  const [loadingPuestos, setLoadingPuestos] = useState(false);
+  const [isAreasDropdownOpen, setIsAreasDropdownOpen] = useState(false);
+  const [isPuestosDropdownOpen, setIsPuestosDropdownOpen] = useState(false);
+const areasDropdownRef = useRef<HTMLDivElement>(null);
+const puestosDropdownRef = useRef<HTMLDivElement>(null);
   // ✅ FUNCIÓN HELPER PARA CONVERTIR PRIORIDAD
   const getPriorityText = (priority?: number | string) => {
     const priorityNum = typeof priority === 'string' ? parseInt(priority) : priority;
@@ -69,24 +84,24 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
   };
 
   // ✅ ESTADO INICIAL BASADO EN MODO EDICIÓN:
-  const [formData, setFormData] = useState<ThemeFormData>({
-    priority: isEditMode ? getPriorityText(themeToEdit?.priority) : '',
-    area: isEditMode ? (themeToEdit?.area_id?._id || themeToEdit?.area_id || '') : '',
-    position: isEditMode ? (themeToEdit?.puesto_id?._id || themeToEdit?.puesto_id || '') : '',
-    files: [],
-    uploadedFiles: [], // Los archivos existentes se cargarán después
-    tags: isEditMode ? (themeToEdit?.keywords || []) : [],
-    currentTag: '',
-    aiModel: '',
-    suggestInHelpDesk: false
-  });
+const [formData, setFormData] = useState<ThemeFormData>({
+  priority: isEditMode ? getPriorityText(themeToEdit?.priority) : '',
+  area: isEditMode ? (Array.isArray(themeToEdit?.area_id) ? themeToEdit.area_id : [themeToEdit?.area_id || '']) : [], // ← CAMBIO
+  position: isEditMode ? (Array.isArray(themeToEdit?.puesto_id) ? themeToEdit.puesto_id : [themeToEdit?.puesto_id || '']) : [], // ← CAMBIO
+  files: [],
+  uploadedFiles: [],
+  tags: isEditMode ? (themeToEdit?.keywords || []) : [],
+  currentTag: '',
+  aiModel: '',
+  suggestInHelpDesk: false
+});
 
-  const [errors, setErrors] = useState({
-    priority: '',
-    area: '',
-    position: '',
-    tags: ''
-  });
+const [errors, setErrors] = useState({
+  priority: '',
+  area: '',      // <- NO areas
+  position: '',  // <- NO positions  
+  tags: ''
+});
 
   // Funciones para manejar tags:
   const addTag = () => {
@@ -120,6 +135,22 @@ const loadPuestosByArea = async (areaId: string) => {
   }
 };
 
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (areasDropdownRef.current && !areasDropdownRef.current.contains(event.target as Node)) {
+      setIsAreasDropdownOpen(false);
+    }
+    if (puestosDropdownRef.current && !puestosDropdownRef.current.contains(event.target as Node)) {
+      setIsPuestosDropdownOpen(false);
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, []);
+
   const removeTag = (tagToRemove: string) => {
     setFormData(prev => ({
       ...prev,
@@ -135,34 +166,82 @@ const loadPuestosByArea = async (areaId: string) => {
   };
 
     // Función de validación
-    const validateForm = () => {
-    const newErrors = {
-      priority: '',
-      area: '',
-      position: '',
-      tags: ''
-    };
+const validateForm = () => {
+const newErrors = {
+  priority: '',
+  area: '',      // <- CAMBIO: de 'areas' a 'area'
+  position: '',  // <- CAMBIO: de 'positions' a 'position'
+  tags: ''
+};
 
-    if (!formData.priority || formData.priority === '') {
-      newErrors.priority = 'La prioridad es obligatoria';
-    }
+  if (!formData.priority || formData.priority === '') {
+    newErrors.priority = 'La prioridad es obligatoria';
+  }
 
-    if (!formData.area || formData.area === '') {
-      newErrors.area = 'El área es obligatoria';
-    }
+  if (formData.area.length === 0) {
+    newErrors.area = 'Debe seleccionar al menos un área';
+  }
 
-    if (!formData.position || formData.position === '') {
-      newErrors.position = 'El puesto es obligatorio';
-    }
+  if (formData.position.length === 0) {
+    newErrors.position = 'Debe seleccionar al menos un puesto';
+  }
 
-    // ✅ CAMBIAR validación de tags:
-    if (formData.tags.length === 0) {
-      newErrors.tags = 'Debe agregar al menos un tag';
-    }
+  if (formData.tags.length === 0) {
+    newErrors.tags = 'Debe agregar al menos un tag';
+  }
 
-    setErrors(newErrors);
-    return Object.values(newErrors).every(error => error === '');
-  };
+  setErrors(newErrors); 
+
+  return Object.values(newErrors).every(error => error === '');
+};
+
+
+const loadPuestosByAreas = async (selectedAreas: string[]) => {
+  if (selectedAreas.length === 0) {
+    setPuestosPorAreas([]);
+    return;
+  }
+
+  try {
+    setLoadingPuestos(true);
+    const puestosData = await puestoService.getPuestosByAreas(selectedAreas);
+    setPuestosPorAreas(puestosData);
+  } catch (error) {
+    console.error('Error loading puestos by areas:', error);
+    setPuestosPorAreas([]);
+  } finally {
+    setLoadingPuestos(false);
+  }
+};
+
+// ✅ CAMBIO 7: Funciones para manejar selecciones múltiples
+const handleAreaToggle = async (areaId: string) => {
+  const newAreas = formData.area.includes(areaId)
+    ? formData.area.filter(id => id !== areaId)
+    : [...formData.area, areaId];
+
+  setFormData(prev => ({ ...prev, area: newAreas, position: [] })); // <- area y position
+  
+  if (errors.area) { // <- area
+    setErrors(prev => ({ ...prev, area: '' })); // <- area
+  }
+
+  await loadPuestosByAreas(newAreas);
+};
+
+const handlePositionToggle = (positionId: string) => {
+  const newPositions = formData.position.includes(positionId)
+    ? formData.position.filter(id => id !== positionId)
+    : [...formData.position, positionId];
+
+  setFormData(prev => ({ ...prev, position: newPositions })); // <- position
+  
+  if (errors.position) { // <- position
+    setErrors(prev => ({ ...prev, position: '' })); // <- position
+  }
+};
+
+
 
 // ✅ AGREGAR ESTE useEffect para cargar archivos existentes en modo edición
 useEffect(() => {
@@ -373,55 +452,173 @@ const handleSubmit = () => {
           {errors.priority && <span className={styles.errorMessage}>{errors.priority}</span>}
         </div>
 
-        {/* Áreas */}
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Áreas</label>
-          <select 
-            className={`${styles.formSelect} ${errors.area ? styles.formSelectError : ''}`}
-            value={formData.area}
-            onChange={(e) => {
-              handleInputChangeWithValidation('area', e.target.value);
-              if (e.target.value) {
-                loadPuestosByArea(e.target.value);
-              } else {
-                setPuestos([]);
-              }
-            }}
-            disabled={loadingData}
-          >
-            <option value="">
-              {loadingData ? 'Cargando...' : 'Seleccionar área'}
-            </option>
-            {areas.map((area) => (
-              <option key={area._id} value={area.area_id}>  {/* ← CAMBIO: usar area_id */}
-                {area.nombre}
-              </option>
-            ))}
-          </select>
-          {errors.area && <span className={styles.errorMessage}>{errors.area}</span>}
-        </div>
+{/* Áreas */}
+<div className={styles.formGroup}>
+  <label className={styles.formLabel}>Áreas</label>
+  <div ref={areasDropdownRef} style={{ position: 'relative' }}>
+    <div 
+className={`${styles.formSelect} ${errors.area ? styles.formSelectError : ''}`}
+      onClick={() => setIsAreasDropdownOpen(!isAreasDropdownOpen)}
+      style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+    >
+      <span>
+        {formData.area.length === 0 
+          ? (loadingData ? 'Cargando...' : 'Seleccionar área')
+          : `${formData.area.length} área(s) seleccionada(s)`
+        }
+      </span>
+      <ChevronDown 
+        size={16} 
+        style={{ 
+          transition: 'transform 0.2s',
+          transform: isAreasDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+        }}
+      />
+    </div>
+    
+    {isAreasDropdownOpen && (
+      <div className={styles.formSelect} style={{ 
+        position: 'absolute', 
+        top: 'calc(100% + 4px)', 
+        left: 0, 
+        right: 0, 
+        zIndex: 9999,
+        maxHeight: '200px',
+        overflowY: 'auto'
+      }}>
+        {loadingData ? (
+          <div style={{ padding: '1rem', textAlign: 'center', fontStyle: 'italic' }}>Cargando...</div>
+        ) : (
+          areas.map((area) => (
+            <div 
+              key={area._id} 
+              style={{ 
+                padding: '0.75rem',
+                cursor: 'pointer',
+                backgroundColor: formData.area.includes(area.area_id) ? '#2563eb' : 'transparent',
+                color: formData.area.includes(area.area_id) ? 'white' : 'inherit',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAreaToggle(area.area_id);
+              }}
+              onMouseEnter={(e) => {
+                if (!formData.area.includes(area.area_id)) {
+                  e.currentTarget.style.backgroundColor = '#2a2d47';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!formData.area.includes(area.area_id)) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
+            >
+              <span>{area.nombre}</span>
+              {formData.area.includes(area.area_id) && <Check size={16} />}
+            </div>
+          ))
+        )}
+      </div>
+    )}
+  </div>
+{errors.area && <span className={styles.errorMessage}>{errors.area}</span>}
+</div>
 
-        {/* Puestos */}
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Puestos</label>
-          <select 
-            className={`${styles.formSelect} ${errors.position ? styles.formSelectError : ''}`}
-            value={formData.position}
-            onChange={(e) => handleInputChangeWithValidation('position', e.target.value)}
-            disabled={loadingData}
-          >
-            <option value="">
-              {loadingData ? 'Cargando...' : 'Seleccionar puesto'}
-            </option>
-            {/* En el select de puestos, cambiar el value: */}
-            {puestos.map((puesto) => (
-              <option key={puesto._id} value={puesto.puesto_id}>
-                {puesto.nombre} - ({puesto.total_usuarios}) 
-              </option>
-            ))}
-          </select>
-          {errors.position && <span className={styles.errorMessage}>{errors.position}</span>}
-        </div>
+{/* Puestos */}
+<div className={styles.formGroup}>
+  <label className={styles.formLabel}>Puestos</label>
+  <div ref={puestosDropdownRef} style={{ position: 'relative' }}>
+    <div 
+className={`${styles.formSelect} ${errors.position ? styles.formSelectError : ''}`}
+      onClick={() => setIsPuestosDropdownOpen(!isPuestosDropdownOpen)}
+      style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+    >
+      <span>
+        {formData.position.length === 0 
+          ? (loadingPuestos ? 'Cargando...' : 'Seleccionar puesto')
+          : `${formData.position.length} puesto(s) seleccionado(s)`
+        }
+      </span>
+      <ChevronDown 
+        size={16} 
+        style={{ 
+          transition: 'transform 0.2s',
+          transform: isPuestosDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+        }}
+      />
+    </div>
+    
+    {isPuestosDropdownOpen && (
+      <div className={styles.formSelect} style={{ 
+        position: 'absolute', 
+        top: 'calc(100% + 4px)', 
+        left: 0, 
+        right: 0, 
+        zIndex: 9999,
+        maxHeight: '200px',
+        overflowY: 'auto'
+      }}>
+        {loadingPuestos ? (
+          <div style={{ padding: '1rem', textAlign: 'center', fontStyle: 'italic' }}>Cargando...</div>
+        ) : puestosPorAreas.length === 0 ? (
+          <div style={{ padding: '1rem', textAlign: 'center', fontStyle: 'italic' }}>Selecciona áreas para ver puestos disponibles</div>
+        ) : (
+          puestosPorAreas.map((areaPuestos) => (
+            <div key={areaPuestos.nombre_area}>
+              <div style={{ 
+                fontWeight: '600',
+                color: '#94a3b8',
+                fontSize: '0.875rem',
+                padding: '0.5rem',
+                borderBottom: '1px solid #3b3f5f',
+                backgroundColor: '#27293d'
+              }}>
+                {areaPuestos.nombre_area}
+              </div>
+              {areaPuestos.data.map((puesto) => (
+                <div 
+                  key={puesto._id}
+                  style={{ 
+                    padding: '0.5rem 0.75rem 0.5rem 1.5rem',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    backgroundColor: formData.position.includes(puesto.puesto_id) ? '#2563eb' : 'transparent',
+                    color: formData.position.includes(puesto.puesto_id) ? 'white' : 'inherit',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderLeft: '3px solid #3b3f5f'
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePositionToggle(puesto.puesto_id);
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!formData.position.includes(puesto.puesto_id)) {
+                      e.currentTarget.style.backgroundColor = '#2a2d47';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!formData.position.includes(puesto.puesto_id)) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
+                  }}
+                >
+                  <span>{puesto.nombre} ({puesto.total_usuarios})</span>
+                  {formData.position.includes(puesto.puesto_id) && <Check size={16} />}
+                </div>
+              ))}
+            </div>
+          ))
+        )}
+      </div>
+    )}
+  </div>
+{errors.position && <span className={styles.errorMessage}>{errors.position}</span>}
+</div>
 
         {/* Archivos */}
         <div className={styles.formGroup}>
@@ -602,8 +799,8 @@ const handleSubmit = () => {
             onChange={(e) => handleInputChange('aiModel', e.target.value)}
           >
             <option value="">Selecciona una AI</option>
-            <option value="GPT-4">GPT-4</option>
-            <option value="Claude">Claude</option>
+            <option value="GPT-4">Club Chelero</option>
+            <option value="Claude">Alasel</option>
           </select>
           <div className={styles.aiSuggestion}>
             <input 

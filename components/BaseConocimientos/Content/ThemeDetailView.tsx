@@ -400,14 +400,14 @@ if (img.parentNode) {
                       <div className={styles.filesGrid1}>
                       {attachedFiles.map((file) => (
                         <FilePreview
-  key={file._id}
-  file={file}
-  onDownload={(file) => {
-    if (file.s3_path) {
-      window.open(file.s3_path, '_blank');
-    }
-  }}
-/>
+                          key={file._id}
+                          file={file}
+                          onDownload={(file) => {
+                            if (file.s3_path) {
+                              window.open(file.s3_path, '_blank');
+                            }
+                          }}
+                        />
                       ))}
                     </div>
                     )}

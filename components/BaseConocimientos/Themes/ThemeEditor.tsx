@@ -110,37 +110,18 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
         
         <div className={styles.topicDescriptionSection}>
           <label className={styles.topicLabel}>Descripción</label>
-          {/* ✅ ReactQuill con configuración básica */}
-          <ReactQuill
-            theme="snow"
-            value={description}
-            onChange={onDescriptionChange}
-            modules={modules}
-            formats={formats}
-            placeholder="Escribe una descripción..."
-            style={{
-              backgroundColor: '#1e1e2f',
-              borderRadius: '0.5rem',
-              color: 'white'
-            }}
-          />
+          <div className={styles.customQuillEditor}>
+            <ReactQuill
+              value={description}
+              onChange={onDescriptionChange}
+              modules={modules}
+              formats={formats}
+              placeholder="Escribe una descripción..."
+            />
+          </div>
         </div>
 
-        <div className={styles.topicEditorActions}>
-          <button 
-            className={styles.cancelButton}
-            onClick={handleCancel}
-          >
-            Cancelar
-          </button>
-          <button 
-            className={styles.saveButton}
-            onClick={handleSave}
-            disabled={!title.trim() || !description.trim()}
-          >
-            {isEditMode ? 'Actualizar' : 'Guardar'}
-          </button>
-        </div>
+
       </div>
     </div>
   );

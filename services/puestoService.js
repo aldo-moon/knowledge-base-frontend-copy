@@ -57,18 +57,32 @@ export const puestoService = {
     }
   },
 
-// Obtener puestos por área (POST)
-getPuestosByArea: async (areaId) => {
-  try {
-    const response = await api.post(`/puestos/get_by_area/${areaId}`, {
-      id_area: areaId
-    });
-    return response.data || [];
-  } catch (error) {
-    console.error("❌ Error al obtener puestos por área:", error);
-    throw error;
+  // ✅ FUNCIÓN EXISTENTE: Obtener puestos por área (POST) - MANTENER por compatibilidad
+  getPuestosByArea: async (areaId) => {
+    try {
+      const response = await api.post(`/puestos/get_by_area/${areaId}`, {
+        id_area: areaId
+      });
+      return response.data || [];
+    } catch (error) {
+      console.error("❌ Error al obtener puestos por área:", error);
+      throw error;
+    }
+  },
+
+  // ✅ NUEVA FUNCIÓN: Obtener puestos por múltiples áreas (GET)
+  getPuestosByAreas: async (areaIds) => {
+    try {
+      // Convertir array de IDs a string separado por comas
+      const areaIdsString = Array.isArray(areaIds) ? areaIds.join(',') : areaIds;
+      
+      const response = await api.get(`/puestos/get_by_area?area_id=${areaIdsString}`);
+      
+      return response.data || [];
+    } catch (error) {
+      console.error("❌ Error al obtener puestos por áreas:", error);
+      throw error;
+    }
   }
-},
-
-
 };
+
