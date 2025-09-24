@@ -24,7 +24,7 @@ interface Folder {
 
 interface File {
   _id: string;
-  name: string;
+  file_name: string;  // ← Cambiar de "name" a "file_name"
   type: string;
   size?: number;
   url?: string;
@@ -47,6 +47,17 @@ interface SortOption {
   value: string;
 }
 
+interface TrashItem {
+  _id: string;
+  type_content: 'Carpeta' | 'Tema' | 'Archivo';
+  content_id: string;
+  created_at?: string;
+  user_bin_id?: string; // ✅ Hacer opcional con ?
+  expireAt?: string; // ✅ Agregar esta propiedad
+  originalContent?: any; // ← Cambiar de "Folder | Theme | File" a "any"
+  // ... otras propiedades que pueda tener
+}
+
 interface ContentAreaProps {
   // Datos
   folders: Folder[];
@@ -66,9 +77,9 @@ interface ContentAreaProps {
 
   viewingThemeId?: string | null;
   onThemeDetailBack: () => void;
-  onThemeEdit?: (theme: any) => void;
-  onThemeDelete?: (theme: any) => void;
-  onThemeDoubleClick?: (theme: any) => void;
+  onThemeEdit?: (theme: Theme) => void;
+  onThemeDelete?: (theme: Theme) => void;
+  onThemeDoubleClick?: (theme: Theme) => void;
   //  Datos del usuario para vista "Mis archivos"
   userContent?: {
     folders: Folder[];
@@ -79,16 +90,17 @@ interface ContentAreaProps {
   userContentError?: string | null;
 
     //  Datos de favoritos para vista "Favoritos"
-  favoritesContent?: {
-    folders: Folder[];
-    themes: Theme[];
-  };
+ favoritesContent?: {
+  folders: Folder[];
+  themes: Theme[];
+  files: File[];  // ← AGREGAR esta línea
+};
   favoritesContentLoading?: boolean;
   favoritesContentError?: string | null;
   
   
   //  Vista activa
-  activeView: 'folder' | 'user-content' | 'favorites' | 'trash';  
+activeView: 'folder' | 'user-content' | 'favorites' | 'trash' | 'theme-detail';
 
   onFileSelect: (file: File) => void;
   onFileDoubleClick?: (file: File) => void;
@@ -228,8 +240,8 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
         onSave={onThemeEditorSave}
         title={themeTitle || ''}
         description={themeDescription || ''}
-        onTitleChange={onThemeTitleChange}
-        onDescriptionChange={onThemeDescriptionChange}
+onTitleChange={onThemeTitleChange || (() => {})}
+onDescriptionChange={onThemeDescriptionChange || (() => {})}
       />
     );
   }
@@ -300,7 +312,7 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
       onThemeMenuAction={onThemeMenuAction}
       onToggleThemeFavorite={onToggleThemeFavorite}
       onToggleFileFavorite={onToggleFileFavorite}
-      
+        onFileSelect={onFileSelect}  // ← AGREGAR esta línea
     />
     );
   }
@@ -333,8 +345,7 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
         onDeleteSelected={onDeleteSelected || (() => {})}
         onThemeSelect={onThemeSelect}
         onFolderSelect={onFolderSelect}
-        onFileSelect={onFileSelect}
-        
+onFileSelect={onFileSelect as any}        
       />
     );
   }
@@ -389,9 +400,9 @@ export const ContentArea: React.FC<ContentAreaProps> = ({
           loading={loading}
           error={error}
           fileFavorites={fileFavorites}
-          onFileSelect={onFileSelect}
-          onFileDoubleClick={onFileDoubleClick}
-          onFileMenuAction={onFileMenuAction}
+onFileSelect={onFileSelect as any}
+          onFileDoubleClick={onFileDoubleClick as any}
+onFileMenuAction={onFileMenuAction as any}
           onToggleFileFavorite={onToggleFileFavorite} 
         />
       </div>

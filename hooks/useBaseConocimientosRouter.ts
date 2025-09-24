@@ -36,6 +36,7 @@ const parseSlugFromUrl = () => {
       folderId: "68acb06886d455d16cceef05",
       themeId: null,
       isCreatingTheme: false,
+          isEditingTheme:true, // Nuevo estado
       isViewingTheme: false,
       activeSection: 'Contenedor'
       
@@ -45,6 +46,8 @@ const parseSlugFromUrl = () => {
   let folderId = "68acb06886d455d16cceef05";
   let themeId = null;
   let isCreatingTheme = false;
+  let  isEditingTheme = true;  // Nuevo estado
+
   let isViewingTheme = false;
   let activeSection = 'Contenedor';
 

@@ -1,98 +1,49 @@
-// components/BaseConocimientos/Themes/ThemeEditor.tsx
 import React, { useState } from 'react';
-import { ChevronLeft, Image } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import styles from './../../../styles/base-conocimientos.module.css';
 import dynamic from 'next/dynamic';
 
-// Importación dinámica para evitar SSR
 const ReactQuill = dynamic(() => import('react-quill'), {
   ssr: false,
   loading: () => <div>Cargando editor...</div>
 });
 
-// Mantener el import del CSS
 import 'react-quill/dist/quill.snow.css';
 
-// ✅ MOVER FUERA DEL COMPONENTE - ESTO SOLUCIONA EL PROBLEMA
-// Modificar el objeto modules en ThemeEditor.tsx
-// Reemplaza tu objeto modules actual por este:
-
+// ✅ Configuración de módulos simplificada
 const modules = {
-  toolbar: {
-    container: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'align': [] }],
-      ['blockquote', 'code-block'],
-      ['image', 'video', 'link'],
-      ['document'], // Botón personalizado para documentos
-      ['clean']
-    ],
-    handlers: {
-      // Handler personalizado para imágenes
-      'image': function() {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-
-        input.onchange = () => {
-          const file = input.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const range = this.quill.getSelection();
-              
-              // Insertar imagen con el nombre del archivo en el atributo alt
-              this.quill.insertEmbed(range.index, 'image', reader.result);
-              
-              // Obtener la imagen recién insertada y agregar atributos
-              setTimeout(() => {
-                const images = this.quill.container.querySelectorAll('img');
-                const lastImage = images[images.length - 1];
-                if (lastImage) {
-                  lastImage.setAttribute('alt', file.name);
-                  lastImage.setAttribute('title', file.name);
-                  lastImage.setAttribute('data-filename', file.name);
-                }
-              }, 100);
-            };
-            reader.readAsDataURL(file);
-          }
-        };
-      },
-      
-      // Handler existente para documentos
-      'document': function() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.pdf,.doc,.docx,.txt,.xlsx,.pptx';
-        input.onchange = (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            const fileName = file.name;
-            const range = this.quill.getSelection();
-            
-            this.quill.insertText(range.index, `📄 ${fileName}`, {
-              'color': '#6262bf',
-              'bold': true
-            });
-            
-            console.log('Archivo seleccionado:', file);
-          }
-        };
-        input.click();
-      }
-    }
-  }
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'align': [] }],
+    ['blockquote', 'code-block'],
+    ['image', 'video', 'link'],
+    ['clean']
+  ]
 };
+
 const formats = [
   'header', 'bold', 'italic', 'underline', 'strike',
   'color', 'background', 'list', 'bullet', 'align',
-  'blockquote', 'code-block', 'image', 'video'
+  'blockquote', 'code-block', 'image', 'video', 'link'
 ];
+
+interface ThemeData {
+  title: string;
+  description: string;
+}
+
+interface Theme {
+  _id: string;
+  title_name: string;
+  description?: string;
+  priority?: number;
+  folder_id?: string;
+  keywords?: string[];
+  creation_date?: string;
+}
 
 interface ThemeEditorProps {
   onBack: () => void;
@@ -101,13 +52,8 @@ interface ThemeEditorProps {
   description: string;
   onTitleChange: (title: string) => void;
   onDescriptionChange: (description: string) => void;
-    isEditMode?: boolean;
+  isEditMode?: boolean;
   themeToEdit?: Theme;
-}
-
-interface ThemeData {
-  title: string;
-  description: string;
 }
 
 export const ThemeEditor: React.FC<ThemeEditorProps> = ({
@@ -120,9 +66,6 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
   isEditMode = false,
   themeToEdit
 }) => {
-  const initialTitle = isEditMode ? themeToEdit?.title_name || '' : title;
-  const initialDescription = isEditMode ? themeToEdit?.description || '' : description;
-
   const handleSave = () => {
     if (title.trim() && description.trim()) {
       onSave?.({
@@ -141,7 +84,9 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
   return (
     <div className={styles.topicEditorSection}>
       <div className={styles.topicEditorHeader}>
-        <h2 className={styles.topicEditorTitle}>Crear nuevo tema</h2>
+        <h2 className={styles.topicEditorTitle}>
+          {isEditMode ? 'Editar tema' : 'Crear nuevo tema'}
+        </h2>
         <button 
           className={styles.backButton}
           onClick={onBack}
@@ -165,15 +110,36 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
         
         <div className={styles.topicDescriptionSection}>
           <label className={styles.topicLabel}>Descripción</label>
-          <div className={styles.customQuillEditor}>
-            <ReactQuill
-              value={description}
-              onChange={onDescriptionChange}
-              modules={modules}
-              formats={formats}
-              placeholder="Escribe una descripción..."
-            />
-          </div>
+          {/* ✅ ReactQuill con configuración básica */}
+          <ReactQuill
+            theme="snow"
+            value={description}
+            onChange={onDescriptionChange}
+            modules={modules}
+            formats={formats}
+            placeholder="Escribe una descripción..."
+            style={{
+              backgroundColor: '#1e1e2f',
+              borderRadius: '0.5rem',
+              color: 'white'
+            }}
+          />
+        </div>
+
+        <div className={styles.topicEditorActions}>
+          <button 
+            className={styles.cancelButton}
+            onClick={handleCancel}
+          >
+            Cancelar
+          </button>
+          <button 
+            className={styles.saveButton}
+            onClick={handleSave}
+            disabled={!title.trim() || !description.trim()}
+          >
+            {isEditMode ? 'Actualizar' : 'Guardar'}
+          </button>
         </div>
       </div>
     </div>

@@ -14,6 +14,7 @@ interface Folder {
   creation_date: string;
   last_update?: string;
   user_creator_id: string;
+   isTrashView?: boolean; 
 }
 
 interface File {
@@ -37,13 +38,16 @@ interface Theme {
 
 interface TrashItem {
   _id: string;
-  user_bin_id: string;
-  type_content: 'tema' | 'carpeta' | 'archivo';
+  type_content: 'Carpeta' | 'Tema' | 'Archivo';
   content_id: string;
   created_at?: string;
-  // Datos del contenido original
-  originalContent?: Folder | Theme | File;
+  user_bin_id?: string; // ✅ Hacer opcional con ?
+  expireAt?: string; // ✅ Agregar esta propiedad
+  originalContent?: any; // ← Cambiar de "Folder | Theme | File" a "any"
+  // ... otras propiedades que pueda tener
 }
+
+
 
 interface TrashContentViewProps {
   // Datos de papelera
@@ -304,7 +308,7 @@ const trashItem = trashItems.find(item =>
                 folders={trashFolders}
                 loading={false}
                 error={null}
-                onFolderSelect={onFolderSelect}
+                onFolderSelect={onFolderSelect ?? (() => {})} // fallback vacío
                 onFolderMenuAction={(action, folder) => handleTrashMenuAction(action, folder, 'carpeta')}
                 isTrashView={true}
                 selectedItems={selectedItems}

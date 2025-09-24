@@ -9,17 +9,17 @@ import {
   Folder,
   ChevronRight, 
   ChevronDown,
-  FileBox,
-  LayoutTemplate
-} from 'lucide-react';
+ } from 'lucide-react';
 import styles from './../../../styles/base-conocimientos.module.css';
 
 interface SidebarItem {
-  icon: React.ElementType;
+  icon: React.ComponentType<any>; // ← Cambiar de React.ElementType
   label: string;
   active?: boolean;
   expandable?: boolean;
 }
+
+
 
 interface SubfolderItem {
   _id: string;
@@ -53,8 +53,7 @@ export const ContentSidebar: React.FC<ContentSidebarProps> = ({
     { icon: Star, label: 'Favoritos', expandable: true },
     { icon: Clock, label: 'Recientes', expandable: false },
     { icon: Trash2, label: 'Papelera', expandable: false },
-    { icon: FileBox, label: 'Modelos', expandable: false },
-    { icon: LayoutTemplate, label: 'Secciones', expandable: false }
+
   ];
 
   // Renderizar subcarpetas de forma recursiva

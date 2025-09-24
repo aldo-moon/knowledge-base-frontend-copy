@@ -18,12 +18,28 @@ interface ThemeFormData {
   priority: string;
   area: string;
   position: string;
-  files: File[];
+  files: globalThis.File[]; // Archivos nativos del navegador para upload
   uploadedFiles: { id: string; name: string }[];
   tags: string[];  
   currentTag: string;  
   aiModel: string;
   suggestInHelpDesk: boolean;
+}
+
+interface Area {
+  _id: string;
+  area_id: string;
+  nombre: string;
+  // ... otras propiedades que pueda tener el área
+}
+
+// ✅ Define la interfaz para Puesto también
+interface Puesto {
+  _id: string;
+  puesto_id: string;
+  nombre: string;
+  total_usuarios?: number;
+  // ... otras propiedades
 }
 
 export const ThemeForm: React.FC<ThemeFormProps> = ({
@@ -35,8 +51,8 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
   themeToEdit = null
 }) => {
 
-  const [areas, setAreas] = useState([]);
-  const [puestos, setPuestos] = useState([]);
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [puestos, setPuestos] = useState<Puesto[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -91,7 +107,7 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
     }
   };
 
-  const loadPuestosByArea = async (areaId) => {
+const loadPuestosByArea = async (areaId: string) => {
   try {
     setPuestos([]); // Limpiar puestos actuales
     setLoadingData(true);
@@ -262,7 +278,7 @@ useEffect(() => {
 
       // Agregar archivos subidos al estado
       if (response.array_file) {
-        const newUploadedFiles = response.array_file.map(([id, name]) => ({
+          const newUploadedFiles = response.array_file.map(([id, name]: [string, string]) => ({
           id,
           name
         }));

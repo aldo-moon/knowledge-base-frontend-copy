@@ -32,28 +32,28 @@ export const aplicacionService = {
     // Subregla 2a: externo es 0 o null - usar URL base + script
     if (externo === 0 || externo === null || externo === undefined) {
       const url = `${aplicacionService.BASE_URL}${script}`;
-      console.log('🔗 URL generada (interno):', url);
+      //console.log('🔗 URL generada (interno):', url);
       return url;
     }
     
     // Subregla 2b: externo es 1 - usar script como URL completa
     if (externo === 1) {
       const url = script;
-      console.log('🔗 URL generada (externo tipo 1):', url);
+      //console.log('🔗 URL generada (externo tipo 1):', url);
       return url;
     }
     
     // Subregla 2c: externo es 2 - usar URL base + script
     if (externo === 2) {
       const url = `${aplicacionService.BASE_URL}${script}`;
-      console.log('🔗 URL generada (externo tipo 2):', url);
+      //console.log('🔗 URL generada (externo tipo 2):', url);
       return url;
     }
     
     // Subregla 2d: externo es 3 - usar script como URL completa con tokens
     if (externo === 3) {
       const url = `${script}?TOKEN=TOKEN2`;
-      console.log('🔗 URL generada (externo con tokens):', url);
+      //console.log('🔗 URL generada (externo con tokens):', url);
       return url;
     }
   }
@@ -85,7 +85,7 @@ export const aplicacionService = {
   },
 
   // ✅ FUNCIÓN ACTUALIZADA: Procesar aplicaciones para sidebar con navegación
-  procesarAplicacionesParaSidebar: async () => {
+procesarAplicacionesParaSidebar: async (userId) => {  // ← Agregar userId
     try {
  // ✅ DESPUÉS:
     const response = await aplicacionService.getAplicacionesByUser(userId);
@@ -146,7 +146,7 @@ export const aplicacionService = {
   // ✅ FUNCIÓN DE PRUEBA: Mostrar URLs que se generarían
   mostrarEjemplosUrls: async () => {
     try {
-      const aplicaciones = await aplicacionService.getAllAplicaciones();
+      const aplicaciones = await aplicacionService.getAplicacionesByUser(userId);
       const apps = aplicaciones.aplicaciones || [];
       
       console.log('🔍 EJEMPLOS DE URLs GENERADAS:');
@@ -314,7 +314,7 @@ export const aplicacionService = {
   // Obtener aplicaciones por usuario con permisos
   getAplicacionesByUser: async (userId) => {
     try {
-      const response = await api.get(`/aplicacion/app_list_user/${userId}`);
+      const response = await api.get(`/aplicaciones/app_list_user/${userId}`);
       return response.data;
     } catch (error) {
       console.error("❌ Error al obtener aplicaciones por usuario:", error);

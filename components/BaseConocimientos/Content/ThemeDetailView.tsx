@@ -14,9 +14,14 @@ interface Theme {
   folder_id?: string;
   keywords?: string[];
   creation_date?: string;
-  author_topic_id?: string;
+  author_topic_id?: {
+    user_id: number;
+    nombre: string;
+    aPaterno: string;
+  } | string;
   area_id?: string;
   puesto_id?: string;
+  files_attachment_id?: string[];
 }
 
 interface ThemeDetailViewProps {
@@ -167,8 +172,9 @@ const processImagesWithCaptions = (htmlContent: string): string => {
     caption.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg> ${imageName}`;
     
     // Insertar el contenedor antes de la imagen
-    img.parentNode.insertBefore(container, img);
-    
+if (img.parentNode) {
+  img.parentNode.insertBefore(container, img);
+}    
     // Mover caption e imagen al contenedor
     container.appendChild(caption);
     container.appendChild(img);
@@ -301,7 +307,8 @@ const processImagesWithCaptions = (htmlContent: string): string => {
             </button>
           )}
           
-          {onEdit && currentUserId && theme?.author_topic_id?._id === currentUserId && (
+
+          {onEdit && currentUserId && typeof theme?.author_topic_id === 'object' && theme.author_topic_id.user_id === parseInt(currentUserId) && (
             <button
               className={styles.actionButton}
               onClick={() => onEdit(theme)}
@@ -311,15 +318,15 @@ const processImagesWithCaptions = (htmlContent: string): string => {
             </button>
           )}
           
-          {onDelete && currentUserId && theme?.author_topic_id?._id === currentUserId && (
-            <button
-              className={styles.actionButton}
-              onClick={() => onDelete(theme)}
-              title="Eliminar tema"
-            >
-              <Trash2 size={20} />
-            </button>
-          )}
+          {onDelete && currentUserId && typeof theme?.author_topic_id === 'object' && theme.author_topic_id.user_id === parseInt(currentUserId) && (
+          <button
+            className={styles.actionButton}
+            onClick={() => onDelete(theme)}
+            title="Eliminar tema"
+          >
+            <Trash2 size={20} />
+          </button>
+        )}
         </div>
       </div>
 
@@ -393,21 +400,14 @@ const processImagesWithCaptions = (htmlContent: string): string => {
                       <div className={styles.filesGrid1}>
                       {attachedFiles.map((file) => (
                         <FilePreview
-                          key={file._id}
-                          file={file}
-                          onSelect={(file) => console.log('Archivo seleccionado:', file.file_name)}
-                          onDoubleClick={(file) => {
-                            if (file.s3_path) {
-                              window.open(file.s3_path, '_blank');
-                            }
-                          }}
-                          onMenuAction={(action, file) => {
-                            if (action === 'download') {
-                              handleFileDownload(file);
-                            }
-                          }}
-                          showPreview={true}
-                        />
+  key={file._id}
+  file={file}
+  onDownload={(file) => {
+    if (file.s3_path) {
+      window.open(file.s3_path, '_blank');
+    }
+  }}
+/>
                       ))}
                     </div>
                     )}

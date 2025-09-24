@@ -16,10 +16,13 @@ interface FilePreviewProps {
   file: AttachedFile;
   onDownload: (file: AttachedFile) => void;
   className?: string;
+   onSelect?: (file: AttachedFile) => void;  // ← Agregar como opcional
+  onDoubleClick?: (file: AttachedFile) => void;  // ← Agregar como opcional
+  onMenuAction?: (action: string, file: AttachedFile) => void; // ← Agregar esta línea
 }
 
 
-export const FilePreview: React.FC<FilePreviewProps> = ({ file, onDownload, className }) => {
+export const FilePreview: React.FC<FilePreviewProps> = ({ file, onDownload, onMenuAction, className }) => {
   const [previewError, setPreviewError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -102,13 +105,15 @@ export const FilePreview: React.FC<FilePreviewProps> = ({ file, onDownload, clas
 };
 
   const handleMenuOptionClick = (action: string) => {
-  if (action === 'open') {
-    window.open(file.s3_path, '_blank');
-  } else if (onMenuAction) {
-    onMenuAction(action, file);
-  }
-  setIsMenuOpen(false);
-};
+    if (action === 'download') {
+      onDownload(file);
+    } else if (action === 'open') {
+      window.open(file.s3_path, '_blank');
+    } else if (onMenuAction) {
+      onMenuAction(action, file);
+    }
+    setIsMenuOpen(false);
+  };
 
 // Agregar este useEffect en tu componente
 useEffect(() => {

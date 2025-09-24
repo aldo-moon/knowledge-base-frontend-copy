@@ -51,10 +51,94 @@ interface FilterOption {
   action?: string;
 }
 
+interface FavoriteFolder {
+  _id: string;
+  folder_name: string;
+  // ... otras propiedades que pueda tener
+}
+
+// ✅ Agregar las interfaces al inicio del archivo (después de las importaciones)
+interface Aplicacion {
+  id: string;
+  script_id: number;
+  nombre: string;
+  icono: string;
+  tipo: number;
+  grupo: string;
+  script: string;
+  externo?: number;
+  orden_menu: number;
+  expandable: boolean;
+  subsecciones: Subseccion[];
+  navegacionUrl?: string | null;
+  navegable: boolean;
+}
+
+// ✅ Agregar la propiedad 'type' que está pidiendo
+interface File {
+  _id: string;
+  file_name: string;
+  type: string;        // ✅ Agregar esta línea
+  type_file?: string;  // Tu propiedad original
+  s3_path?: string;
+  creation_date?: string;
+  last_update?: string;
+}
+
+interface Subseccion {
+  _id: string;
+  script_id: number;
+  nombre: string;
+  icono: string;
+  script: string;
+  externo?: number;
+  orden_submenu: number;
+  grupo: string;
+  navegacionUrl?: string | null;
+  navegable: boolean;
+}
+
+interface ContentSidebarItem {
+  icon: React.ElementType; // o React.ComponentType<any>
+  label: string;
+  active?: boolean;
+  expandable?: boolean;
+}
+
+
+interface FavoriteTopic {
+  _id: string;
+  title_name?: string;
+  // ... otras propiedades
+}
+
+interface FavoriteFile {
+  _id: string;
+  file_name?: string;
+  // ... otras propiedades
+}
+
 interface SortOption {
   icon: React.ElementType;
   label: string;
   value: string;
+}
+
+interface FavoritesContent {
+  folders: any[]; // o el tipo específico de carpetas que uses
+  themes: any[];  // o el tipo específico de temas
+  files: any[];   // o el tipo específico de archivos
+}
+
+interface TrashItem {
+  _id: string;
+  type_content: 'Carpeta' | 'Tema' | 'Archivo';
+  content_id: string;
+  created_at?: string;
+  user_bin_id?: string; // ✅ Hacer opcional con ?
+  expireAt?: string; // ✅ Agregar esta propiedad
+  originalContent?: any; // ← Cambiar de "Folder | Theme | File" a "any"
+  // ... otras propiedades que pueda tener
 }
 
 interface Folder {
@@ -84,6 +168,59 @@ interface FolderDetails {
   lastModified: string;
 }
 
+interface SidebarItem {
+  label: string;
+  icon?: React.ReactNode;
+  // otros campos que uses
+}
+
+interface ThemeFormData {
+  priority: string;
+  area: string;
+  position: string;
+  tags: string[];
+  fileIds?: string[];
+  files: globalThis.File[]; // Archivos nativos del navegador para upload
+  uploadedFiles?: { id: string; name: string }[];
+  // ... otras propiedades que pueda tener el formulario
+}
+
+interface FavoriteFolder {
+  _id: string;
+}
+
+interface FavoriteTopic {
+  _id: string;
+  title_name?: string;
+}
+
+interface FavoriteFile {
+  _id: string;
+  file_name?: string;
+}
+
+interface TrashContent {
+  items: TrashItem[];
+  folders: any[]; // o el tipo específico que uses para carpetas
+  themes: any[];  // o el tipo específico que uses para temas
+  files: any[];   // o el tipo específico que uses para archivos
+}
+
+interface FavoritesResponse {
+  content_folder?: FavoriteFolder[];
+  content_topic?: FavoriteTopic[];
+  content_file?: FavoriteFile[];
+}
+
+
+interface SidebarFolders {
+  [key: string]: any[]; // o el tipo específico de carpetas que uses
+}
+
+interface ExpandedItems {
+  [key: string]: boolean;
+}
+
 const BaseConocimientos = () => {
   // Hook de routing
   const {
@@ -106,6 +243,9 @@ const BaseConocimientos = () => {
     generateShareableUrl
   } = useBaseConocimientosRouter();
 
+  
+
+
   // Estados básicos - inicializar desde URL
   const urlFilters = getFiltersFromUrl();
   const [searchTerm, setSearchTerm] = useState(urlFilters.search);
@@ -113,9 +253,16 @@ const BaseConocimientos = () => {
   const [selectedFolderDetails, setSelectedFolderDetails] = useState<FolderDetails | null>(null);
   const [selectedTemaId, setSelectedTemaId] = useState<string | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
-  const handleCancelDelete = () => closeModal(setIsDeleteModalOpen, () => setFolderToDelete(null));
-  const handleCancelThemeDelete = () => closeModal(setIsDeleteThemeModalOpen, () => setThemeToDelete(null));
-  const [fileFavorites, setFileFavorites] = useState(new Set());
+const handleCancelDelete = () => {
+  setIsDeleteModalOpen(false);
+  setFolderToDelete(null);
+};
+
+const handleCancelThemeDelete = () => {
+  setIsDeleteThemeModalOpen(false);  
+  setThemeToDelete(null);
+};
+const [fileFavorites, setFileFavorites] = useState<Set<string>>(new Set());
 
   const [showAuthModal, setShowAuthModal] = useState(false);
 const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -126,10 +273,10 @@ const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isMultimediaModalOpen, setIsMultimediaModalOpen] = useState(false);
   const [isRenameFolderModalOpen, setIsRenameFolderModalOpen] = useState(false);
   const [isRenameThemeModalOpen, setIsRenameThemeModalOpen] = useState(false);
-  const [isRenameFileModalOpen, setIsRenameFileModalOpen] = useState(false);
-  const [isDeleteFileModalOpen, setIsDeleteFileModalOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [fileToDelete, setFileToDelete] = useState(null);
+const [isRenameFileModalOpen, setIsRenameFileModalOpen] = useState<boolean>(false);
+const [isDeleteFileModalOpen, setIsDeleteFileModalOpen] = useState<boolean>(false);
+const [selectedFile, setSelectedFile] = useState<File | null>(null);
+const [fileToDelete, setFileToDelete] = useState<File | null>(null);
 
   // Estados de filtros - inicializar desde URL
   const [areFiltersVisible, setAreFiltersVisible] = useState(false);
@@ -137,7 +284,7 @@ const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentSortBy, setCurrentSortBy] = useState(urlFilters.sortBy);
   // Estados para favoritos
   const [folderFavorites, setFolderFavorites] = useState<Set<string>>(new Set());
-  const [themeFavorites, setThemeFavorites] = useState<Set<string>>(new Set());
+const [themeFavorites, setThemeFavorites] = useState<Set<string>>(new Set());
 
   const [themeTitle, setThemeTitle] = useState('');
   const [themeDescription, setThemeDescription] = useState('');
@@ -154,22 +301,21 @@ const [isEditingTheme, setIsEditingTheme] = useState(false);
   const [userContentLoading, setUserContentLoading] = useState(false);
   const [userContentError, setUserContentError] = useState(null);
 
-  const [favoritesContent, setFavoritesContent] = useState({
+const [favoritesContent, setFavoritesContent] = useState<FavoritesContent>({
   folders: [],
   themes: [],
   files: []
 });
-const [favoritesContentLoading, setFavoritesContentLoading] = useState(false);
-const [favoritesContentError, setFavoritesContentError] = useState(null);
-const [trashContent, setTrashContent] = useState({
+const [favoritesContentLoading, setFavoritesContentLoading] = useState<boolean>(false);
+const [favoritesContentError, setFavoritesContentError] = useState<string | null>(null);
+const [trashContent, setTrashContent] = useState<TrashContent>({
   items: [],
   folders: [],
   themes: [],
   files: []
 });
-const [trashContentLoading, setTrashContentLoading] = useState(false);
-const [trashContentError, setTrashContentError] = useState(null);
-
+const [trashContentLoading, setTrashContentLoading] = useState<boolean>(false);
+const [trashContentError, setTrashContentError] = useState<string | null>(null);
 
   // Inicializar desde URL al montar el componente
  useEffect(() => {
@@ -207,17 +353,17 @@ useEffect(() => {
 
 
   // Estados de datos
-  const [folders, setFolders] = useState([]);
-  const [themes, setThemes] = useState([]);
-  const [files, setFiles] = useState([]);
+const [folders, setFolders] = useState<Folder[]>([]);
+  const [themes, setThemes] = useState<Theme[]>([]);
+const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleteThemeModalOpen, setIsDeleteThemeModalOpen] = useState(false);
-  const [folderToDelete, setFolderToDelete] = useState(null);
-  const [themeToDelete, setThemeToDelete] = useState(null);
+const [folderToDelete, setFolderToDelete] = useState<Folder | null>(null);
+const [themeToDelete, setThemeToDelete] = useState<Theme | null>(null);
   const [error, setError] = useState(null);
-  const [sidebarFolders, setSidebarFolders] = useState({});
-  const [expandedSidebarItems, setExpandedSidebarItems] = useState({});
+const [sidebarFolders, setSidebarFolders] = useState<SidebarFolders>({});
+const [expandedSidebarItems, setExpandedSidebarItems] = useState<ExpandedItems>({});
   const CURRENT_USER_ID = currentUserId;
   const [mounted, setMounted] = useState(false);
 
@@ -263,9 +409,22 @@ const handleCloseModal = () => {
   // ============= HANDLERS PARA COMPONENTES MODULARES =============
   
   /////////////////////////////////////////////// Handler para MainSidebar ////////////////////////////////////////////////////
-  const handleSidebarItemClick = (item: any, index: number) => {
-    console.log(`Clicked sidebar item: ${item.label}`);
-  };
+// ✅ Función que maneja ambos casos
+const handleSidebarItemClick = (aplicacion: Aplicacion | Subseccion, isSubseccion?: boolean) => {
+  console.log('🖱️ Click en sidebar item:', aplicacion.nombre);
+  
+  // Tu lógica personalizada aquí
+  if (aplicacion.nombre === 'Base de Conocimientos') {
+    // Lógica específica para Base de Conocimientos
+    console.log('🧠 Navegando a Base de Conocimientos');
+    return;
+  }
+
+  // Lógica de navegación estándar
+  if (aplicacion.navegable && aplicacion.navegacionUrl) {
+    window.location.href = aplicacion.navegacionUrl;
+  }
+};
 
   // Handler para NewButton
 const handleNewButtonAction = (action: string) => {
@@ -297,7 +456,7 @@ const handleNewButtonAction = (action: string) => {
 
 
 
-const handleContentSidebarExpand = async (itemLabel) => {
+const handleContentSidebarExpand = async (itemLabel: string) => {
   setExpandedSidebarItems(prev => ({
     ...prev,
     [itemLabel]: !prev[itemLabel]
@@ -306,14 +465,20 @@ const handleContentSidebarExpand = async (itemLabel) => {
   // Solo cargar si no está expandido y no tiene datos
   if (expandedSidebarItems[itemLabel] || sidebarFolders[itemLabel]) return;
 
-  const loaders = {
-    'Contenedor': loadSidebarFolders,
-    'Favoritos': loadUserFavorites,
-    'Mis archivos': refreshUserData
-  };
+type LoaderKey = "Contenedor" | "Favoritos" | "Mis archivos";
 
+const loaders: Record<LoaderKey, () => Promise<void>> = {
+  Contenedor: async () => { /* ... */ },
+  Favoritos: async () => { /* ... */ },
+  "Mis archivos": async () => { /* ... */ },
+};
+
+// itemLabel debe ser de tipo LoaderKey
+const handleLoad = (itemLabel: LoaderKey) => {
   const loader = loaders[itemLabel];
-  if (loader) await loader();
+  loader();
+};
+
 };
 
 
@@ -323,7 +488,7 @@ const refreshUserData = async () => {
     const userData = await usuarioService.getAllContentByUser(CURRENT_USER_ID);
     
     // Actualizar sidebar
-    const transformedFolders = (userData.carpetas || []).map(folder => ({
+const transformedFolders = (userData.carpetas || []).map((folder: Folder) => ({
       _id: folder._id,
       folder_name: folder.folder_name
     }));
@@ -348,12 +513,11 @@ const refreshUserData = async () => {
 
 
 // Handler actualizado para click en sidebar
-const handleContentSidebarItemClick = (item) => {
+const handleContentSidebarItemClick = (item: ContentSidebarItem) => {
   // Si hace clic en el item principal, cambiar la sección
   if (item.label === 'Mis archivos' || item.label === 'Contenedor' || item.label === 'Favoritos') {
     handleSectionChange(item.label);
   }
-  
   console.log(`Clicked sidebar item: ${item.label}`);
 };
 
@@ -398,7 +562,7 @@ const handleSubfolderClick = (folderId: string, folderName: string) => {
   };
 
   // Handler para ThemeForm (en el DetailsPanel) - usar navegación con routing
-const handleThemeFormSubmit = async (formData) => {
+const handleThemeFormSubmit = async (formData: ThemeFormData) => {
   try {
     console.log('📝 Datos del formulario recibidos:', formData);
 
@@ -552,7 +716,7 @@ const handleRenameFolder = async (newName: string) => {
 
 
   // Handler para NewFolderModal
-const handleCreateFolder = async (folderName) => {
+const handleCreateFolder = async (folderName: string) => {
   try {
     console.log(`Creando carpeta: ${folderName}`);
 
@@ -698,10 +862,15 @@ const handleThemeDeleteFromDetail = (theme: Theme) => {
 
 
   // Handler genérico para cerrar modales
-  const closeModal = (setModalState, clearDataFunction = null) => {
-    setModalState(false);
-    if (clearDataFunction) clearDataFunction();
-  };
+const closeModal = (
+  setModalState: React.Dispatch<React.SetStateAction<boolean>>,
+  clearDataFunction: (() => void) | null = null
+) => {
+  setModalState(false);
+  if (clearDataFunction) {
+    clearDataFunction();
+  }
+};
 
 
 const handleToggleFolderFavorite = async (folderId: string) => {
@@ -797,9 +966,9 @@ const loadUserFavorites = async () => {
       return;
     }
 
-    const folderFavorites = favorites.content_folder || [];
-    const topicFavorites = favorites.content_topic || [];
-    const fileFavorites = favorites.content_file || [];
+   const folderFavorites: FavoriteFolder[] = favorites.folders || [];
+    const topicFavorites: FavoriteTopic[] = favorites.topics || [];
+    const fileFavorites: FavoriteFile[] = favorites.files || [];
 
 
     // Siempre actualizar estados
@@ -859,43 +1028,31 @@ useEffect(() => {
 
 
 
-const handleMultimediaUpload = async (files: FileList) => {
+// ✅ La función ya debería estar así (como la cambiamos antes)
+// En index.tsx
+const handleMultimediaUpload = async (files: globalThis.File[]) => {
   try {
     console.log('📁 Subiendo archivos a carpeta:', currentFolderId);
     console.log('👤 Usuario:', CURRENT_USER_ID);
     console.log('📄 Archivos:', files.length);
     
-    // Convertir FileList a Array para el servicio
-    const filesArray = Array.from(files);
-    
-    // Subir archivos usando el servicio
+    // files son archivos nativos del navegador para upload
     const response = await archivoService.uploadArchivos(
-      filesArray,
-      currentFolderId || "68acb06886d455d16cceef05", // Carpeta actual o root
+      files,
+      currentFolderId || "68acb06886d455d16cceef05",
       CURRENT_USER_ID
     );
     
     console.log('✅ Respuesta del servidor:', response);
     
-    // Recargar contenido para mostrar los archivos nuevos
     await loadCarpetas();
     
-    // Actualizar datos del usuario si está en "Mis archivos"
     if (activeSection === 'Mis archivos') {
       await refreshUserData();
     }
     
-    // Mostrar mensaje de éxito (opcional)
-    // Puedes agregar aquí una notificación toast si tienes sistema de notificaciones
-    
   } catch (error) {
     console.error('❌ Error al subir archivos:', error);
-    
-    // Aquí puedes mostrar un mensaje de error al usuario
-    // Por ejemplo, si tienes un sistema de notificaciones:
-    // showErrorNotification('Error al subir archivos. Inténtalo de nuevo.');
-    
-    throw error; // Re-lanzar para que el modal pueda manejarlo
   }
 };
 
@@ -943,7 +1100,7 @@ const loadCarpetas = async () => {
   };
 
 
-  const loadSubfolderContent = async (folderId, folderName) => {
+const loadSubfolderContent = async (folderId: string, folderName: string) => {
     try {
       const response = await carpetaService.getFolderContent(folderId);
       setSidebarFolders(prev => ({
@@ -959,21 +1116,26 @@ const loadCarpetas = async () => {
     }
   };
 
-  const handleSubfolderExpandClick = async (folderId, folderName, event) => {
-    event.stopPropagation();
-    
-    const key = folderId;
-    setExpandedSidebarItems(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-    
-    if (!expandedSidebarItems[key] && !sidebarFolders[folderId]) {
-      await loadSubfolderContent(folderId, folderName);
-    }
-  };
+const handleSubfolderExpandClick = async (
+  folderId: string, 
+  folderName: string, 
+  event: React.MouseEvent<Element>
+) => {
+  event.stopPropagation();
+  
+  console.log(`🔄 Expandir/contraer subcarpeta: ${folderName}`);
 
-const handleSectionChange = async (sectionName) => {
+  setExpandedSidebarItems(prev => ({
+    ...prev,
+    [folderId]: !prev[folderId]
+  }));
+
+  if (!expandedSidebarItems[folderId] && !sidebarFolders[folderName]) {
+    await loadSubfolderContent(folderId, folderName);
+  }
+};
+
+const handleSectionChange = async (sectionName:string) => {
   console.log('Cambiando a sección:', sectionName);
   
   // Usar la función del hook
@@ -1020,61 +1182,58 @@ const loadFavoritesContent = async () => {
   try {
     setFavoritesContentLoading(true);
     setFavoritesContentError(null);
-    
 
-    
     const favoritesResponse = await favoritoService.getFavoritoById(CURRENT_USER_ID);
 
-
     if (!favoritesResponse) {
-      setFavoritesContent({ folders: [], themes: [], files: [] }); // Agregar files
+      setFavoritesContent({ folders: [], themes: [], files: [] });
       return;
     }
 
-    let favorites = null;
+    let favorites: FavoritesResponse | null = null;
     if (Array.isArray(favoritesResponse)) {
       if (favoritesResponse.length === 0) {
         setFavoritesContent({ folders: [], themes: [], files: [] });
         return;
       }
-      favorites = favoritesResponse[0];
+      favorites = favoritesResponse[0] as FavoritesResponse;
     } else {
-      favorites = favoritesResponse;
+      favorites = favoritesResponse as FavoritesResponse;
     }
 
-    const folderFavorites = favorites.content_folder || [];
-    const topicFavorites = favorites.content_topic || [];
-    const fileFavorites = favorites.content_file || []; // Nuevo
+    // ✅ Tipar las variables extraídas
+    const folderFavorites: FavoriteFolder[] = favorites.content_folder || [];
+    const topicFavorites: FavoriteTopic[] = favorites.content_topic || [];
+    const fileFavorites: FavoriteFile[] = favorites.content_file || [];
 
-
-    // Obtener datos completos
+    // ✅ Obtener datos completos con tipos explícitos
     const folderDetails = await Promise.all(
-      folderFavorites.map(async (folder) => {
+      folderFavorites.map(async (folder: FavoriteFolder) => {
         try {
           return await carpetaService.getCarpetaById(folder._id);
         } catch (error) {
-          return { _id: folder._id, folder_name: folder.folder_name };
+          return { _id: folder._id, folder_name: folder.folder_name || `Carpeta ${folder._id.slice(-6)}` };
         }
       })
     );
 
     const themeDetails = await Promise.all(
-      topicFavorites.map(async (theme) => {
+      topicFavorites.map(async (theme: FavoriteTopic) => {
         try {
           return await temaService.getTemaById(theme._id);
         } catch (error) {
-          return { _id: theme._id, title_name: theme.title_name };
+          return { _id: theme._id, title_name: theme.title_name || `Tema ${theme._id.slice(-6)}` };
         }
       })
     );
 
-    // Nuevo: obtener datos de archivos favoritos
+    // ✅ Nuevo: obtener datos de archivos favoritos con tipos
     const fileDetails = await Promise.all(
-      fileFavorites.map(async (file) => {
+      fileFavorites.map(async (file: FavoriteFile) => {
         try {
           return await archivoService.getArchivoById(file._id);
         } catch (error) {
-          return { _id: file._id, file_name: file.file_name };
+          return { _id: file._id, file_name: file.file_name || `Archivo ${file._id.slice(-6)}` };
         }
       })
     );
@@ -1082,7 +1241,7 @@ const loadFavoritesContent = async () => {
     setFavoritesContent({
       folders: folderDetails,
       themes: themeDetails,
-      files: fileDetails // Agregar archivos
+      files: fileDetails
     });
 
     console.log('🔍 setFavoritesContent llamado con files:', fileDetails);
@@ -1099,18 +1258,20 @@ const loadFavoritesContent = async () => {
 
 /////////////////////////////////////////MULTIMEDIA Y ARCHIVOS /////////////////////////////////////////////////////////////////////////////////////////////
 
-// Handlers
-const handleFileSelection = (file) => {
+
+
+// ✅ Funciones con tipos explícitos
+const handleFileSelection = (file: File) => {
   console.log('Archivo seleccionado:', file.file_name);
   // Lógica para mostrar detalles del archivo
 };
 
-const handleFileDoubleClick = (file) => {
+const handleFileDoubleClick = (file: File) => {
   console.log('Doble click en archivo:', file.file_name);
   // Lógica para abrir/descargar archivo
 };
 
-const handleFileMenuAction = (action, file) => {
+const handleFileMenuAction = (action: string, file: File) => {
   switch(action) {
     case 'rename':
       setSelectedFile(file);
@@ -1120,13 +1281,16 @@ const handleFileMenuAction = (action, file) => {
       setFileToDelete(file);
       setIsDeleteFileModalOpen(true);
       break;
+    default:
+      console.log(`Acción no reconocida: ${action}`);
+      break;
   }
 };
 
 
 ////////////////////////////  Handler para RENOMBRAR Y ELIMINAR //// /////////////////////////////////////////////////////
 
-const handleRenameFile = async (newName) => {
+const handleRenameFile = async (newName: string) => {
   try {
     if (!selectedFile) return;
 
@@ -1154,31 +1318,26 @@ const handleRenameFile = async (newName) => {
 };
 
 const handleDeleteFile = async () => {
-  if (fileToDelete) {
-    try {
-      console.log(`Eliminando archivo: ${fileToDelete.file_name}`);
-      
-      await archivoService.deleteArchivoById(fileToDelete._id);
-      console.log('Archivo eliminado exitosamente');
-      
-      // Actualizar la lista local de archivos
-      setFiles(files.filter(file => file._id !== fileToDelete._id));
-      
-      // Cerrar modal y limpiar estado
-      setIsDeleteFileModalOpen(false);
-      setFileToDelete(null);
-      
-      // Recargar contenido para asegurar consistencia
-      await loadCarpetas();
-      
-      // Actualizar "Mis archivos" si está activo
-      if (activeSection === 'Mis archivos') {
-        await refreshUserData();
-      }
-      
-    } catch (error) {
-      console.error('Error eliminando archivo:', error);
-    }
+  // Verificar que fileToDelete no sea null
+  if (!fileToDelete) return;
+
+  try {
+    console.log('🗑️ Eliminando archivo:', fileToDelete.file_name);
+    
+    await archivoService.deleteArchivoById(fileToDelete._id);
+
+    // ✅ Ahora TypeScript sabe que fileToDelete no es null
+    setFiles(files.filter(file => file._id !== fileToDelete._id));
+    
+    setIsDeleteFileModalOpen(false);
+    setFileToDelete(null);
+    
+    // Recargar datos si es necesario
+    await loadCarpetas();
+    await refreshUserData();
+    
+  } catch (error) {
+    console.error('❌ Error eliminando archivo:', error);
   }
 };
 
@@ -1199,7 +1358,7 @@ const handleCancelDeleteFile = () => {
 /////////////////////////////////////////// handlers Para AGREGAR A FAVORITOS ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Handler para favoritos de archivos
-const handleToggleFileFavorite = async (fileId) => {
+const handleToggleFileFavorite = async (fileId: string) => {
   try {
     const userId = CURRENT_USER_ID;
     const isFavorite = fileFavorites.has(fileId);
@@ -1217,15 +1376,15 @@ const handleToggleFileFavorite = async (fileId) => {
         await favoritoService.addFileToFavorites(userId, fileId);
         setFileFavorites(prev => new Set(prev).add(fileId));
         console.log('Added file to favorites');
-      } catch (error) {
-        if (error.response?.status === 409) {
-          // El archivo ya estaba en favoritos, solo sincronizar estado local
-          setFileFavorites(prev => new Set(prev).add(fileId));
-          console.log('Archivo ya estaba en favoritos, estado sincronizado');
-        } else {
-          throw error; // Re-lanzar otros errores
+        } catch (error) {
+          // ✅ Cast a any para acceder a propiedades
+          const err = error as any;
+          if (err.response?.status === 409) {
+            console.log('File already in favorites');
+          } else {
+            console.error('Error adding file to favorites:', err.response?.data || err.message || error);
+          }
         }
-      }
     }
 
   } catch (error) {
@@ -1252,9 +1411,9 @@ const loadTrashContent = async () => {
     console.log('🗑️ Items de papelera recibidos:', trashItems);
     
     // Separar por tipo - USANDO MAYÚSCULAS
-    const folderIds = trashItems.filter(item => item.type_content === 'Carpeta');
-    const themeIds = trashItems.filter(item => item.type_content === 'Tema');
-    const fileIds = trashItems.filter(item => item.type_content === 'Archivo');
+   const folderIds = trashItems.filter((item: TrashItem) => item.type_content === 'Carpeta');
+    const themeIds = trashItems.filter((item: TrashItem) => item.type_content === 'Tema');
+    const fileIds = trashItems.filter((item: TrashItem) => item.type_content === 'Archivo');
     
     console.log('🔍 Elementos por tipo:', {
       carpetas: folderIds.length,
@@ -1267,7 +1426,7 @@ const loadTrashContent = async () => {
     
 // Cambiar las llamadas en loadTrashContent:
 const folders = await Promise.all(
-  folderIds.map(async (item) => {
+  folderIds.map(async (item: TrashItem) => {
     try {
       const folderData = await carpetaService.getCarpetaByIdPapelera(item.content_id);
       return {
@@ -1283,7 +1442,7 @@ const folders = await Promise.all(
 );
 
 const themes = await Promise.all(
-  themeIds.map(async (item) => {
+  themeIds.map(async (item:TrashItem) => {
     try {
       const themeData = await temaService.getTemaByIdPapelera(item.content_id);
       return {
@@ -1298,7 +1457,7 @@ const themes = await Promise.all(
   })
 );
     
-    const files = fileIds.map(item => ({
+const files = fileIds.map((item: TrashItem) => ({
       _id: item.content_id,
       file_name: `Archivo eliminado`, // Nombre genérico
       creation_date: item.expireAt || new Date().toISOString(),
@@ -1371,10 +1530,10 @@ const navigateToEditTheme = (themeId: string) => {
 
       <div className={styles.mainContentWrapper}>
         {/* Usar componente modular MainSidebar */}
-<MainSidebar 
-  onItemClick={handleSidebarItemClick}
-  currentUserId={currentUserId} // ← Solo agregar esta línea
-/>
+        <MainSidebar
+          onItemClick={handleSidebarItemClick}
+          currentUserId={currentUserId || undefined}
+        />
         <div className={styles.mainContent}>
           {/* Search and New Button Area */}
           <div className={styles.searchContainer}>
@@ -1454,7 +1613,7 @@ const navigateToEditTheme = (themeId: string) => {
               trashContent={trashContent}
               trashContentLoading={trashContentLoading}
               trashContentError={trashContentError}
-              onThemeEdit={handleThemeEdit}  // ✅ AGREGAR ESTA LÍNEA
+              //onThemeEdit={handleThemeEdit}  // ✅ AGREGAR ESTA LÍNEA
 
             />
 
@@ -1476,7 +1635,7 @@ const navigateToEditTheme = (themeId: string) => {
                     onSubmit={handleThemeFormSubmit}
                     onCancel={handleThemeFormCancel}
                     currentFolderId={currentFolderId || "68acb06886d455d16cceef05"}
-                    userId={CURRENT_USER_ID}
+                    userId={CURRENT_USER_ID || undefined} // Convertir null a undefined
                     isEditMode={isEditingTheme}
                     themeToEdit={themeToEdit}
                   />
@@ -1524,7 +1683,7 @@ const navigateToEditTheme = (themeId: string) => {
         onClose={() => setIsMultimediaModalOpen(false)}
         onUpload={handleMultimediaUpload}
         currentFolderId={currentFolderId || "68acb06886d455d16cceef05"}
-        userId={CURRENT_USER_ID}
+         userId={CURRENT_USER_ID || "default-user-id"} // Valor por defecto
       />
 
       {/* Modal para Eliminar Tema */}

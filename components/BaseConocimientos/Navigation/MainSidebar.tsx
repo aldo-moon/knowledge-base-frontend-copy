@@ -48,16 +48,10 @@ interface MainSidebarProps {
 }
 
 
-
-interface MainSidebarProps {
-  onItemClick?: (aplicacion: Aplicacion | Subseccion, isSubseccion?: boolean) => void;
-    currentUserId // ← AGREGAR aquí
-
-  isCollapsed?: boolean;
-  onToggleCollapse?: () => void;
-}
-
-export const MainSidebar: React.FC<MainSidebarProps> = ({ onItemClick }) => {
+export const MainSidebar: React.FC<MainSidebarProps> = ({ 
+  onItemClick, 
+  currentUserId 
+}) => {
   
   const [aplicaciones, setAplicaciones] = useState<Aplicacion[]>([]);
   const [loading, setLoading] = useState(true);

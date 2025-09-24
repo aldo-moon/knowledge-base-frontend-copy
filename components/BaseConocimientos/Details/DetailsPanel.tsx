@@ -23,9 +23,32 @@ interface TemaDetails {
   description: string;
   priority: string;
   keywords: string[];
-  author_topic_id: string;
+  author_topic_id: string | {
+    _id: string;
+    nombre: string;
+    aPaterno: string;
+    // ... otras propiedades del autor
+  };
   creation_date: string;
   last_update?: string;
+}
+
+interface Theme {
+  _id: string;
+  title_name: string;
+  description?: string;
+  priority?: number;
+  folder_id?: string;
+  keywords?: string[];
+  creation_date?: string;
+  author_topic_id?: {
+    user_id: number;
+    nombre: string;
+    aPaterno: string;
+  } | string;
+  area_id?: string;
+  puesto_id?: string;
+  files_attachment_id?: string[];
 }
 
 // Props del panel
@@ -33,6 +56,8 @@ interface DetailsPanelProps {
   selectedFolderDetails?: FolderDetails | null;
   selectedTemaId?: string | null; 
   isCreatingNewTopic?: boolean;
+    isEditingTheme?: boolean; // ← Agregar esta línea
+  themeToEdit?: Theme | null; 
   children?: React.ReactNode;
 }
 
@@ -40,6 +65,9 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({
   selectedFolderDetails,
   selectedTemaId,
   isCreatingNewTopic = false,
+    isEditingTheme = false, 
+      themeToEdit, // ← Y este también
+// ← Agregar este parámetro
   children
 }) => {
   const [temaDetails, setTemaDetails] = useState<TemaDetails | null>(null);
@@ -65,8 +93,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({
   if (children) {
     return <div className={styles.detailsPanel}>{children}</div>;
   }
-
-const getPriorityText = (priorityNum) => {
+const getPriorityText = (priorityNum: string | number | undefined) => {
   const priority = Number(priorityNum);
   
   switch (priority) {
@@ -135,7 +162,9 @@ const getPriorityText = (priorityNum) => {
               <span className={styles.detailLabel}>Autor:</span>
               <span className={styles.detailValue}>
                   {temaDetails.author_topic_id
-                    ? `${temaDetails.author_topic_id.nombre || ""} ${temaDetails.author_topic_id.aPaterno || ""}`
+                    ? typeof temaDetails.author_topic_id === 'object'
+                      ? `${temaDetails.author_topic_id.nombre || ""} ${temaDetails.author_topic_id.aPaterno || ""}`
+                      : temaDetails.author_topic_id
                     : "Desconocido"}
                 </span>
               </div>

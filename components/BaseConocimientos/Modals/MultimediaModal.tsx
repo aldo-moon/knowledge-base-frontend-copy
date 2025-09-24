@@ -7,9 +7,9 @@ import { archivoService } from '../../../services/archivoService';
 interface MultimediaModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (files: FileList) => Promise<void>;
+  onUpload: (files: globalThis.File[]) => Promise<void>; // Archivos nativos del navegador
   currentFolderId: string;
-  userId: string;
+  userId: string | null; // ← Cambiar para aceptar null
 }
 
 const MultimediaModal: React.FC<MultimediaModalProps> = ({
@@ -124,53 +124,47 @@ const MultimediaModal: React.FC<MultimediaModalProps> = ({
 
   // Subir archivos
   const handleUploadClick = async () => {
-    if (selectedFiles.length === 0) {
-      setError('Selecciona al menos un archivo');
-      return;
-    }
+  if (selectedFiles.length === 0) {
+    setError('Selecciona al menos un archivo');
+    return;
+  }
 
-    try {
-      setIsUploading(true);
-      setError('');
+  try {
+    setIsUploading(true);
+    setError('');
 
-      // Simular progreso de subida
-      selectedFiles.forEach((file, index) => {
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += Math.random() * 30;
-          if (progress >= 100) {
-            progress = 100;
-            clearInterval(interval);
-          }
-          setUploadProgress(prev => ({
-            ...prev,
-            [file.name]: Math.min(progress, 100)
-          }));
-        }, 200);
-      });
+    // Simular progreso de subida
+    selectedFiles.forEach((file, index) => {
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 30;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+        }
+        setUploadProgress(prev => ({
+          ...prev,
+          [file.name]: Math.min(progress, 100)
+        }));
+      }, 200);
+    });
 
-      // Convertir array a FileList-like object
-      const fileListLike = {
-        length: selectedFiles.length,
-        ...selectedFiles
-      } as FileList;
+    // ✅ Pasar directamente el array de archivos (sin conversión)
+    await onUpload(selectedFiles);
 
-      // Llamar función de upload del padre (que ya maneja el servicio)
-      await onUpload(fileListLike);
+    console.log('✅ Archivos subidos exitosamente');
+    
+    // Pequeño delay para mostrar progreso completo
+    setTimeout(() => {
+      handleClose();
+    }, 1000);
 
-      console.log('✅ Archivos subidos exitosamente');
-      
-      // Pequeño delay para mostrar progreso completo
-      setTimeout(() => {
-        handleClose();
-      }, 1000);
-
-    } catch (error) {
-      console.error('❌ Error subiendo archivos:', error);
-      setError('Error al subir archivos. Inténtalo de nuevo.');
-      setIsUploading(false);
-    }
-  };
+  } catch (error) {
+    console.error('❌ Error subiendo archivos:', error);
+    setError('Error al subir archivos. Inténtalo de nuevo.');
+    setIsUploading(false);
+  }
+};
 
   return (
     <div className={styles.modalOverlay} onClick={handleClose}>

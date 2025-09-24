@@ -18,11 +18,15 @@ interface FoldersGridProps {
   error?: string | null;
   folderFavorites?: Set<string>; 
   onFolderSelect: (folder: Folder) => void;
-  onFolderDoubleClick: (folder: Folder) => void;
+  onFolderDoubleClick?: (folder: Folder) => void; // ← Hacer opcional
   onFolderMenuAction: (action: string, folder: Folder) => void;
-  onToggleFolderFavorite?: (folderId: string) => void; 
+  onToggleFolderFavorite?: (folderId: string) => void;
+  // Props para vista de papelera
+  isTrashView?: boolean;
+  selectedItems?: Set<string>;
+  onItemSelect?: (itemId: string) => void;
 }
-
+  
 export const FoldersGrid: React.FC<FoldersGridProps> = ({
   folders,
   loading = false,
@@ -69,15 +73,17 @@ console.log('🎯 FoldersGrid va a renderizar:', folders?.length, 'carpetas');
       <div className={styles.foldersGrid}>
         {folders.map((folder, index) => (
           <FolderCard
-            key={folder._id}
-            folder={folder}
-            index={index}
-            isFavorite={folderFavorites.has(folder._id)}
-            onSelect={onFolderSelect}
-            onDoubleClick={onFolderDoubleClick}
-            onMenuAction={onFolderMenuAction}
-            onToggleFavorite={onToggleFolderFavorite}
-          />
+  key={folder._id}
+  folder={folder}
+  index={index}
+  isFavorite={folderFavorites.has(folder._id)}
+  onSelect={onFolderSelect}
+  onDoubleClick={onFolderDoubleClick || (() => {})} // ← Proporcionar fallback
+  onMenuAction={onFolderMenuAction}
+  onToggleFavorite={onToggleFolderFavorite}
+  // Props de papelera si las necesitas
+
+/>
         ))}
       </div>
     </div>

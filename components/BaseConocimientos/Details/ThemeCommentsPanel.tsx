@@ -27,7 +27,7 @@ export const ThemeCommentsPanel: React.FC<ThemeCommentsPanelProps> = ({ themeId 
   const [error, setError] = useState<string | null>(null);
 
   // ID del usuario actual - ajusta según tu implementación
-const [currentUserId, setCurrentUserId] = useState(null);
+const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
 // Y agrega este useEffect:
 useEffect(() => {
@@ -110,19 +110,27 @@ const formatDate = (dateString: string) => {
   });
 };
 
-  const getAuthorName = (author: Comment['comment_user_id']) => {
-    if (typeof author === 'string') {
-      return 'Usuario';
-    }
-    return `${author.nombre} ${author.aPaterno || ''}`.trim();
-  };
+const getAuthorName = (author: Comment['comment_user_id']) => {
+  if (typeof author === 'string') {
+    return 'Usuario';
+  }
+  // ✅ AGREGAR validación para nombre
+  if (!author || !author.nombre) {
+    return 'Usuario';
+  }
+  return `${author.nombre} ${author.aPaterno || ''}`.trim();
+};
 
-  const getAuthorInitial = (author: Comment['comment_user_id']) => {
-    if (typeof author === 'string') {
-      return 'U';
-    }
-    return author.nombre.charAt(0).toUpperCase();
-  };
+const getAuthorInitial = (author: Comment['comment_user_id']) => {
+  if (typeof author === 'string') {
+    return 'U';
+  }
+  // ✅ AGREGAR validación para nombre
+  if (!author || !author.nombre) {
+    return 'U';
+  }
+  return author.nombre.charAt(0).toUpperCase();
+};
 
   return (
     <div className={styles.commentsPanel}>
@@ -146,10 +154,10 @@ const formatDate = (dateString: string) => {
           disabled={submitting}
         />
         
-        <button 
+        <button
+          className={styles.publishButton}
           onClick={handleSubmitComment}
-          disabled={!commentText.trim() || submitting || !currentUserId} 
-          className={styles.submitButton}
+          disabled={!commentText.trim() || submitting}
         >
           {submitting ? (
             <>

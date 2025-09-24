@@ -11,16 +11,20 @@ interface File {
   creation_date?: string;
   last_update?: string;
 }
-
 interface FilesGridProps {
   files: File[];
   loading?: boolean;
   error?: string | null;
   fileFavorites?: Set<string>;
-  onFileSelect: (file: File) => void;
+  onFileSelect?: (file: File) => void; // ← Hacer opcional
   onFileDoubleClick?: (file: File) => void;
   onFileMenuAction?: (action: string, file: File) => void;
   onToggleFileFavorite?: (fileId: string) => void;
+  
+  // Props para vista de papelera (consistente con FoldersGrid y ThemesGrid)
+  isTrashView?: boolean;
+  selectedItems?: Set<string>;
+  onItemSelect?: (itemId: string) => void;
 }
 
 export const FilesGrid: React.FC<FilesGridProps> = ({
@@ -31,7 +35,10 @@ export const FilesGrid: React.FC<FilesGridProps> = ({
   onFileSelect,
   onFileDoubleClick,
   onFileMenuAction,
-  onToggleFileFavorite
+  onToggleFileFavorite,
+   isTrashView = false,
+  selectedItems,
+  onItemSelect
 }) => {
 
   if (loading) {
@@ -65,7 +72,7 @@ export const FilesGrid: React.FC<FilesGridProps> = ({
               key={file._id}
               file={file}
               isFavorite={fileFavorites.has(file._id)} 
-              onSelect={onFileSelect}  // ← Cambiar de onSelect a onFileSelect
+              onSelect={onFileSelect || (() => {})} // ← Proporcionar fallback
               onDoubleClick={onFileDoubleClick}
               onMenuAction={onFileMenuAction}
               onToggleFavorite={onToggleFileFavorite}

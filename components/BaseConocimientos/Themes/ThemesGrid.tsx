@@ -18,10 +18,15 @@ interface ThemesGridProps {
   loading?: boolean;
   error?: string | null;
   themeFavorites?: Set<string>; 
-  onThemeSelect: (theme: Theme) => void;
-  onThemeDoubleClick?: (theme: Theme) => void;  // NUEVO
+  onThemeSelect?: (theme: Theme) => void; // ← Ya opcional
+  onThemeDoubleClick?: (theme: Theme) => void;
   onThemeMenuAction?: (action: string, theme: Theme) => void;
-  onToggleThemeFavorite?: (folderId: string) => void; 
+  onToggleThemeFavorite?: (folderId: string) => void;
+  
+  // Props para vista de papelera (igual que en FoldersGrid)
+  isTrashView?: boolean;
+  selectedItems?: Set<string>;
+  onItemSelect?: (itemId: string) => void;
 }
 
 export const ThemesGrid: React.FC<ThemesGridProps> = ({
@@ -32,7 +37,10 @@ export const ThemesGrid: React.FC<ThemesGridProps> = ({
   onThemeSelect,
   onThemeDoubleClick,
   onThemeMenuAction,
-  onToggleThemeFavorite
+  onToggleThemeFavorite,
+    isTrashView = false,
+  selectedItems,
+  onItemSelect
 }) => {
   if (loading) {
     return (
@@ -63,10 +71,12 @@ export const ThemesGrid: React.FC<ThemesGridProps> = ({
             key={theme._id}
             theme={theme}
             isFavorite={themeFavorites.has(theme._id)}
-            onSelect={onThemeSelect}
+            onSelect={onThemeSelect || (() => {})} // ✅ Proporcionar fallback
             onThemeDoubleClick={onThemeDoubleClick}
             onMenuAction={onThemeMenuAction}
             onToggleFavorite={onToggleThemeFavorite}
+            // Props de papelera si las necesitas
+
           />
         ))}
       </div>
