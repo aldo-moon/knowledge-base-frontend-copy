@@ -76,9 +76,7 @@ useEffect(() => {
         setActiveItem(sidebarData[0].script_id.toString());
       }
 
-      if (process.env.NODE_ENV === 'development') {
-        aplicacionService.mostrarEjemplosUrls();
-      }
+      
     } catch (err) {
       console.error('❌ Error cargando aplicaciones:', err);
       setError('Error al cargar las aplicaciones');

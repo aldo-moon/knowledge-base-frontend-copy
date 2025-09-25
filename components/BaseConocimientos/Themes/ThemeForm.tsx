@@ -7,16 +7,17 @@ import { puestoService } from '../../../services/puestoService';
 import { archivoService } from '../../../services/archivoService';
 
 interface ThemeFormProps {
-  onSubmit?: (formData: ThemeFormData, isDraft: boolean) => void; // <- CAMBIAR AQUÍ
+  onSubmit?: (formData: ThemeFormData) => void; 
   onCancel?: () => void;
   currentFolderId?: string;
   userId?: string;
   isEditMode?: boolean;
-  themeToEdit?: any;}
+  themeToEdit?: any;
+}
 
 interface ThemeFormData {
   priority: string;
-  area: string[];        // ← CAMBIO: de 'area' a 'areas' (array)
+  area: string[];
   position: string[];  
   files: globalThis.File[]; // Archivos nativos del navegador para upload
   uploadedFiles: { id: string; name: string }[];
@@ -24,7 +25,7 @@ interface ThemeFormData {
   currentTag: string;  
   aiModel: string;
   suggestInHelpDesk: boolean;
-    isDraft?: boolean; // <- AGREGAR ESTA LÍNEA
+  isDraft?: boolean;
 
 }
 
@@ -35,13 +36,24 @@ interface Area {
   // ... otras propiedades que pueda tener el área
 }
 
+interface PuestoData {
+  _id: string;
+  puesto_id: string;
+  nombre: string;
+  total_usuarios: number;
+}
+
+interface PuestosResponse {
+  nombre_area: string;
+  data: PuestoData[];
+}
+
 // ✅ Define la interfaz para Puesto también
 interface Puesto {
   _id: string;
   puesto_id: string;
   nombre: string;
   total_usuarios?: number;
-  // ... otras propiedades
 }
 
 interface PuestosPorArea {
@@ -72,6 +84,10 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
   const [loadingPuestos, setLoadingPuestos] = useState(false);
   const [isAreasDropdownOpen, setIsAreasDropdownOpen] = useState(false);
   const [isPuestosDropdownOpen, setIsPuestosDropdownOpen] = useState(false);
+  const [selectedAllAreas, setSelectedAllAreas] = useState<string[]>([]); // Areas donde se seleccionó "Todos"
+  const isAllAreaSelected = (areaPuestos: PuestosResponse): boolean => {
+  return selectedAllAreas.includes(areaPuestos.nombre_area);
+};
 const areasDropdownRef = useRef<HTMLDivElement>(null);
 const puestosDropdownRef = useRef<HTMLDivElement>(null);
   // ✅ FUNCIÓN HELPER PARA CONVERTIR PRIORIDAD
@@ -168,13 +184,13 @@ useEffect(() => {
   };
 
     // Función de validación
-const validateForm = () => {
-const newErrors = {
-  priority: '',
-  area: '',      // <- CAMBIO: de 'areas' a 'area'
-  position: '',  // <- CAMBIO: de 'positions' a 'position'
-  tags: ''
-};
+  const validateForm = () => {
+  const newErrors = {
+    priority: '',
+    area: '',      // <- CAMBIO: de 'areas' a 'area'
+    position: '',  // <- CAMBIO: de 'positions' a 'position'
+    tags: ''
+  };
 
   if (!formData.priority || formData.priority === '') {
     newErrors.priority = 'La prioridad es obligatoria';
@@ -216,36 +232,118 @@ const loadPuestosByAreas = async (selectedAreas: string[]) => {
   }
 };
 
-// ✅ CAMBIO 7: Funciones para manejar selecciones múltiples
 const handleAreaToggle = async (areaId: string) => {
   const newAreas = formData.area.includes(areaId)
     ? formData.area.filter(id => id !== areaId)
     : [...formData.area, areaId];
 
-  setFormData(prev => ({ ...prev, area: newAreas, position: [] })); // <- area y position
+  // ✅ CAMBIO: Solo filtrar puestos que no pertenecen a las áreas seleccionadas
+  let filteredPositions = formData.position;
   
-  if (errors.area) { // <- area
-    setErrors(prev => ({ ...prev, area: '' })); // <- area
+  // Si estamos removiendo un área, filtrar sus puestos
+  if (formData.area.includes(areaId) && !newAreas.includes(areaId)) {
+    console.log('🔍 Removiendo área, filtrando puestos...');
+    
+    // Obtener puestos de todas las áreas restantes para saber cuáles conservar
+    try {
+      if (newAreas.length > 0) {
+        const puestosDeAreasRestantes: PuestosResponse[] = await puestoService.getPuestosByAreas(newAreas);
+        const puestosValidosIds = puestosDeAreasRestantes.flatMap((area: PuestosResponse) => 
+          area.data.map((puesto: PuestoData) => puesto.puesto_id)
+        );
+        
+        // Solo conservar puestos que pertenecen a las áreas que quedan
+        filteredPositions = formData.position.filter((positionId: string) => 
+          puestosValidosIds.includes(positionId)
+        );
+        
+        console.log('🔍 Puestos después de filtrar:', filteredPositions);
+      } else {
+        // Si no quedan áreas, limpiar todos los puestos
+        filteredPositions = [];
+      }
+    } catch (error) {
+      console.error('Error filtrando puestos:', error);
+      // En caso de error, mantener puestos actuales
+    }
+  }
+
+  setFormData(prev => ({ 
+    ...prev, 
+    area: newAreas, 
+    position: filteredPositions // ✅ Solo usar puestos filtrados, no array vacío
+  }));
+  
+  if (errors.area) {
+    setErrors(prev => ({ ...prev, area: '' }));
   }
 
   await loadPuestosByAreas(newAreas);
 };
 
+const handleAllAreaToggle = (areaPuestos: PuestosResponse) => {
+  const areaName = areaPuestos.nombre_area;
+  const allPuestosIds = areaPuestos.data.map(puesto => puesto.puesto_id);
+  
+  if (selectedAllAreas.includes(areaName)) {
+    // Si ya está seleccionado "Todos", deseleccionar
+    setSelectedAllAreas(prev => prev.filter(area => area !== areaName));
+    
+    // Quitar todos los puestos de esta área de la selección
+    setFormData(prev => ({
+      ...prev,
+      position: prev.position.filter(positionId => 
+        !allPuestosIds.includes(positionId)
+      )
+    }));
+    
+  } else {
+    // Seleccionar "Todos" para esta área
+    setSelectedAllAreas(prev => [...prev, areaName]);
+    
+    // Agregar todos los puestos de esta área (sin duplicados)
+    setFormData(prev => {
+      const newPositions = [...prev.position];
+      allPuestosIds.forEach(id => {
+        if (!newPositions.includes(id)) {
+          newPositions.push(id);
+        }
+      });
+      return { ...prev, position: newPositions };
+    });
+  }
+  
+  if (errors.position) {
+    setErrors(prev => ({ ...prev, position: '' }));
+  }
+};
+
+
 const handlePositionToggle = (positionId: string) => {
+  // Encontrar a qué área pertenece este puesto
+  const areaOfPuesto = puestosPorAreas.find(area => 
+    area.data.some(puesto => puesto.puesto_id === positionId)
+  );
+  
+  if (areaOfPuesto && selectedAllAreas.includes(areaOfPuesto.nombre_area)) {
+    // Si se está deseleccionando un puesto individual de un área con "Todos" seleccionado,
+    // quitar "Todos" de esa área
+    setSelectedAllAreas(prev => prev.filter(area => area !== areaOfPuesto.nombre_area));
+  }
+  
   const newPositions = formData.position.includes(positionId)
     ? formData.position.filter(id => id !== positionId)
     : [...formData.position, positionId];
 
-  setFormData(prev => ({ ...prev, position: newPositions })); // <- position
+  setFormData(prev => ({ ...prev, position: newPositions }));
   
-  if (errors.position) { // <- position
-    setErrors(prev => ({ ...prev, position: '' })); // <- position
+  if (errors.position) {
+    setErrors(prev => ({ ...prev, position: '' }));
   }
 };
 
 
 
-// ✅ AGREGAR ESTE useEffect para cargar archivos existentes en modo edición
 useEffect(() => {
   if (isEditMode && themeToEdit?.files_attachment_id) {
     const loadExistingFiles = async () => {
@@ -302,6 +400,20 @@ useEffect(() => {
     
     loadFormData();
   }, []);
+
+  useEffect(() => {
+    const loadPuestosForEditMode = async () => {
+      if (isEditMode && formData.area.length > 0) {
+        console.log('🔍 Modo edición: cargando puestos para áreas:', formData.area);
+        await loadPuestosByAreas(formData.area);
+      }
+    };
+
+    // Solo ejecutar después de que se hayan cargado las áreas iniciales
+    if (!loadingData && areas.length > 0) {
+      loadPuestosForEditMode();
+    }
+  }, [loadingData, areas.length, isEditMode]); // Dependencias: cuando termine de cargar áreas y estemos en modo edición
 
   // Obtener icono según el tipo de archivo
   const getFileIcon = (file: File) => {
@@ -494,16 +606,16 @@ className={`${styles.formSelect} ${errors.area ? styles.formSelectError : ''}`}
       />
     </div>
     
-    {isAreasDropdownOpen && (
-      <div className={styles.formSelect} style={{ 
-        position: 'absolute', 
-        top: 'calc(100% + 4px)', 
-        left: 0, 
-        right: 0, 
-        zIndex: 9999,
-        maxHeight: '200px',
-        overflowY: 'auto'
-      }}>
+      {isAreasDropdownOpen && (
+        <div className={`${styles.formSelect} ${styles.dropdownScroll}`} style={{ 
+          position: 'absolute', 
+          top: 'calc(100% + 4px)', 
+          left: 0, 
+          right: 0, 
+          zIndex: 9999,
+          maxHeight: '200px',
+          overflowY: 'auto'
+        }}>
         {loadingData ? (
           <div style={{ padding: '1rem', textAlign: 'center', fontStyle: 'italic' }}>Cargando...</div>
         ) : (
@@ -569,71 +681,102 @@ className={`${styles.formSelect} ${errors.position ? styles.formSelectError : ''
       />
     </div>
     
-    {isPuestosDropdownOpen && (
-      <div className={styles.formSelect} style={{ 
-        position: 'absolute', 
-        top: 'calc(100% + 4px)', 
-        left: 0, 
-        right: 0, 
-        zIndex: 9999,
-        maxHeight: '200px',
-        overflowY: 'auto'
-      }}>
-        {loadingPuestos ? (
-          <div style={{ padding: '1rem', textAlign: 'center', fontStyle: 'italic' }}>Cargando...</div>
-        ) : puestosPorAreas.length === 0 ? (
-          <div style={{ padding: '1rem', textAlign: 'center', fontStyle: 'italic' }}>Selecciona áreas para ver puestos disponibles</div>
-        ) : (
-          puestosPorAreas.map((areaPuestos) => (
-            <div key={areaPuestos.nombre_area}>
-              <div style={{ 
-                fontWeight: '600',
-                color: '#94a3b8',
-                fontSize: '0.875rem',
-                padding: '0.5rem',
-                borderBottom: '1px solid #3b3f5f',
-                backgroundColor: '#27293d'
-              }}>
-                {areaPuestos.nombre_area}
-              </div>
-              {areaPuestos.data.map((puesto) => (
-                <div 
-                  key={puesto._id}
-                  style={{ 
-                    padding: '0.5rem 0.75rem 0.5rem 1.5rem',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem',
-                    backgroundColor: formData.position.includes(puesto.puesto_id) ? '#2563eb' : 'transparent',
-                    color: formData.position.includes(puesto.puesto_id) ? 'white' : 'inherit',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    borderLeft: '3px solid #3b3f5f'
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePositionToggle(puesto.puesto_id);
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!formData.position.includes(puesto.puesto_id)) {
-                      e.currentTarget.style.backgroundColor = '#2a2d47';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!formData.position.includes(puesto.puesto_id)) {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }
-                  }}
-                >
-                  <span>{puesto.nombre} ({puesto.total_usuarios})</span>
-                  {formData.position.includes(puesto.puesto_id) && <Check size={16} />}
-                </div>
-              ))}
+      {isPuestosDropdownOpen && (
+  <div className={`${styles.formSelect} ${styles.dropdownScroll}`} style={{ 
+    position: 'absolute', 
+    top: 'calc(100% + 4px)', 
+    left: 0, 
+    right: 0, 
+    zIndex: 9999,
+    maxHeight: '200px',
+    overflowY: 'auto'
+  }}>
+    {loadingPuestos ? (
+      <div style={{ padding: '1rem', textAlign: 'center', fontStyle: 'italic' }}>Cargando...</div>
+    ) : puestosPorAreas.length === 0 ? (
+      <div style={{ padding: '1rem', textAlign: 'center', fontStyle: 'italic' }}>Selecciona áreas para ver puestos disponibles</div>
+    ) : (
+      puestosPorAreas.map((areaPuestos) => (
+        <div key={areaPuestos.nombre_area}>
+          <div style={{ 
+            fontWeight: '600',
+            color: '#94a3b8',
+            fontSize: '0.875rem',
+            padding: '0.5rem',
+            borderBottom: '1px solid #3b3f5f',
+            backgroundColor: '#27293d'
+          }}>
+            {areaPuestos.nombre_area}
+          </div>
+          
+          {/* ✅ AGREGAR OPCIÓN "TODOS" */}
+          <div 
+            style={{ 
+              padding: '0.5rem 0.75rem 0.5rem 1.5rem',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              backgroundColor: isAllAreaSelected(areaPuestos) ? '#2563eb' : 'transparent',
+              color: isAllAreaSelected(areaPuestos) ? 'white' : '#ffffffff',
+              fontWeight: '600',
+              borderBottom: '1px solid #3b3f5f'
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAllAreaToggle(areaPuestos);
+            }}
+            onMouseEnter={(e) => {
+              if (!isAllAreaSelected(areaPuestos)) {
+                e.currentTarget.style.backgroundColor = '#2a2d47';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isAllAreaSelected(areaPuestos)) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }
+            }}
+          >
+            <span>Todos los puestos</span>
+            {isAllAreaSelected(areaPuestos) && <Check size={16} />}
+          </div>
+          
+          {/* Puestos individuales */}
+          {areaPuestos.data.map((puesto) => (
+            <div 
+              key={puesto._id}
+              style={{ 
+                padding: '0.5rem 0.75rem 0.5rem 1.5rem',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                backgroundColor: formData.position.includes(puesto.puesto_id) ? '#2563eb' : 'transparent',
+                color: formData.position.includes(puesto.puesto_id) ? 'white' : 'inherit',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePositionToggle(puesto.puesto_id);
+              }}
+              onMouseEnter={(e) => {
+                if (!formData.position.includes(puesto.puesto_id)) {
+                  e.currentTarget.style.backgroundColor = '#2a2d47';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!formData.position.includes(puesto.puesto_id)) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
+            >
+              <span>{puesto.nombre}</span>
+              {formData.position.includes(puesto.puesto_id) && <Check size={16} />}
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      ))
     )}
+  </div>
+)}
   </div>
 {errors.position && <span className={styles.errorMessage}>{errors.position}</span>}
 </div>
@@ -817,8 +960,8 @@ className={`${styles.formSelect} ${errors.position ? styles.formSelectError : ''
             onChange={(e) => handleInputChange('aiModel', e.target.value)}
           >
             <option value="">Selecciona una AI</option>
-            <option value="GPT-4">Club Chelero</option>
-            <option value="Claude">Alasel</option>
+            <option value="Club-Chelero">Club Chelero</option>
+            <option value="Alacel">Alacel</option>
           </select>
           <div className={styles.aiSuggestion}>
             <input 
@@ -833,30 +976,43 @@ className={`${styles.formSelect} ${errors.position ? styles.formSelectError : ''
             </label>
           </div>
         </div>
-
-        {/* Botón Crear */}
-        <div className={styles.formActions} style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', flexDirection: "column" }}>
-        
+        {/* Botones - diferentes según el modo */}
+        <div className={styles.formActions} style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', flexDirection: "column"  }}>
           
-          <button
-            type="button"
-            onClick={() => handleSubmitWithDraft(true)}
-            disabled={uploadingFiles}
-            className={styles.createButton}
-            style={{ backgroundColor: '#6b7280' }} // Color gris para borrador
-          >
-            {uploadingFiles ? 'Subiendo...' : 'Crear Borrador'}
-          </button>
-          
-          <button
-            type="button"
-            onClick={() => handleSubmitWithDraft(false)}
-            disabled={uploadingFiles}
-            className={styles.createButton}
-            style={{ backgroundColor: '#2563eb' }} // Color azul para publicar
-          >
-            {uploadingFiles ? 'Subiendo...' : 'Publicar Tema'}
-          </button>
+          {isEditMode ? (
+            // MODO EDICIÓN: Solo un botón "Guardar cambios"
+            <button
+              type="button"
+              onClick={() => handleSubmitWithDraft(false)} // Al editar, siempre guardar como no-borrador
+              disabled={uploadingFiles}
+              className={styles.createButton}
+            >
+              {uploadingFiles ? 'Guardando...' : 'Guardar cambios'}
+            </button>
+          ) : (
+            // MODO CREACIÓN: Dos botones (Borrador y Publicar)
+            <>
+              <button
+                type="button"
+                onClick={() => handleSubmitWithDraft(true)}
+                disabled={uploadingFiles}
+                className={styles.createButton}
+                style={{ backgroundColor: '#6b7280' }} // Color gris para borrador
+              >
+                {uploadingFiles ? 'Subiendo...' : 'Crear Borrador'}
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => handleSubmitWithDraft(false)}
+                disabled={uploadingFiles}
+                className={styles.createButton}
+                style={{ backgroundColor: '#2563eb' }} // Color azul para publicar
+              >
+                {uploadingFiles ? 'Subiendo...' : 'Publicar Tema'}
+              </button>
+            </>
+          )}
         </div>
       </form>
     </div>

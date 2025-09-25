@@ -86,7 +86,7 @@ const fileType = getFileType(file.file_name, file.type_file);
 
 const renderPreview = () => {
   if (loadingFileData || !fullFileData) {
-    return <img src="/Imagen.svg" alt="Archivo" className={styles.themeIcon1} />;
+  return <img src="/knowledge/Imagen.svg" alt="Archivo" className={styles.themeIcon1} />;
   }
 
   console.log('Datos completos:', fullFileData);
@@ -94,7 +94,7 @@ const renderPreview = () => {
   const fileType = getFileType(fullFileData.file_name, fullFileData.type_file);
   
   if (previewError || !fullFileData.s3_path) {
-    return <img src="/Imagen.svg" alt="Archivo" className={styles.themeIcon1} />;
+    return <img src="/knowledge/Imagen.svg" alt="Archivo" className={styles.themeIcon1} />;
   }
 
 switch (fileType) {
@@ -133,9 +133,8 @@ case 'video':
 
 
   default:
-    return <img src="/Imagen.svg" alt="Archivo" className={styles.themeIcon1} />;
-}
-
+    return <img src="/knowledge/Imagen.svg" alt="Archivo" className={styles.themeIcon1} />;
+  }
 };
 
 

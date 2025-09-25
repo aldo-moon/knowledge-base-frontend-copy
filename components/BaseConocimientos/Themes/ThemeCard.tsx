@@ -88,11 +88,11 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
       <div
         className={styles.themeCard}
         onClick={handleCardClick}
-        onDoubleClick={handleCardDoubleClick}  // Usar onDoubleClick del DOM
+        onDoubleClick={handleCardDoubleClick}  
       >
         <div className={styles.themeContent}>
           <div className={styles.themeIconContainer}>
-            <img src="/Tema.svg" alt="Tema" className={styles.themeIcon} />
+          <img src="/knowledge/Tema.svg" alt="Tema" className={styles.themeIcon} />
           </div>
           <h3 className={styles.themeName}>{theme.title_name}</h3>
         </div>

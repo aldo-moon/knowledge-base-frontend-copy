@@ -133,59 +133,88 @@ const parseSlugFromUrl = () => {
   };
 
   // Construir path de navegación desde URL (lógica existente)
-  const buildNavigationPathFromUrl = async (targetFolderId: string) => {
-    try {
-      if (targetFolderId === "68acb06886d455d16cceef05") {
-        return [{ id: "68acb06886d455d16cceef05", name: "Contenedor" }];
-      }
-
-      try {
-        const response = await fetch(`/api/carpetas/test/${targetFolderId}`);
-        if (response.ok) {
-          const data = await response.json();
-          return data.ruta || await buildPathManually(targetFolderId);
-        }
-      } catch {
-        return await buildPathManually(targetFolderId);
-      }
-      
-      return await buildPathManually(targetFolderId);
-    } catch (error) {
-      console.error('Error building navigation path:', error);
-      return [
-        { id: "68acb06886d455d16cceef05", name: "Contenedor" },
-        { id: targetFolderId, name: "Carpeta" }
-      ];
+const buildNavigationPathFromUrl = async (targetFolderId: string) => {
+  try {
+    console.log('🔍 buildNavigationPathFromUrl recibió:', {
+      targetFolderId,
+      type: typeof targetFolderId,
+      isObject: typeof targetFolderId === 'object',
+      stringified: targetFolderId?.toString()
+    });
+    
+    // ✅ Validación temprana
+    if (!targetFolderId) {
+      console.log('⚠️ targetFolderId está vacío');
+      return [{ id: "68acb06886d455d16cceef05", name: "Contenedor" }];
     }
-  };
+    
+    // ✅ Convertir a string si es necesario
+    const folderIdString = targetFolderId?.toString();
+    
+    if (folderIdString === "68acb06886d455d16cceef05") {
+      return [{ id: "68acb06886d455d16cceef05", name: "Contenedor" }];
+    }
+
+    try {
+      // ✅ USAR CARPETA SERVICE EN LUGAR DE FETCH DIRECTO
+      console.log('🌐 Usando carpetaService.getRutaCarpeta para:', folderIdString);
+      
+      // Si tienes un método getRutaCarpeta, usarlo
+      // Si no, usar getCarpetaById y construir la ruta manualmente
+      return await buildPathManually(folderIdString);
+      
+    } catch (serviceError) {
+      console.error('❌ Error usando carpetaService:', serviceError);
+      return await buildPathManually(folderIdString);
+    }
+    
+  } catch (error) {
+    console.error('Error building navigation path:', error);
+    return [
+      { id: "68acb06886d455d16cceef05", name: "Contenedor" },
+      { id: targetFolderId?.toString() || "unknown", name: "Carpeta" }
+    ];
+  }
+};
 
   // Función auxiliar para construir ruta manualmente (lógica existente)
-  const buildPathManually = async (targetFolderId: string) => {
-    try {
-      const path = [{ id: "68acb06886d455d16cceef05", name: "Contenedor" }];
-      
-      const folderDetails = await carpetaService.getCarpetaById(targetFolderId);
-      
-      if (folderDetails.parent_id_folder && folderDetails.parent_id_folder !== "68acb06886d455d16cceef05") {
-        const parentPath = await buildPathManually(folderDetails.parent_id_folder);
-        const pathWithoutRoot = parentPath.slice(1);
-        path.push(...pathWithoutRoot);
-      }
-      
-      path.push({ 
-        id: targetFolderId, 
-        name: folderDetails.folder_name 
-      });
-      
-      return path;
-    } catch (error) {
-      console.error('Error building path manually:', error);
-      return [
-        { id: "68acb06886d455d16cceef05", name: "Contenedor" },
-        { id: targetFolderId, name: "Carpeta" }
-      ];
+const buildPathManually = async (targetFolderId: string) => {
+  try {
+    console.log('🔧 buildPathManually recibió:', {
+      targetFolderId,
+      type: typeof targetFolderId
+    });
+    
+    const path = [{ id: "68acb06886d455d16cceef05", name: "Contenedor" }];
+    
+    // ✅ Asegurar que sea string
+    const folderIdString = targetFolderId?.toString();
+    
+    // ✅ USAR CARPETA SERVICE
+    console.log('🔧 Obteniendo detalles de carpeta con carpetaService...');
+    const folderDetails = await carpetaService.getCarpetaById(folderIdString);
+    console.log('🔧 Detalles de carpeta obtenidos:', folderDetails);
+    
+    if (folderDetails.parent_id_folder && folderDetails.parent_id_folder !== "68acb06886d455d16cceef05") {
+      const parentPath = await buildPathManually(folderDetails.parent_id_folder);
+      const pathWithoutRoot = parentPath.slice(1);
+      path.push(...pathWithoutRoot);
     }
-  };
+    
+    path.push({ 
+      id: folderIdString, 
+      name: folderDetails.folder_name 
+    });
+    
+    return path;
+  } catch (error) {
+    console.error('Error building path manually:', error);
+    return [
+      { id: "68acb06886d455d16cceef05", name: "Contenedor" },
+      { id: targetFolderId?.toString() || "unknown", name: "Carpeta" }
+    ];
+  }
+};
   
   // Navegar a carpeta (lógica existente pero actualizada)
   const navigateToFolder = (folderId: string, folderName: string) => {
@@ -363,6 +392,11 @@ const navigateToThemeDetail = (themeId: string) => {
   const currentQuery = { ...router.query };
   delete currentQuery.slug;
   
+  // ✅ INCLUIR el currentFolderId en la query string
+  if (currentContext.folderId && currentContext.folderId !== "68acb06886d455d16cceef05") {
+    currentQuery.folderId = currentContext.folderId;
+  }
+  
   const url = `/theme-detail/${themeId}`;
   const queryString = Object.keys(currentQuery).length > 0 
     ? '?' + new URLSearchParams(currentQuery as Record<string, string>).toString()
@@ -372,8 +406,28 @@ const navigateToThemeDetail = (themeId: string) => {
 };
 
 const navigateBackFromThemeDetail = () => {
-  // Volver a la vista de contenedor por defecto
-  navigateToSection('Contenedor');
+  // ✅ LEER el folderId desde la query string
+  const folderIdFromQuery = router.query.folderId as string;
+  
+  console.log('🔙 navigateBackFromThemeDetail - folderIdFromQuery:', folderIdFromQuery);
+  
+  const currentQuery = { ...router.query };
+  delete currentQuery.slug;
+  delete currentQuery.folderId; // Limpiar el folderId de la query
+  
+  // Si hay folderId en query, volver a esa carpeta
+  if (folderIdFromQuery && folderIdFromQuery !== "68acb06886d455d16cceef05") {
+    console.log('🔙 Volviendo a carpeta específica:', folderIdFromQuery);
+    
+    const queryString = Object.keys(currentQuery).length > 0 
+      ? '?' + new URLSearchParams(currentQuery as Record<string, string>).toString()
+      : '';
+    
+    router.push(`/folder/${folderIdFromQuery}${queryString}`);
+  } else {
+    console.log('🔙 Volviendo a vista general');
+    navigateToSection('Contenedor');
+  }
 };
   
   return {

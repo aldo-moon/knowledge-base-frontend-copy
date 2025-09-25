@@ -666,30 +666,36 @@ const handleThemeFormSubmit = async (formData: ThemeFormData) => {
   };
 
   // Handler para FoldersGrid
-  const handleFolderSelection = async (folder: Folder) => {
-    try {
-      const folderDetails = await carpetaService.getCarpetaById(folder._id);
-      
-      const transformedDetails: FolderDetails = {
-        name: folderDetails.folder_name,
-        elements: 0,
-        creator: folderDetails.user_creator_id?.nombre && folderDetails.user_creator_id?.aPaterno 
-          ? `${folderDetails.user_creator_id.nombre} ${folderDetails.user_creator_id.aPaterno}`
-          : folderDetails.user_creator_id?.nombre || 'Desconocido',
-        createdDate: new Date(folderDetails.creation_date).toLocaleDateString(),
-        type: 'Carpeta',
-        access: 'Todos',
-        lastOpened: 'N/A',
-        lastModified: folderDetails.last_update ? 
-          new Date(folderDetails.last_update).toLocaleDateString() : 'N/A'
-      };
-      
-      setSelectedFolder(folder);
-      setSelectedFolderDetails(transformedDetails);
-    } catch (error) {
-      console.error('Error getting folder details:', error);
-    }
-  };
+const handleFolderSelection = async (folder: Folder) => {
+  try {
+    const folderDetails = await carpetaService.getCarpetaById(folder._id);
+    
+    console.log('🔍 folderDetails completo:', folderDetails);
+    console.log('🔍 user_creator_id:', folderDetails.user_creator_id);
+    console.log('🔍 user_creator_id tipo:', typeof folderDetails.user_creator_id);
+    
+    const transformedDetails: FolderDetails = {
+      name: folderDetails.folder_name,
+      elements: 0,
+      creator: folderDetails.user_creator_id?.nombre && folderDetails.user_creator_id?.aPaterno 
+        ? `${folderDetails.user_creator_id.nombre} ${folderDetails.user_creator_id.aPaterno}`
+        : folderDetails.user_creator_id?.nombre || 'Desconocido',
+      createdDate: new Date(folderDetails.creation_date).toLocaleDateString(),
+      type: 'Carpeta',
+      access: 'Todos',
+      lastOpened: 'N/A',
+      lastModified: folderDetails.last_update ? 
+        new Date(folderDetails.last_update).toLocaleDateString() : 'N/A'
+    };
+    
+    console.log('🔍 transformedDetails.creator:', transformedDetails.creator);
+    
+    setSelectedFolder(folder);
+    setSelectedFolderDetails(transformedDetails);
+  } catch (error) {
+    console.error('Error getting folder details:', error);
+  }
+};
 
   const handleFolderDoubleClick = async (folder: Folder) => {
     console.log('Double click en carpeta:', folder.folder_name);
@@ -866,8 +872,14 @@ const handleDeleteTheme = async () => {
 
 
 // AGREGAR función para manejar doble click en temas
-const handleThemeDoubleClick = (theme: Theme) => {
-  console.log('Doble click en tema:', theme.title_name);
+const handleThemeDoubleClick = (theme: any) => {
+  console.log('🔍 handleThemeDoubleClick:', {
+    themeId: theme._id,
+    currentFolderId: currentFolderId,
+    currentFolderIdType: typeof currentFolderId,
+    activeSection: activeSection
+  });
+  
   navigateToThemeDetail(theme._id);
 };
 
@@ -934,22 +946,38 @@ const handleToggleThemeFavorite = async (themeId: string) => {
     const userId = CURRENT_USER_ID;
     const isFavorite = themeFavorites.has(themeId);
     
+    console.log('🔍 Toggle Theme Favorite - Datos iniciales:', {
+      userId,
+      themeId,
+      isFavorite,
+      currentFavorites: Array.from(themeFavorites)
+    });
+    
     if (isFavorite) {
-      await favoritoService.removeTopicFromFavorites(userId, themeId);
+      console.log('🔄 Intentando remover tema de favoritos...');
+      const response = await favoritoService.removeTopicFromFavorites(userId, themeId);
+      console.log('✅ Respuesta remove topic:', response);
+      
       setThemeFavorites(prev => {
         const newSet = new Set(prev);
         newSet.delete(themeId);
+        console.log('🔄 Favoritos después de remover:', Array.from(newSet));
         return newSet;
       });
-      console.log('Removed topic from favorites');
     } else {
-      await favoritoService.addTopicToFavorites(userId, themeId);
-      setThemeFavorites(prev => new Set(prev).add(themeId));
-      console.log('Added topic to favorites');
+      console.log('🔄 Intentando agregar tema a favoritos...');
+      const response = await favoritoService.addTopicToFavorites(userId, themeId);
+      console.log('✅ Respuesta add topic:', response);
+      
+      setThemeFavorites(prev => {
+        const newSet = new Set(prev).add(themeId);
+        console.log('🔄 Favoritos después de agregar:', Array.from(newSet));
+        return newSet;
+      });
     }
-
   } catch (error) {
-    console.error('Error toggling theme favorite:', error);
+    console.error('❌ Error toggling theme favorite:', error);
+
   }
 };
 
@@ -958,37 +986,43 @@ const handleToggleThemeFavorite = async (themeId: string) => {
 const loadUserFavorites = async () => {
   try {
     const userId = CURRENT_USER_ID;
+    console.log('🔍 Cargando favoritos para usuario:', userId);
 
-    
     const favoritesResponse = await favoritoService.getFavoritoById(userId);
-
+    console.log('🔍 Respuesta completa de favoritos:', favoritesResponse);
 
     if (!favoritesResponse) {
-      console.log('No hay favoritos para este usuario');
+      console.log('⚠️ No hay favoritos para este usuario');
       return;
     }
 
     let favorites = null;
     
     if (Array.isArray(favoritesResponse)) {
+      console.log('🔍 Favoritos es array, length:', favoritesResponse.length);
       if (favoritesResponse.length === 0) {
-        console.log('Usuario sin favoritos guardados');
+        console.log('⚠️ Usuario sin favoritos guardados');
         return;
       }
       favorites = favoritesResponse[0];
     } else if (typeof favoritesResponse === 'object') {
+      console.log('🔍 Favoritos es objeto directo');
       favorites = favoritesResponse;
     } else {
+      console.log('⚠️ Tipo de favoritos no reconocido:', typeof favoritesResponse);
       return;
     }
+
+    console.log('🔍 Estructura de favoritos procesada:', favorites);
 
     if (!favorites || typeof favorites !== 'object') {
+      console.log('⚠️ Favoritos inválidos después de procesamiento');
       return;
     }
 
-   const folderFavorites: FavoriteFolder[] = favorites.folders || [];
-    const topicFavorites: FavoriteTopic[] = favorites.topics || [];
-    const fileFavorites: FavoriteFile[] = favorites.files || [];
+const folderFavorites: FavoriteFolder[] = favorites.content_folder || [];
+const topicFavorites: FavoriteTopic[] = favorites.content_topic || [];
+const fileFavorites: FavoriteFile[] = favorites.content_file || [];
 
 
     // Siempre actualizar estados
@@ -1639,7 +1673,6 @@ const navigateToEditTheme = (themeId: string) => {
               onThemeEdit={handleThemeEdit}  
             />
 
-            {/* Details Panel - siempre visible, cambia contenido según el contexto */}
             {/* Panel derecho - cambiar según el contexto */}
             {activeSection === 'theme-detail' && currentThemeId ? (  // Mostrar panel de comentarios cuando estás viendo un tema
               <ThemeCommentsPanel themeId={currentThemeId} />

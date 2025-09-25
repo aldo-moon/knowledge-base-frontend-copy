@@ -143,26 +143,7 @@ procesarAplicacionesParaSidebar: async (userId) => {  // ← Agregar userId
     }
   },
 
-  // ✅ FUNCIÓN DE PRUEBA: Mostrar URLs que se generarían
-  mostrarEjemplosUrls: async () => {
-    try {
-      const aplicaciones = await aplicacionService.getAplicacionesByUser(userId);
-      const apps = aplicaciones.aplicaciones || [];
-      
-      console.log('🔍 EJEMPLOS DE URLs GENERADAS:');
-      console.log('=====================================');
-      
-      apps.filter(app => app.estatus === 1).forEach(app => {
-        const url = aplicacionService.generarUrlNavegacion(app);
-        console.log(`📄 ${app.nombre}`);
-        console.log(`   - Tipo: ${app.tipo}, Externo: ${app.externo}, Script: "${app.script}"`);
-        console.log(`   - URL: ${url || 'NO NAVEGABLE (tipo 0)'}`);
-        console.log('---');
-      });
-    } catch (error) {
-      console.error('❌ Error mostrando ejemplos:', error);
-    }
-  },
+
 
   // Mantener todas las funciones existentes...
   getAplicacionesByTipo: async (tipo) => {

@@ -65,9 +65,8 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({
   selectedFolderDetails,
   selectedTemaId,
   isCreatingNewTopic = false,
-    isEditingTheme = false, 
-      themeToEdit, // ← Y este también
-// ← Agregar este parámetro
+  isEditingTheme = false, 
+  themeToEdit, 
   children
 }) => {
   const [temaDetails, setTemaDetails] = useState<TemaDetails | null>(null);
@@ -153,7 +152,7 @@ const getPriorityText = (priorityNum: string | number | undefined) => {
         <h3 className={styles.detailsTitle}>DETALLES</h3>
         <div className={styles.folderDetailsContent}>
           <div className={styles.folderDetailsIcon}>
-          <img src="/Tema.svg" alt="Tema" className={styles.themeIcon} />
+          <img src="/knowledge/Tema.svg" alt="Tema" className={styles.themeIcon} />
           </div>
           <h4 className={styles.folderDetailsName}>{temaDetails.title_name}</h4>
 

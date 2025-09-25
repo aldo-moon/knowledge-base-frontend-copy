@@ -1492,7 +1492,7 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: white;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 2rem 0;
 }
 
 /* Número de elementos */
@@ -5019,3 +5019,45 @@ max-width: 300px;
 
 
 
+/* Scrollbar para dropdown de áreas */
+.formSelect div[style*="position: absolute"][style*="overflowY: auto"]::-webkit-scrollbar {
+  width: 8px;
+}
+
+.formSelect div[style*="position: absolute"][style*="overflowY: auto"]::-webkit-scrollbar-track {
+  background: #1e1e2f;
+  border-radius: 10px;
+}
+
+.formSelect div[style*="position: absolute"][style*="overflowY: auto"]::-webkit-scrollbar-thumb {
+  background: #6262bf;
+  border-radius: 10px;
+}
+
+.formSelect div[style*="position: absolute"][style*="overflowY: auto"]::-webkit-scrollbar-thumb:hover {
+  background: #7c7ce0;
+}
+
+/* Alternativa más específica usando clases */
+.dropdownScroll {
+  scrollbar-width: thin;
+  scrollbar-color: #6262bf #1e1e2f;
+}
+
+.dropdownScroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dropdownScroll::-webkit-scrollbar-track {
+  background: #1e1e2f;
+  border-radius: 10px;
+}
+
+.dropdownScroll::-webkit-scrollbar-thumb {
+  background: #6262bf;
+  border-radius: 10px;
+}
+
+.dropdownScroll::-webkit-scrollbar-thumb:hover {
+  background: #7c7ce0;
+}
