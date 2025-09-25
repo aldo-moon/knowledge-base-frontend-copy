@@ -7,7 +7,7 @@ import { puestoService } from '../../../services/puestoService';
 import { archivoService } from '../../../services/archivoService';
 
 interface ThemeFormProps {
-  onSubmit?: (formData: ThemeFormData) => void;
+  onSubmit?: (formData: ThemeFormData, isDraft: boolean) => void; // <- CAMBIAR AQUÍ
   onCancel?: () => void;
   currentFolderId?: string;
   userId?: string;
@@ -24,6 +24,8 @@ interface ThemeFormData {
   currentTag: string;  
   aiModel: string;
   suggestInHelpDesk: boolean;
+    isDraft?: boolean; // <- AGREGAR ESTA LÍNEA
+
 }
 
 interface Area {
@@ -380,6 +382,22 @@ useEffect(() => {
     }
   };
 
+const handleSubmitWithDraft = async (isDraft: boolean) => {
+  if (!validateForm()) {
+    return;
+  }
+
+  // ✅ AGREGAR isDraft directamente al formData
+  const formDataWithDraft = {
+    ...formData,
+    isDraft // <- Agregar al objeto
+  };
+
+  if (onSubmit) {
+    onSubmit(formDataWithDraft); // <- Solo pasar formData
+  }
+};
+
   // Eliminar archivo subido
   const removeUploadedFile = async (fileId: string) => {
     try {
@@ -419,7 +437,7 @@ useEffect(() => {
     }
   };
 
-const handleSubmit = () => {
+/* const handleSubmit = () => {
   if (validateForm()) {
     const formDataWithFiles = {
       ...formData,
@@ -431,7 +449,7 @@ const handleSubmit = () => {
     console.log('🏷️ Tags que se envían:', formData.tags); // Para debug
     onSubmit?.(formDataWithFiles);
   }
-};
+}; */
 
   return (
     <div className={styles.topicFormContent}>
@@ -817,18 +835,29 @@ className={`${styles.formSelect} ${errors.position ? styles.formSelectError : ''
         </div>
 
         {/* Botón Crear */}
-        <button 
-          type="button" 
-          className={styles.createButton}
-          onClick={handleSubmit}
-          disabled={uploadingFiles}
-          style={{
-            opacity: uploadingFiles ? 0.5 : 1,
-            cursor: uploadingFiles ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {uploadingFiles ? 'SUBIENDO...' : (isEditMode ? 'ACTUALIZAR' : 'CREAR')}
-        </button>
+        <div className={styles.formActions} style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', flexDirection: "column" }}>
+        
+          
+          <button
+            type="button"
+            onClick={() => handleSubmitWithDraft(true)}
+            disabled={uploadingFiles}
+            className={styles.createButton}
+            style={{ backgroundColor: '#6b7280' }} // Color gris para borrador
+          >
+            {uploadingFiles ? 'Subiendo...' : 'Crear Borrador'}
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => handleSubmitWithDraft(false)}
+            disabled={uploadingFiles}
+            className={styles.createButton}
+            style={{ backgroundColor: '#2563eb' }} // Color azul para publicar
+          >
+            {uploadingFiles ? 'Subiendo...' : 'Publicar Tema'}
+          </button>
+        </div>
       </form>
     </div>
   );

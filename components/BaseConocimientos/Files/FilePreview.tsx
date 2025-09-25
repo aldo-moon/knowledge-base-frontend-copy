@@ -271,13 +271,13 @@ useEffect(() => {
           <Download size={16} />
           Descargar
         </button>
-        <button
+        {/* <button
           className={styles.folderContextOption}
           onClick={() => handleMenuOptionClick('open')}
         >
           <ExternalLink size={16} />
           Abrir en nueva pestaña
-        </button>
+        </button> */}
       </div>
     )}
   </div>

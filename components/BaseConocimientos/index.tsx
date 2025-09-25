@@ -182,7 +182,7 @@ interface ThemeFormData {
   fileIds?: string[];
   files: globalThis.File[]; // Archivos nativos del navegador para upload
   uploadedFiles?: { id: string; name: string }[];
-  // ... otras propiedades que pueda tener el formulario
+  isDraft?: boolean; // <- AGREGAR ESTA LÍNEA
 }
 
 interface FavoriteFolder {
@@ -587,17 +587,18 @@ const handleThemeFormSubmit = async (formData: ThemeFormData) => {
     console.log('📝 Datos del formulario recibidos:', formData);
 
     // Construir objeto tema con archivos adjuntos
-const temaCompleto = {
-  title_name: themeTitle,
-  description: themeDescription,
-  priority: formData.priority === 'Alta' ? 2 : formData.priority === 'Baja' ? 0 : 1,
-  area_id: formData.area.length > 0 ? formData.area : formData.area[0] || '', // <- CAMBIO
-  puesto_id: formData.position.length > 0 ? formData.position : formData.position[0] || '', // <- CAMBIO
-  folder_id: currentFolderId,
-  author_topic_id: CURRENT_USER_ID,
-  keywords: Array.isArray(formData.tags) ? formData.tags : [],
-  files_attachment_id: formData.fileIds || []
-};
+   const temaCompleto = {
+      title_name: themeTitle,
+      description: themeDescription,
+      priority: formData.priority === 'Alta' ? 2 : formData.priority === 'Baja' ? 0 : 1,
+      area_id: formData.area,
+      puesto_id: formData.position,
+      folder_id: currentFolderId,
+      author_topic_id: CURRENT_USER_ID,
+      keywords: Array.isArray(formData.tags) ? formData.tags : [],
+      files_attachment_id: formData.fileIds || [],
+      is_draft: formData.isDraft !== undefined ? formData.isDraft : true 
+    };
 
     console.log('📁 Tema completo:', temaCompleto);
     
@@ -1076,29 +1077,34 @@ const handleMultimediaUpload = async (files: globalThis.File[]) => {
 };
 
 
+// ✅ CAMBIO RÁPIDO: En loadCarpetas, cambiar a:
+
 const loadCarpetas = async () => {
   console.log('Loading content for folder:', currentFolderId);
-  console.log('🔍 CURRENT_USER_ID en loadCarpetas:', CURRENT_USER_ID); // ← AGREGAR ESTO
-  console.log('🔍 Tipo de CURRENT_USER_ID:', typeof CURRENT_USER_ID); // ← Y ESTO
+  console.log('🔍 CURRENT_USER_ID:', CURRENT_USER_ID);
   
   try {
     setLoading(true);
     
     const carpetas = await carpetaService.getFolderContent(currentFolderId);
-    setFolders(carpetas);
+    console.log('📁 Carpetas response:', carpetas); // <- AGREGAR LOG
+    setFolders(Array.isArray(carpetas) ? carpetas : []); // <- VALIDAR ARRAY
       
-    // ✅ Agregar validación antes de llamar al servicio
     if (!CURRENT_USER_ID) {
       console.error('❌ No se puede cargar temas: CURRENT_USER_ID es null');
       setThemes([]);
+      setFiles([]); // <- AGREGAR ESTO
       return;
     }
     
     const temas = await temaService.getTemasByFolder(currentFolderId, CURRENT_USER_ID);
-    setThemes(temas);
+    console.log('📝 Temas response:', temas); // <- AGREGAR LOG
+    setThemes(Array.isArray(temas) ? temas : []); // <- VALIDAR ARRAY
 
     const archivos = await archivoService.getFilesByFolderId(currentFolderId);
-    setFiles(archivos);
+    console.log('📄 Archivos response:', archivos); // <- AGREGAR LOG
+    setFiles(Array.isArray(archivos) ? archivos : []); // <- VALIDAR ARRAY
+    
   } catch (error) {
     console.error('Error loading content:', error);
     setFolders([]);
