@@ -30,7 +30,8 @@ import DeleteFileModal from './Modals/DeleteFileModal';
 import FilesGrid from './Files/FilesGrid';
 import ThemeDetailView from './Content/ThemeDetailView';
 import ThemeCommentsPanel from './Details/ThemeCommentsPanel';
-import { AuthModal } from './Auth/AuthButton';
+import TopHeader from './Header/TopHeader';
+
 
 // Importar servicios
 import { carpetaService } from '../../services/carpetaService';
@@ -40,6 +41,7 @@ import { favoritoService } from '../../services/favoritoService';
 import { usuarioService } from '../../services/usuarioService';
 import papeleraService from '../../services/papeleraService';
 import { authService } from '../../services/authService';
+import { aplicacionService } from '../../services/aplicacionService';
 
 // Importar hook de routing
 import { useBaseConocimientosRouter } from '../../hooks/useBaseConocimientosRouter';
@@ -264,8 +266,7 @@ const handleCancelThemeDelete = () => {
 };
 const [fileFavorites, setFileFavorites] = useState<Set<string>>(new Set());
 
-  const [showAuthModal, setShowAuthModal] = useState(false);
-const [isAuthenticated, setIsAuthenticated] = useState(false);
+
 const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     // Estados para componentes modulares
@@ -375,6 +376,8 @@ const [sidebarFolders, setSidebarFolders] = useState<SidebarFolders>({});
 const [expandedSidebarItems, setExpandedSidebarItems] = useState<ExpandedItems>({});
   const CURRENT_USER_ID = currentUserId;
   const [mounted, setMounted] = useState(false);
+  // Agregar junto a los otros estados
+const [currentClientId, setCurrentClientId] = useState<string | null>(null);
 
 useEffect(() => {
   setMounted(true);
@@ -384,11 +387,18 @@ useEffect(() => {
 // Verificar autenticación al cargar
 useEffect(() => {
   const checkAuth = async () => {
-    if (authService.isAuthenticated()) {
-      setIsAuthenticated(true);
-      setCurrentUserId(authService.getCurrentUserId());
+    console.log('🔄 Inicializando autenticación...');
+    const authResult = await authService.initializeAuth();
+    
+    if (authResult.success) {
+      setCurrentUserId(authResult.id_usuario);
+      console.log(`✅ Autenticado via ${authResult.source}:`, authResult.id_usuario);
     } else {
-      setShowAuthModal(true); // Mostrar modal si no está autenticado
+      console.log('❌ No se pudo autenticar, redirigiendo al sistema padre...');
+      setTimeout(() => {
+        window.location.href = "https://www.aemretail.com/navreport/logout.php";
+      }, 500);
+      return;
     }
   };
   
@@ -396,42 +406,53 @@ useEffect(() => {
 }, []);
 
 
-const handleAuthSuccess = (userId: string) => {
-  setIsAuthenticated(true);
-  setCurrentUserId(userId);
-  setShowAuthModal(false);
-  console.log('✅ Usuario autenticado:', userId);
-  
-  // Recargar datos si es necesario
-  Promise.all([
-    loadUserFavorites?.(),
-    loadSidebarFolders?.(),
-    refreshUserData?.()
-  ]).catch(console.error);
-};
-
-const handleCloseModal = () => {
-  setShowAuthModal(false);
-  // Permitir usar la app sin autenticar (modo limitado)
-};
 
   // ============= HANDLERS PARA COMPONENTES MODULARES =============
   
   /////////////////////////////////////////////// Handler para MainSidebar ////////////////////////////////////////////////////
 // ✅ Función que maneja ambos casos
-const handleSidebarItemClick = (aplicacion: Aplicacion | Subseccion, isSubseccion?: boolean) => {
+const handleSidebarItemClick = async (aplicacion: Aplicacion | Subseccion, isSubseccion?: boolean) => {
   console.log('🖱️ Click en sidebar item:', aplicacion.nombre);
+  console.log('🔍 Navegable:', aplicacion.navegable); // ← Ya tienes este
   
-  // Tu lógica personalizada aquí
   if (aplicacion.nombre === 'Base de Conocimientos') {
-    // Lógica específica para Base de Conocimientos
     console.log('🧠 Navegando a Base de Conocimientos');
     return;
   }
 
-  // Lógica de navegación estándar
-  if (aplicacion.navegable && aplicacion.navegacionUrl) {
-    window.location.href = aplicacion.navegacionUrl;
+  console.log('🔍 Verificando navegabilidad...', aplicacion.navegable); // ← AGREGAR
+  
+  if (aplicacion.navegable) {
+    console.log('✅ Item ES navegable, generando URL...'); // ← AGREGAR
+    
+    try {
+      const id_usuario = authService.getCurrentUserId();
+      const id_cliente = authService.getCurrentClientId();
+      
+      console.log('🔍 IDs obtenidos:', { id_usuario, id_cliente }); // ← AGREGAR
+      
+      if (!id_usuario) {
+        console.error('❌ No hay usuario autenticado');
+        return;
+      }
+      
+      console.log('🔗 Generando URL de navegación para:', aplicacion.nombre);
+      
+      const url = await aplicacionService.generarUrlNavegacion(aplicacion, id_usuario, id_cliente);
+      
+      console.log('🔍 URL generada:', url); // ← AGREGAR
+      
+      if (url) {
+        console.log('🚀 Navegando a:', url);
+        window.location.href = url;
+      } else {
+        console.error('❌ No se pudo generar URL de navegación para:', aplicacion.nombre);
+      }
+    } catch (error) {
+      console.error('❌ Error generando URL:', error);
+    }
+  } else {
+    console.log('⚠️ Item no navegable:', aplicacion.nombre); // ← ESTE ES EL QUE SALE
   }
 };
 
@@ -1571,18 +1592,33 @@ const navigateToEditTheme = (themeId: string) => {
   navigateToCreateTheme(currentFolderId);
 };
 
+const handleLogout = () => {
+  // Limpiar estados de usuario
+  setCurrentUserId(null);
+  
+  // Limpiar datos locales
+  setFolders([]);
+  setThemes([]);
+  setFiles([]);
+  setUserContent({ folders: [], themes: [], files: [] });
+  setFavoritesContent({ folders: [], themes: [], files: [] });
+  
+  // El authService.logout() ya maneja la redirección
+  authService.logout();
+};
+
   // ============= RENDER =============
 
   return (
   <div className={styles.baseConocimientos}>
-    {/* Todo tu contenido existente */}
-    
-    {/* 🆕 Solo agregar esto al final */}
-    <AuthModal
-      isOpen={showAuthModal}
-      onClose={handleCloseModal}
-      onAuthSuccess={handleAuthSuccess}
-    />      {/* Usar componente modular HeaderSection */}
+     <TopHeader 
+      currentUserId={currentUserId}
+      onLogout={handleLogout}
+    />
+  
+
+
+    {/* Usar componente HeaderSection */}
       <HeaderSection />
 
       <div className={styles.mainContentWrapper}>

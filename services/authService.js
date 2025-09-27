@@ -1,116 +1,183 @@
 // services/authService.js
-import api from '../utils/api';
-
 export const authService = {
-  // Token estático para pruebas
-  //STATIC_TOKEN: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTgzOTA1NDcsImlkX3VzdWFyaW8iOiI2OGFkYzI5Nzg1ZDkyYjRjODRlMDFjNWIifQ.Vqy2FI6dYCiVIJBGekpO2SU5H2QlL8KuIAHM78AFrZI",
-  //STATIC_TOKEN: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTgzOTUzMTEsImlkX3VzdWFyaW8iOiI2OGFmNzkyNTVmN2NlMzNkODZmYzY0MWUifQ.unFNi60VA2w0K7ijvOoGP-PvLxxxTDs1W6D9KQeTK9o",
-  
-  //STATIC_TOKEN: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTg2NDQ0NDMsImlkX3VzdWFyaW8iOiIyIn0.px1olPHwwqT4rg6k8NOZOdHu0Xcc9v-L8qEzuNOjfvI",
-     STATIC_TOKEN: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTk1ODc2MTksImlkX3VzdWFyaW8iOiIxOCJ9.dssPX1jMAAamBWoU3JQGmq3bbvTT1EgFvrRmlJvuD_w",
+  // Bearer token para validación externa
   AUTH_BEARER_TOKEN: "ff07d4b68ddc474a45031dbdf70f74c2e2d699d7af02c5d571b9b2ff6276434f",
 
-  // Validar token con la API externa
-  validateToken: async (token = null) => {
-    try {
-      const tokenToValidate = token || authService.STATIC_TOKEN;
-      
-      console.log('🔐 Validando token...');
-      
-        const response = await fetch('https://login.aemretail.com/api/v1/external-session/validate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authService.AUTH_BEARER_TOKEN}`, 
-        },
-        body: JSON.stringify({
-            Token: tokenToValidate // Token para validar 
-        })
-        });
-
-      const data = await response.json();
-      
-        if (response.ok && data.code === 200) {
-        console.log('✅ Token válido:', data);
-        
-        // Extraer el id_usuario de la respuesta
-        const userId = data.data.dynamic_claims.id_usuario;
-        
-        // 🆕 Solo guardar el user_id y limpiar tokens temporales
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('user_id', userId);
-            
-            // Limpiar tokens que ya no se necesitan
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('token_exp');
-        }
-        
-        return {
-          success: true,
-          userId: userId,
-          token: tokenToValidate,
-          expiration: data.data.dynamic_claims.exp
-        };
-      } else {
-        console.error('❌ Token inválido:', data);
-        return {
-          success: false,
-          message: data.message || 'Token inválido'
-        };
-      }
-    } catch (error) {
-      console.error('❌ Error validando token:', error);
-      return {
-        success: false,
-        message: 'Error de conexión al validar token'
-      };
-    }
-  },
-
-  // Obtener el ID del usuario desde localStorage
-  getCurrentUserId: () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('user_id');
-    }
+  // Función para obtener datos de cookies
+  getCookieValue: (name) => {
+    if (typeof document === 'undefined') return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
     return null;
   },
 
-  // Obtener el token actual
-    getCurrentToken: () => {
-    return null; // 🆕 Ya no guardamos token
-    },
+  // Función para establecer cookies
+  setCookieValue: (name, value, days = 7) => {
+    if (typeof document === 'undefined') return;
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+  },
+
+  // Verificar token de URL
+  verificarToken: async (token) => {
+    try {
+      const datos = { token: token };
+      
+      const response = await fetch('https://login.aemretail.com/api/v1/external-session/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authService.AUTH_BEARER_TOKEN}`,
+        },
+        body: JSON.stringify(datos)
+      });
+
+      const respuesta = await response.json();
+      
+      if (respuesta.code === 200) {
+        const claims = respuesta.data.dynamic_claims;
+        
+        // Guardar en cookies
+        authService.setCookieValue('id_usuario', claims.id_usuario);
+        if (claims.id_cliente) {
+          authService.setCookieValue('id_cliente', claims.id_cliente);
+        }
+        
+        console.log('✅ Token verificado y cookies actualizadas');
+        return {
+          success: true,
+          id_usuario: claims.id_usuario,
+          id_cliente: claims.id_cliente
+        };
+      } else {
+        console.error('❌ Token inválido');
+        return { success: false };
+      }
+    } catch (error) {
+      console.error('❌ Error verificando token:', error);
+      return { success: false };
+    }
+  },
+
+  // Obtener IDs desde cookies
+  getAuthFromCookies: () => {
+    const id_usuario = authService.getCookieValue('id_usuario');
+    const id_cliente = authService.getCookieValue('id_cliente');
+    
+    return {
+      id_usuario,
+      id_cliente,
+      isAuthenticated: !!id_usuario
+    };
+  },
+
+  // Inicialización principal de autenticación
+  initializeAuth: async () => {
+    try {
+      // 1. Verificar si hay token en URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('dowjdjfur');
+      
+      if (token) {
+        console.log('🔑 Token encontrado en URL, verificando...');
+        const result = await authService.verificarToken(token);
+        
+        if (result.success) {
+          
+          return {
+            success: true,
+            id_usuario: result.id_usuario,
+            id_cliente: result.id_cliente,
+            source: 'url_token'
+          };
+        }
+      }
+      
+      // 2. Si no hay token válido en URL, verificar cookies
+      const cookieAuth = authService.getAuthFromCookies();
+      
+      if (cookieAuth.isAuthenticated) {
+        console.log('🍪 Autenticación encontrada en cookies');
+        return {
+          success: true,
+          id_usuario: cookieAuth.id_usuario,
+          id_cliente: cookieAuth.id_cliente,
+          source: 'cookies'
+        };
+      }
+      
+      // 3. No hay autenticación válida
+      console.log('❌ No se encontró autenticación válida');
+      return { success: false };
+      
+    } catch (error) {
+      console.error('❌ Error en inicialización:', error);
+      return { success: false };
+    }
+  },
+
+  // Obtener ID del usuario desde cookies
+  getCurrentUserId: () => {
+    return authService.getCookieValue('id_usuario');
+  },
+
+  // Obtener ID del cliente desde cookies
+  getCurrentClientId: () => {
+    return authService.getCookieValue('id_cliente');
+  },
 
   // Verificar si el usuario está autenticado
-    isAuthenticated: () => {
-    if (typeof window === 'undefined') return false;
-    
-    const userId = localStorage.getItem('user_id');
-    
-    return !!userId;
-    },
+  isAuthenticated: () => {
+    const id_usuario = authService.getCookieValue('id_usuario');
+    return !!id_usuario;
+  },
 
-  // Cerrar sesión (limpiar datos)
-    logout: () => {
-    if (typeof window !== 'undefined') {
-        localStorage.removeItem('user_id');
+  // Cerrar sesión (limpiar cookies y datos)
+ logout: () => {
+  console.log('🚪 Iniciando cierre de sesión...');
+  
+  // Función para borrar TODAS las cookies
+  const clearAllCookies = () => {
+    if (typeof document !== 'undefined') {
+      // Obtener todas las cookies
+      const cookies = document.cookie.split(";");
+      
+      // Borrar cada cookie individualmente
+      for (let cookie of cookies) {
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        
+        // Borrar en diferentes paths y dominios para asegurar eliminación completa
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname};`;
+      }
+      
+      console.log('🍪 Todas las cookies eliminadas');
     }
-    console.log('🚪 Sesión cerrada');
-    },
-
-  // Validar token automáticamente al cargar la página
-  initializeAuth: async () => {
-    // Verificar si ya hay un token válido
-    if (authService.isAuthenticated()) {
-      console.log('✅ Usuario ya autenticado:', authService.getCurrentUserId());
-      return {
-        success: true,
-        userId: authService.getCurrentUserId(),
-        fromCache: true
-      };
+  };
+  
+  // Limpiar todas las cookies
+  clearAllCookies();
+  
+  // Limpiar localStorage completamente
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      console.log('💾 Storage local limpiado');
+    } catch (error) {
+      console.warn('⚠️ Error limpiando storage:', error);
     }
-    
-    // Si no hay token válido, intentar validar el token estático
-    console.log('🔄 Iniciando validación automática...');
-    return await authService.validateToken();
   }
+  
+  console.log('✅ Sesión cerrada completamente');
+  
+  // Redirigir a la página de logout
+  setTimeout(() => {
+    window.location.href = 'https://www.aemretail.com/navreport/logout.php';
+  }, 100); // Pequeño delay para asegurar que se ejecute la limpieza
+},
 };

@@ -185,10 +185,17 @@ useEffect(() => {
     return (
       <div className={styles.mainSidebar}>
         <div className={styles.logo}>
-          <div className={styles.logoIcon}>
+          <button 
+            className={styles.logoIcon}
+            onClick={() => {
+              console.log('🏠 Navegando a INICIO...');
+              window.location.href = 'https://www.aemretail.com/navreport/home?m=b';
+            }}
+            title="Ir a Inicio"
+          >
             <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
             <span>INICIO</span>
-          </div>
+          </button>
         </div>
         
         <nav className={styles.mainSidebarNav}>
@@ -205,12 +212,19 @@ useEffect(() => {
   if (error) {
     return (
       <div className={styles.mainSidebar}>
-        <div className={styles.logo}>
-          <div className={styles.logoIcon}>
-            <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
-            <span>INICIO</span>
-          </div>
-        </div>
+ <div className={styles.logo}>
+  <button 
+    className={styles.logoIcon}
+    onClick={() => {
+      console.log('🏠 Navegando a INICIO...');
+      window.location.href = 'https://www.aemretail.com/navreport/home?m=b';
+    }}
+    title="Ir a Inicio"
+  >
+    <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
+    <span>INICIO</span>
+  </button>
+</div>
         
         <nav className={styles.mainSidebarNav}>
           <div className={styles.errorContainer}>
@@ -229,12 +243,19 @@ useEffect(() => {
 
   return (
     <div className={styles.mainSidebar}>
-      <div className={styles.logo}>
-        <div className={styles.logoIcon}>
-          <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
-          <span>INICIO</span>
-        </div>
-      </div>
+<div className={styles.logo}>
+  <button 
+    className={styles.logoIcon}
+    onClick={() => {
+      console.log('🏠 Navegando a INICIO...');
+      window.location.href = 'https://www.aemretail.com/navreport/home?m=b';
+    }}
+    title="Ir a Inicio"
+  >
+    <i className="fas fa-home sidebar-icon" style={{ fontSize: '18px', minWidth: '20px' }} />
+    <span>INICIO</span>
+  </button>
+</div>
       
       <nav className={styles.mainSidebarNav}>
         {aplicaciones.map((aplicacion) => (

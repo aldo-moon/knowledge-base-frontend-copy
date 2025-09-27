@@ -8,7 +8,7 @@ export const aplicacionService = {
   // Obtener todas las aplicaciones del endpoint
   getAllAplicaciones: async () => {
     try {
-      const response = await api.get('/aplicacion/AppsList');
+      const response = await api.get('/aplicacions/AppsList');
       return response.data;
     } catch (error) {
       console.error("❌ Error al obtener aplicaciones:", error);
@@ -16,9 +16,49 @@ export const aplicacionService = {
       throw error;
     }
   },
+  // Agregar esta función al aplicacionService
+generateToken: async (id_usuario, id_cliente = null) => {
+  try {
+    const datos = {
+      dynamic_claims: {
+        id_usuario: id_usuario,
+        ...(id_cliente && { id_cliente: id_cliente }) // Solo agregar id_cliente si existe
+      },
+      token_duration: 30,
+      unit_duration: "seconds",
+    };
+    
+    const bearerToken = "ff07d4b68ddc474a45031dbdf70f74c2e2d699d7af02c5d571b9b2ff6276434f";
+    
+    const response = await fetch('https://login.aemretail.com/api/v1/external-session/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${bearerToken}`,
+      },
+      body: JSON.stringify(datos)
+    });
+
+    const respuesta = await response.json();
+    
+    if (respuesta.code === 200) {
+      console.log('✅ Token generado exitosamente');
+      return respuesta.data.token;
+    } else {
+      console.error('❌ Error generando token:', respuesta);
+      return "";
+    }
+  } catch (error) {
+    console.error('❌ Error en generateToken:', error);
+    return "";
+  }
+},
+
+
+
 
   // ✅ NUEVA FUNCIÓN: Generar URL de navegación según las reglas
-  generarUrlNavegacion: (aplicacion) => {
+generarUrlNavegacion: async (aplicacion, id_usuario, id_cliente) => {
   const { tipo, externo, script } = aplicacion;
   
   // Regla 1: Si tipo es 0, no hacer nada (solo separador)
@@ -29,36 +69,31 @@ export const aplicacionService = {
 
   // Regla 2: Si tipo es 1
   if (tipo === 1) {
-    // Subregla 2a: externo es 0 o null - usar URL base + script
+    // Si externo es 0 o null - URL normal sin tokens
     if (externo === 0 || externo === null || externo === undefined) {
-      const url = `${aplicacionService.BASE_URL}${script}`;
-      //console.log('🔗 URL generada (interno):', url);
+      // ✅ VERIFICAR si script ya es URL completa
+      const url = script.startsWith('http') ? script : `${aplicacionService.BASE_URL}${script}`;
       return url;
     }
     
-    // Subregla 2b: externo es 1 - usar script como URL completa
-    if (externo === 1) {
-      const url = script;
-      //console.log('🔗 URL generada (externo tipo 1):', url);
-      return url;
+    // Si externo NO es 0 ni null - necesita tokens
+    if (!id_usuario) {
+      return 'REQUIRES_TOKEN';
     }
     
-    // Subregla 2c: externo es 2 - usar URL base + script
-    if (externo === 2) {
-      const url = `${aplicacionService.BASE_URL}${script}`;
-      //console.log('🔗 URL generada (externo tipo 2):', url);
-      return url;
+    const token = await aplicacionService.generateToken(id_usuario, id_cliente);
+    if (!token) {
+      console.error('❌ No se pudo generar token');
+      return null;
     }
     
-    // Subregla 2d: externo es 3 - usar script como URL completa con tokens
-    if (externo === 3) {
-      const url = `${script}?TOKEN=TOKEN2`;
-      //console.log('🔗 URL generada (externo con tokens):', url);
-      return url;
-    }
+    // ✅ VERIFICAR si script ya es URL completa antes de concatenar
+    const baseUrl = script.startsWith('http') ? script : `${aplicacionService.BASE_URL}${script}`;
+    const url = `${baseUrl}?dowjdjfur=${encodeURIComponent(token)}`;
+    console.log('🔗 URL generada (con tokens):', url);
+    return url;
   }
 
-  // Si no coincide con ninguna regla, devolver null
   console.warn('⚠️ No se pudo generar URL para:', aplicacion);
   return null;
 },
@@ -104,37 +139,35 @@ procesarAplicacionesParaSidebar: async (userId) => {  // ← Agregar userId
         .sort((a, b) => a.orden_submenu - b.orden_submenu);
 
       // Agrupar subsecciones por grupo
-      const subseccionesPorGrupo = subsecciones.reduce((acc, subseccion) => {
-        const grupo = subseccion.grupo;
-        if (!acc[grupo]) {
-          acc[grupo] = [];
-        }
-        acc[grupo].push({
-          ...subseccion,
-          // ✅ AGREGAR: URL de navegación precomputada
-          navegacionUrl: aplicacionService.generarUrlNavegacion(subseccion),
-          navegable: aplicacionService.generarUrlNavegacion(subseccion) !== null
-        });
-        return acc;
-      }, {});
+const subseccionesPorGrupo = subsecciones.reduce((acc, subseccion) => {
+  const grupo = subseccion.grupo;
+  if (!acc[grupo]) {
+    acc[grupo] = [];
+  }
+  acc[grupo].push({
+    ...subseccion,
+    navegacionUrl: null, // Se generará en el click
+    navegable: subseccion.tipo === 1 // ← CAMBIAR 'aplicacion' por 'subseccion'
+  });
+  return acc;
+}, {});
 
       // Construir la estructura final del sidebar
-      const sidebarData = seccionesPrincipales.map(seccion => ({
-        id: seccion._id,
-        script_id: seccion.script_id,
-        nombre: seccion.nombre,
-        icono: seccion.icono,
-        tipo: seccion.tipo,
-        grupo: seccion.grupo,
-        script: seccion.script,
-        externo: seccion.externo, // ✅ AGREGAR campo externo
-        orden_menu: seccion.orden_menu,
-        expandable: subseccionesPorGrupo[seccion.grupo]?.length > 0,
-        subsecciones: subseccionesPorGrupo[seccion.grupo] || [],
-        // ✅ AGREGAR: URL de navegación para secciones principales también
-        navegacionUrl: aplicacionService.generarUrlNavegacion(seccion),
-        navegable: aplicacionService.generarUrlNavegacion(seccion) !== null
-      }));
+const sidebarData = seccionesPrincipales.map(seccion => ({
+  id: seccion._id,
+  script_id: seccion.script_id,
+  nombre: seccion.nombre,
+  icono: seccion.icono,
+  tipo: seccion.tipo,
+  grupo: seccion.grupo,
+  script: seccion.script,
+  externo: seccion.externo,
+  orden_menu: seccion.orden_menu,
+  expandable: subseccionesPorGrupo[seccion.grupo]?.length > 0,
+  subsecciones: subseccionesPorGrupo[seccion.grupo] || [],
+  navegacionUrl: null, // Se generará en el click
+  navegable: seccion.tipo === 1 // Solo tipo 1 es navegable
+}));
 
       return sidebarData;
     } catch (error) {
