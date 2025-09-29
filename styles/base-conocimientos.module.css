@@ -75,7 +75,7 @@
 
 .baseConocimientosHeader {
   width: 100%;
-  padding: 1.5rem 0 0.5rem 0;
+  padding: .5rem 0 0.5rem 0;
   display: flex;
   justify-content: center;
 }
@@ -2597,6 +2597,12 @@ font-size: 1rem;
   height: 7.5rem;
 }
 
+.themeIcon2 {
+  width: 6rem;
+  height: 6rem;
+  color:white;
+  background: white;
+}
 
 .themeName {
   color: white;
@@ -5061,4 +5067,1355 @@ max-width: 300px;
 
 .dropdownScroll::-webkit-scrollbar-thumb:hover {
   background: #7c7ce0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para Modal CRUD de Modelos IA */
+/* ========================================= */
+
+/* Contenido del modal CRUD (más grande que modal normal) */
+.crudModalContent {
+  background: #27293d;
+  border: 2px solid #6262bf;
+  border-radius: 1.5rem;
+  width: 95%;
+  max-width: 900px;
+  max-height: 90vh;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: modalSlideIn 0.2s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header del modal CRUD */
+.crudModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid #3b3f5f;
+}
+
+/* Botón cerrar */
+.closeButton {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: #30334d;
+  color: white;
+}
+
+/* Body del modal CRUD */
+.crudModalBody {
+  padding: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+
+/* Scrollbar para crudModalBody */
+.crudModalBody::-webkit-scrollbar {
+  width: 8px;
+}
+
+.crudModalBody::-webkit-scrollbar-track {
+  background: #1e1e2f;
+  border-radius: 4px;
+}
+
+.crudModalBody::-webkit-scrollbar-thumb {
+  background: #6262bf;
+  border-radius: 4px;
+  border: 1px solid #3b3f5f;
+}
+
+.crudModalBody::-webkit-scrollbar-thumb:hover {
+  background: #7373c4;
+}
+
+/* Acciones CRUD */
+.crudActions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.createButton1 {
+  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.createButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.createButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Formulario */
+.crudForm {
+  background: #1e1e2f;
+  border: 1px solid #3b3f5f;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formLabel1 {
+  color: #facd01;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.formInput {
+  background: #27293d;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  color: white;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.formInput:focus {
+  border-color: #6262bf;
+  box-shadow: 0 0 0 3px rgba(98, 98, 191, 0.1);
+}
+
+.formInput::placeholder {
+  color: #6b7280;
+}
+
+.formActions1 {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.saveButton {
+  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.saveButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cancelButton {
+  background: transparent;
+  border: 1px solid #6b7280;
+  color: #9ca3af;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cancelButton:hover {
+  background: #30334d;
+  border-color: #9ca3af;
+  color: white;
+}
+
+/* Mensaje de error */
+.errorMessage {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  color: #ef4444;
+  font-size: 0.875rem;
+}
+
+/* Tabla CRUD */
+.crudTable {
+  background: #1e1e2f;
+  border: 1px solid #3b3f5f;
+  border-radius: 1rem;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-height: 400px; /* Altura máxima para activar scroll */
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 100%;
+  white-space: nowrap;
+}
+
+.table thead,
+.table tbody,
+.table tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.table tbody {
+  display: block;
+  overflow-y: auto;
+  max-height: 320px; /* Altura máxima del tbody */
+}
+
+.table tbody tr {
+  display: table;
+  width: 100%;
+}
+
+.table th {
+  background: #30334d;
+  color: #facd01;
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #3b3f5f;
+  font-size: 0.875rem;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #3b3f5f;
+  color: white;
+  font-size: 0.875rem;
+}
+
+.table tbody tr:hover {
+  background: rgba(98, 98, 191, 0.05);
+}
+
+.urlCell {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.urlCell span {
+  color: #6262bf;
+  cursor: help;
+}
+
+/* Botones de acción */
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editButton,
+.deleteButton {
+  background: none;
+  border: 1px solid;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editButton {
+  border-color: #fbbf24;
+  color: #fbbf24;
+}
+
+.editButton:hover:not(:disabled) {
+  background: #fbbf24;
+  color: #27293d;
+}
+
+.deleteButton {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.deleteButton:hover:not(:disabled) {
+  background: #ef4444;
+  color: white;
+}
+
+.editButton:disabled,
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Estados de carga y vacío */
+.loadingSpinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  color: #6262bf;
+  font-size: 0.875rem;
+}
+
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Footer del modal CRUD */
+.crudModalFooter {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #3b3f5f;
+  display: flex;
+  justify-content: center;
+}
+
+.recordCount {
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .crudModalContent {
+    width: 98%;
+    max-height: 95vh;
+    margin: 1rem;
+  }
+  
+  .table {
+    font-size: 0.75rem;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .formActions {
+    flex-direction: column;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+/* ========================================= */
+/* Estilos personalizados para Scrollbar */
+/* ========================================= */
+
+/* Scrollbar para tabla */
+.table::-webkit-scrollbar,
+.table tbody::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table::-webkit-scrollbar-track,
+.table tbody::-webkit-scrollbar-track {
+  background: #1e1e2f;
+  border-radius: 4px;
+}
+
+.table::-webkit-scrollbar-thumb,
+.table tbody::-webkit-scrollbar-thumb {
+  background: #6262bf;
+  border-radius: 4px;
+  border: 1px solid #3b3f5f;
+}
+
+.table::-webkit-scrollbar-thumb:hover,
+.table tbody::-webkit-scrollbar-thumb:hover {
+  background: #7373c4;
+}
+
+.table::-webkit-scrollbar-corner,
+.table tbody::-webkit-scrollbar-corner {
+  background: #1e1e2f;
+}
+
+/* Scrollbar para checkbox group */
+.checkboxGroup::-webkit-scrollbar {
+  width: 6px;
+}
+
+.checkboxGroup::-webkit-scrollbar-track {
+  background: #27293d;
+  border-radius: 3px;
+}
+
+.checkboxGroup::-webkit-scrollbar-thumb {
+  background: #6262bf;
+  border-radius: 3px;
+}
+
+.checkboxGroup::-webkit-scrollbar-thumb:hover {
+  background: #7373c4;
+}
+
+/* ========================================= */
+/* Modal de Confirmación de Eliminación */
+/* ========================================= */
+
+.confirmOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.confirmModal {
+  background: #27293d;
+  border: 2px solid #ef4444;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: modalSlideIn 0.2s ease-out;
+}
+
+.confirmHeader {
+  padding: 1.5rem 1.5rem 0 1.5rem;
+  text-align: center;
+}
+
+.confirmTitle {
+  color: #ef4444;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.confirmBody {
+  padding: 1rem 1.5rem;
+  text-align: center;
+}
+
+.confirmMessage {
+  color: white;
+  font-size: 1rem;
+  margin: 0 0 1rem 0;
+}
+
+.modeloInfo {
+  background: #1e1e2f;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modeloInfo strong {
+  color: #facd01;
+  font-size: 0.875rem;
+}
+
+.modeloInfo span {
+  color: #6262bf;
+  font-size: 0.75rem;
+  word-break: break-all;
+}
+
+.confirmFooter {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.confirmCancelButton {
+  background: transparent;
+  border: 1px solid #6b7280;
+  color: #9ca3af;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.confirmCancelButton:hover:not(:disabled) {
+  background: #30334d;
+  border-color: #9ca3af;
+  color: white;
+}
+
+.confirmDeleteButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.confirmDeleteButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+.confirmDeleteButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos adicionales para Modal de Secciones */
+/* ========================================= */
+
+/* Textarea para descripción */
+.formTextarea {
+  background: #27293d;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  color: white;
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.formTextarea:focus {
+  border-color: #6262bf;
+  box-shadow: 0 0 0 3px rgba(98, 98, 191, 0.1);
+}
+
+.formTextarea::placeholder {
+  color: #6b7280;
+}
+
+/* Grupo de checkboxes */
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: #1e1e2f;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.5rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease;
+}
+
+.checkboxLabel:hover {
+  background: rgba(98, 98, 191, 0.1);
+}
+
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #6262bf;
+}
+
+.checkboxText {
+  color: white;
+  font-size: 0.875rem;
+  flex: 1;
+}
+
+.noModels {
+  color: #6b7280;
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Celdas específicas de la tabla */
+.descriptionCell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.descriptionCell span {
+  cursor: help;
+}
+
+.modelosCell {
+  text-align: center;
+}
+
+.modelosCell span {
+  color: #6262bf;
+  font-size: 0.875rem;
+  cursor: help;
+}
+
+/* Badges de estado */
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statusActive {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.statusInactive {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Responsive para tablets */
+@media (max-width: 1024px) {
+  .table th:nth-child(2),
+  .table td:nth-child(2) {
+    display: none; /* Ocultar descripción en tablets */
+  }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .table th:nth-child(3),
+  .table td:nth-child(3),
+  .table th:nth-child(4),
+  .table td:nth-child(4) {
+    display: none; /* Ocultar modelos y estado en móviles */
+  }
+  
+  .checkboxGroup {
+    max-height: 120px;
+  }
+  
+  .formTextarea {
+    min-height: 60px;
+  }
+}
+
+/* ========================================= */
+/* Estilos para tabla con scroll (Secciones) */
+/* ========================================= */
+
+/* Aplicar los mismos estilos de tabla scrollable */
+.crudTable {
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.table {
+  display: block;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 100%;
+  white-space: nowrap;
+}
+
+.table thead,
+.table tbody,
+.table tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.table tbody {
+  display: block;
+  overflow-y: auto;
+  max-height: 320px;
+}
+
+.table tbody tr {
+  display: table;
+  width: 100%;
+}
+
+/* Scrollbar personalizado para tablas de secciones */
+.table::-webkit-scrollbar,
+.table tbody::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table::-webkit-scrollbar-track,
+.table tbody::-webkit-scrollbar-track {
+  background: #1e1e2f;
+  border-radius: 4px;
+}
+
+.table::-webkit-scrollbar-thumb,
+.table tbody::-webkit-scrollbar-thumb {
+  background: #6262bf;
+  border-radius: 4px;
+  border: 1px solid #3b3f5f;
+}
+
+.table::-webkit-scrollbar-thumb:hover,
+.table tbody::-webkit-scrollbar-thumb:hover {
+  background: #7373c4;
+}
+
+.table::-webkit-scrollbar-corner,
+.table tbody::-webkit-scrollbar-corner {
+  background: #1e1e2f;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para Tags de Sección en ThemeForm */
+/* ========================================= */
+
+
+
+/* Descripción de la sección seleccionada */
+.sectionDescription {
+  background: #1e1e2f;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para Dropdowns Múltiples (Modelos y Secciones) */
+/* ========================================= */
+
+/* Contenedor del dropdown */
+.multiSelectDropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: #27293d;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.5rem;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Dropdown de secciones (más alto) */
+.multiSelectDropdownSections {
+  max-height: 350px;
+}
+
+/* Opción "Seleccionar todos" */
+.selectAllOption {
+  padding: 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid #3b3f5f;
+  font-weight: 600;
+  color: rgb(148,163,184);
+  background: #1e1e2f;
+  transition: background-color 0.2s;
+}
+
+.selectAllOption.selected {
+  background: rgba(98, 98, 191, 0.1);
+}
+
+.selectAllOption:hover {
+  background: rgba(98, 98, 191, 0.05);
+}
+
+/* Item individual del dropdown */
+.dropdownItem {
+  padding: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  transition: background-color 0.2s;
+}
+
+.dropdownItem.selected {
+  background: rgba(98, 98, 191, 0.1);
+}
+
+.dropdownItem:hover {
+  background: rgba(98, 98, 191, 0.05);
+}
+
+/* Header de grupo (para secciones por modelo) */
+.groupHeader {
+  padding: 0.75rem;
+  background: #1e1e2f;
+  border-bottom: 1px solid #3b3f5f;
+  font-weight: 600;
+  color: rgb(148,163,184);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.groupHeader:hover {
+  background: #252738;
+}
+
+.groupCounter {
+  font-size: 0.75rem;
+  color: #6262bf;
+}
+
+/* Item de sección */
+.sectionItem {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: transparent;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.sectionItem.selected {
+  background: rgba(98, 98, 191, 0.1);
+  border-left-color: #6262bf;
+}
+
+.sectionItem:hover {
+  background: rgba(98, 98, 191, 0.05);
+}
+
+/* Contenido de la sección */
+.sectionContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sectionDescription {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  padding-left: 1.5rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* Grupo de secciones */
+.sectionGroup {
+  margin-bottom: 0.5rem;
+}
+
+/* Select trigger (botón que abre el dropdown) */
+.multiSelectTrigger {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Scrollbar para dropdowns */
+.multiSelectDropdown::-webkit-scrollbar,
+.multiSelectDropdownSections::-webkit-scrollbar {
+  width: 6px;
+}
+
+.multiSelectDropdown::-webkit-scrollbar-track,
+.multiSelectDropdownSections::-webkit-scrollbar-track {
+  background: #1e1e2f;
+  border-radius: 3px;
+}
+
+.multiSelectDropdown::-webkit-scrollbar-thumb,
+.multiSelectDropdownSections::-webkit-scrollbar-thumb {
+  background: #6262bf;
+  border-radius: 3px;
+}
+
+.multiSelectDropdown::-webkit-scrollbar-thumb:hover,
+.multiSelectDropdownSections::-webkit-scrollbar-thumb:hover {
+  background: #7373c4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .multiSelectDropdown {
+    max-height: 200px;
+  }
+  
+  .multiSelectDropdownSections {
+    max-height: 280px;
+  }
+  
+  .dropdownItem,
+  .selectAllOption,
+  .groupHeader {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .sectionItem {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* Estilos para Dropdowns Múltiples (Modelos y Secciones) */
+/* ========================================= */
+
+/* Contenedor del dropdown */
+.multiSelectDropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: #27293d;
+  border: 1px solid #3b3f5f;
+  border-radius: 0.5rem;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Dropdown de secciones (más alto) */
+.multiSelectDropdownSections {
+  max-height: 350px;
+}
+
+
+
+
+.selectAllOption:hover {
+  background: rgba(98, 98, 191, 0.05);
+}
+
+/* Item individual del dropdown */
+.dropdownItem {
+  padding: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  transition: background-color 0.2s;
+}
+
+.dropdownItem.selected {
+  background: rgba(98, 98, 191, 0.1);
+}
+
+.dropdownItem:hover {
+  background: rgba(98, 98, 191, 0.05);
+}
+
+/* Header de grupo (para secciones por modelo) */
+
+
+.groupHeader:hover {
+  background: #252738;
+}
+
+.groupCounter {
+  font-size: 0.75rem;
+  color: #6262bf;
+}
+
+/* Item de sección */
+.sectionItem {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: transparent;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.sectionItem.selected {
+  background: rgba(98, 98, 191, 0.1);
+  border-left-color: #6262bf;
+}
+
+.sectionItem:hover {
+  background: rgba(98, 98, 191, 0.05);
+}
+
+/* Contenido de la sección */
+.sectionContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sectionDescription {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  padding-left: 1.5rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* Grupo de secciones */
+.sectionGroup {
+  margin-bottom: 0.5rem;
+}
+
+/* Select trigger (botón que abre el dropdown) */
+.multiSelectTrigger {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Scrollbar para dropdowns */
+.multiSelectDropdown::-webkit-scrollbar,
+.multiSelectDropdownSections::-webkit-scrollbar {
+  width: 6px;
+}
+
+.multiSelectDropdown::-webkit-scrollbar-track,
+.multiSelectDropdownSections::-webkit-scrollbar-track {
+  background: #1e1e2f;
+  border-radius: 3px;
+}
+
+.multiSelectDropdown::-webkit-scrollbar-thumb,
+.multiSelectDropdownSections::-webkit-scrollbar-thumb {
+  background: #6262bf;
+  border-radius: 3px;
+}
+
+.multiSelectDropdown::-webkit-scrollbar-thumb:hover,
+.multiSelectDropdownSections::-webkit-scrollbar-thumb:hover {
+  background: #7373c4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .multiSelectDropdown {
+    max-height: 200px;
+  }
+  
+  .multiSelectDropdownSections {
+    max-height: 280px;
+  }
+  
+  .dropdownItem,
+  .selectAllOption,
+  .groupHeader {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .sectionItem {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* ========================================= */
+/* Estilos específicos para Áreas y Puestos */
+/* ========================================= */
+
+/* Dropdown con altura limitada */
+.dropdownScroll {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Loading state */
+.loadingState {
+  padding: 1rem;
+  text-align: center;
+  font-style: italic;
+  color: #9ca3af;
+}
+
+/* Empty state */
+.emptyDropdownState {
+  padding: 1rem;
+  text-align: center;
+  font-style: italic;
+  color: #9ca3af;
+}
+
+/* Header de área en dropdown de puestos */
+.areaGroupHeader {
+  font-weight: 600;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid #3b3f5f;
+  background-color: #27293d;
+}
+
+/* Opción "Todos los puestos" */
+.allPuestosOption {
+  padding: 0.5rem 0.75rem 0.5rem 1.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: transparent;
+  color: #ffffff;
+  font-weight: 600;
+  border-bottom: 1px solid #3b3f5f;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.allPuestosOption.selected {
+  background: #2a2d47;
+  color: white;
+}
+
+.allPuestosOption:hover {
+  background: #2a2d47;
+}
+
+/* Items de puestos individuales */
+.puestoItem {
+  padding: 0.5rem 0.75rem 0.5rem 1.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: transparent;
+  display: flex;
+  justify-content: 'space-between';
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.puestoItem.selected {
+  background: #2a2d47;
+  color: white;
+}
+
+.puestoItem:hover {
+  background: #2a2d47;
+}
+
+/* Items de áreas */
+.areaItem {
+  padding: 0.75rem;
+  cursor: pointer;
+  background: transparent;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.areaItem.selected {
+  background: #2a2d47;
+  color: white;
+}
+
+.areaItem:hover {
+  background: #2a2d47;
 }

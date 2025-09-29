@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { User, Settings, LogOut, ChevronDown, Bell, Search, HelpCircle } from 'lucide-react';
 import { authService } from '../../../services/authService';
 import styles from './TopHeader.module.css';
+import { FaApple, FaAndroid } from 'react-icons/fa';
+import { Type } from 'lucide-react';
 
 interface UserData {
   _id: string;
@@ -165,16 +167,26 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
       <div className={styles.rightSection}>
         {/* Iconos adicionales */}
         <div className={styles.iconSection}>
-          <button className={styles.iconButton} title="Buscar">
-            <Search size={18} />
+          <button 
+            className={styles.iconButton} 
+            title="Descargar para iOS"
+            onClick={() => window.open('https://apps.apple.com/us/app/sri-m%C3%B3vil/id6479270163', '_blank')}
+          >
+            {/* @ts-ignore */}
+            <FaApple size={22} />
           </button>
           
-          <button className={styles.iconButton} title="Notificaciones">
-            <Bell size={18} />
+          <button 
+            className={styles.iconButton} 
+            title="Descargar para Android"
+            onClick={() => window.open('https://play.google.com/store/apps/details?id=com.zimple.aemretailapp&pli=1', '_blank')}
+          >
+            {/* @ts-ignore */}
+            <FaAndroid size={22} />
           </button>
           
           <button className={styles.iconButton} title="Ayuda">
-            <HelpCircle size={18} />
+          <img src="/knowledge/Supporte_a.svg" alt="Tema" className={styles.themeIcon2} />
           </button>
         </div>
 

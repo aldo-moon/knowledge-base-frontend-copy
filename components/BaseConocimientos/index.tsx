@@ -31,6 +31,9 @@ import FilesGrid from './Files/FilesGrid';
 import ThemeDetailView from './Content/ThemeDetailView';
 import ThemeCommentsPanel from './Details/ThemeCommentsPanel';
 import TopHeader from './Header/TopHeader';
+import ModeloIACrudModal from './Modals/ModeloIACrudModal';
+import SeccionCrudModal from './Modals/SeccionCrudModal';
+
 
 
 // Importar servicios
@@ -178,13 +181,15 @@ interface SidebarItem {
 
 interface ThemeFormData {
   priority: string;
-   area: string[];        // ← CAMBIO: de 'area' a 'areas' (array)
+  area: string[]; 
   position: string[]; 
   tags: string[];
   fileIds?: string[];
-  files: globalThis.File[]; // Archivos nativos del navegador para upload
+  files: globalThis.File[]; 
   uploadedFiles?: { id: string; name: string }[];
-  isDraft?: boolean; // <- AGREGAR ESTA LÍNEA
+  isDraft?: boolean;
+  aiModel?: string[];
+  aiSection?: string[]; 
 }
 
 interface FavoriteFolder {
@@ -266,6 +271,8 @@ const handleCancelThemeDelete = () => {
 };
 const [fileFavorites, setFileFavorites] = useState<Set<string>>(new Set());
 
+const [isModeloIAModalOpen, setIsModeloIAModalOpen] = useState(false);
+const [isSeccionModalOpen, setIsSeccionModalOpen] = useState(false);
 
 const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -458,25 +465,37 @@ const handleSidebarItemClick = async (aplicacion: Aplicacion | Subseccion, isSub
 
   // Handler para NewButton
 const handleNewButtonAction = (action: string) => {
-  switch(action) {
+  switch (action) {
     case 'new-folder':
       setIsNewFolderModalOpen(true);
       break;
+
     case 'new-topic':
+      // ✅ Combina ambas variantes
       setIsEditingTheme(false);
       setThemeToEdit(null);
       setThemeTitle('');
       setThemeDescription('');
-      
       navigateToCreateTheme(currentFolderId);
       break;
+
     case 'multimedia':
       setIsMultimediaModalOpen(true);
       break;
+
+    case 'new-modelo': // ✅ Nueva acción
+      setIsModeloIAModalOpen(true);
+      break;
+
+    case 'new-section': // ✅ Nueva acción para secciones
+      setIsSeccionModalOpen(true);
+      break;
+
     default:
-      console.log(`Acción no implementada: ${action}`);
+      console.log(`Acción no reconocida: ${action}`);
   }
 };
+
 
   // Handler para SearchSection
   const handleSearchChange = (term: string) => {
@@ -618,7 +637,9 @@ const handleThemeFormSubmit = async (formData: ThemeFormData) => {
       author_topic_id: CURRENT_USER_ID,
       keywords: Array.isArray(formData.tags) ? formData.tags : [],
       files_attachment_id: formData.fileIds || [],
-      is_draft: formData.isDraft !== undefined ? formData.isDraft : true 
+      is_draft: formData.isDraft !== undefined ? formData.isDraft : true,
+      modelo_id: formData.aiModel || [], // ✅ Enviar array de modelos
+      seccion_id: formData.aiSection || [], // ✅ Enviar array de secciones
     };
 
     console.log('📁 Tema completo:', temaCompleto);
@@ -1617,7 +1638,6 @@ const handleLogout = () => {
     />
   
 
-
     {/* Usar componente HeaderSection */}
       <HeaderSection />
 
@@ -1798,6 +1818,15 @@ const handleLogout = () => {
         onConfirmDelete={handleDeleteFile}
         onCancel={handleCancelDeleteFile}
       />
+      <ModeloIACrudModal 
+      isOpen={isModeloIAModalOpen}
+      onClose={() => setIsModeloIAModalOpen(false)}
+     />
+      <SeccionCrudModal 
+        isOpen={isSeccionModalOpen}
+        onClose={() => setIsSeccionModalOpen(false)}
+      />
+      
     </div>
   );
 };

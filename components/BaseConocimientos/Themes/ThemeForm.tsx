@@ -5,6 +5,8 @@ import styles from './../../../styles/base-conocimientos.module.css';
 import { areaService } from '../../../services/areaService';
 import { puestoService } from '../../../services/puestoService';
 import { archivoService } from '../../../services/archivoService';
+import { modeloIAService } from '../../../services/modeloIAService';
+import { seccionService } from '../../../services/seccionService';
 
 interface ThemeFormProps {
   onSubmit?: (formData: ThemeFormData) => void; 
@@ -19,14 +21,14 @@ interface ThemeFormData {
   priority: string;
   area: string[];
   position: string[];  
-  files: globalThis.File[]; // Archivos nativos del navegador para upload
+  files: globalThis.File[];
   uploadedFiles: { id: string; name: string }[];
   tags: string[];  
-  currentTag: string;  
-  aiModel: string;
+  currentTag: string;
+  aiModel: string[];  // ✅ Cambiar a array
+  aiSection: string[];
   suggestInHelpDesk: boolean;
   isDraft?: boolean;
-
 }
 
 interface Area {
@@ -46,6 +48,27 @@ interface PuestoData {
 interface PuestosResponse {
   nombre_area: string;
   data: PuestoData[];
+}
+
+interface ModeloIA {
+  _id: string;
+  nombre: string;
+  url_ai: string;
+}
+
+interface Seccion {
+  _id: string;
+  nombre: string;
+  descripcion: string;
+  modelo_id: string[];
+  status: boolean;
+}
+
+interface SeccionesAgrupadas {
+  [modeloId: string]: {
+    modeloNombre: string;
+    secciones: Seccion[];
+  };
 }
 
 // ✅ Define la interfaz para Puesto también
@@ -84,6 +107,17 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
   const [loadingPuestos, setLoadingPuestos] = useState(false);
   const [isAreasDropdownOpen, setIsAreasDropdownOpen] = useState(false);
   const [isPuestosDropdownOpen, setIsPuestosDropdownOpen] = useState(false);
+  const [modelosIA, setModelosIA] = useState<ModeloIA[]>([]);
+const [secciones, setSecciones] = useState<Seccion[]>([]);
+const [seccionesFiltradas, setSeccionesFiltradas] = useState<Seccion[]>([]);
+const [loadingModelos, setLoadingModelos] = useState(false);
+const [loadingSecciones, setLoadingSecciones] = useState(false);
+const [isModelosDropdownOpen, setIsModelosDropdownOpen] = useState(false);
+const [isSeccionesDropdownOpen, setIsSeccionesDropdownOpen] = useState(false);
+const modelosDropdownRef = useRef<HTMLDivElement>(null);
+const seccionesDropdownRef = useRef<HTMLDivElement>(null);
+const [seccionesAgrupadas, setSeccionesAgrupadas] = useState<SeccionesAgrupadas>({});
+
   const [selectedAllAreas, setSelectedAllAreas] = useState<string[]>([]); // Areas donde se seleccionó "Todos"
   const isAllAreaSelected = (areaPuestos: PuestosResponse): boolean => {
   return selectedAllAreas.includes(areaPuestos.nombre_area);
@@ -101,16 +135,17 @@ const puestosDropdownRef = useRef<HTMLDivElement>(null);
     }
   };
 
-  // ✅ ESTADO INICIAL BASADO EN MODO EDICIÓN:
+// ✅ ESTADO INICIAL BASADO EN MODO EDICIÓN:
 const [formData, setFormData] = useState<ThemeFormData>({
   priority: isEditMode ? getPriorityText(themeToEdit?.priority) : '',
-  area: isEditMode ? (Array.isArray(themeToEdit?.area_id) ? themeToEdit.area_id : [themeToEdit?.area_id || '']) : [], // ← CAMBIO
-  position: isEditMode ? (Array.isArray(themeToEdit?.puesto_id) ? themeToEdit.puesto_id : [themeToEdit?.puesto_id || '']) : [], // ← CAMBIO
+  area: isEditMode ? (Array.isArray(themeToEdit?.area_id) ? themeToEdit.area_id : [themeToEdit?.area_id || '']) : [],
+  position: isEditMode ? (Array.isArray(themeToEdit?.puesto_id) ? themeToEdit.puesto_id : [themeToEdit?.puesto_id || '']) : [],
   files: [],
   uploadedFiles: [],
   tags: isEditMode ? (themeToEdit?.keywords || []) : [],
   currentTag: '',
-  aiModel: '',
+  aiModel: [], // ✅ Array vacío
+  aiSection: [],// ✅ Agregar este campo que faltaba
   suggestInHelpDesk: false
 });
 
@@ -563,6 +598,147 @@ const handleSubmitWithDraft = async (isDraft: boolean) => {
   }
 }; */
 
+
+
+// Agregar este useEffect para cargar los modelos IA al montar el componente:
+useEffect(() => {
+  const loadModelosIA = async () => {
+    try {
+      setLoadingModelos(true);
+      const response = await modeloIAService.getAllModeloIA();
+      setModelosIA(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.error('Error al cargar modelos IA:', error);
+    } finally {
+      setLoadingModelos(false);
+    }
+  };
+
+  loadModelosIA();
+}, []);
+
+// Agregar este useEffect para cargar todas las secciones:
+useEffect(() => {
+  const loadSecciones = async () => {
+    try {
+      setLoadingSecciones(true);
+      const response = await seccionService.getAllSeccion();
+      setSecciones(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.error('Error al cargar secciones:', error);
+    } finally {
+      setLoadingSecciones(false);
+    }
+  };
+
+  loadSecciones();
+}, []);
+
+// Agregar este useEffect para filtrar secciones cuando se selecciona un modelo:
+useEffect(() => {
+  if (formData.aiModel.length > 0) {
+    // Agrupar secciones por modelo
+    const agrupadas: SeccionesAgrupadas = {};
+    
+    formData.aiModel.forEach(modeloId => {
+      const modelo = modelosIA.find(m => m._id === modeloId);
+      if (modelo) {
+        const seccionesDelModelo = secciones.filter(seccion => 
+          seccion.status && 
+          seccion.modelo_id.includes(modeloId)
+        );
+        
+        if (seccionesDelModelo.length > 0) {
+          agrupadas[modeloId] = {
+            modeloNombre: modelo.nombre,
+            secciones: seccionesDelModelo
+          };
+        }
+      }
+    });
+    
+    setSeccionesAgrupadas(agrupadas);
+    
+    // Limpiar secciones seleccionadas que ya no son válidas
+    const seccionesValidas = Object.values(agrupadas)
+      .flatMap(grupo => grupo.secciones.map(s => s._id));
+    
+    setFormData(prev => ({
+      ...prev,
+      aiSection: prev.aiSection.filter(id => seccionesValidas.includes(id))
+    }));
+  } else {
+    setSeccionesAgrupadas({});
+    setFormData(prev => ({ ...prev, aiSection: [] }));
+  }
+}, [formData.aiModel, secciones, modelosIA]);
+
+
+
+// ✅ AGREGAR funciones para manejar selección de modelos:
+const handleModeloToggle = (modeloId: string) => {
+  setFormData(prev => ({
+    ...prev,
+    aiModel: prev.aiModel.includes(modeloId)
+      ? prev.aiModel.filter(id => id !== modeloId)
+      : [...prev.aiModel, modeloId]
+  }));
+};
+
+const handleSelectAllModelos = () => {
+  if (formData.aiModel.length === modelosIA.length) {
+    setFormData(prev => ({ ...prev, aiModel: [] }));
+  } else {
+    setFormData(prev => ({ ...prev, aiModel: modelosIA.map(m => m._id) }));
+  }
+};
+
+// ✅ AGREGAR funciones para manejar selección de secciones:
+const handleSeccionToggle = (seccionId: string) => {
+  setFormData(prev => ({
+    ...prev,
+    aiSection: prev.aiSection.includes(seccionId)
+      ? prev.aiSection.filter(id => id !== seccionId)
+      : [...prev.aiSection, seccionId]
+  }));
+};
+
+const handleSelectAllSeccionesDelModelo = (modeloId: string) => {
+  const seccionesDelModelo = seccionesAgrupadas[modeloId]?.secciones.map(s => s._id) || [];
+  const todasSeleccionadas = seccionesDelModelo.every(id => formData.aiSection.includes(id));
+  
+  if (todasSeleccionadas) {
+    // Deseleccionar todas
+    setFormData(prev => ({
+      ...prev,
+      aiSection: prev.aiSection.filter(id => !seccionesDelModelo.includes(id))
+    }));
+  } else {
+    // Seleccionar todas
+      const nuevasSelecciones = Array.from(new Set([...formData.aiSection, ...seccionesDelModelo]));    setFormData(prev => ({
+      ...prev,
+      aiSection: nuevasSelecciones
+    }));
+  }
+};
+
+// ✅ AGREGAR useEffect para cerrar dropdowns al hacer clic fuera:
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (modelosDropdownRef.current && !modelosDropdownRef.current.contains(event.target as Node)) {
+      setIsModelosDropdownOpen(false);
+    }
+    if (seccionesDropdownRef.current && !seccionesDropdownRef.current.contains(event.target as Node)) {
+      setIsSeccionesDropdownOpen(false);
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, []);
+
+
+
   return (
     <div className={styles.topicFormContent}>
       <form className={styles.topicForm} onSubmit={(e) => e.preventDefault()}>
@@ -587,9 +763,8 @@ const handleSubmitWithDraft = async (isDraft: boolean) => {
   <label className={styles.formLabel}>Áreas</label>
   <div ref={areasDropdownRef} style={{ position: 'relative' }}>
     <div 
-className={`${styles.formSelect} ${errors.area ? styles.formSelectError : ''}`}
+      className={`${styles.formSelect} ${styles.multiSelectTrigger} ${errors.area ? styles.formSelectError : ''}`}
       onClick={() => setIsAreasDropdownOpen(!isAreasDropdownOpen)}
-      style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
     >
       <span>
         {formData.area.length === 0 
@@ -606,44 +781,18 @@ className={`${styles.formSelect} ${errors.area ? styles.formSelectError : ''}`}
       />
     </div>
     
-      {isAreasDropdownOpen && (
-        <div className={`${styles.formSelect} ${styles.dropdownScroll}`} style={{ 
-          position: 'absolute', 
-          top: 'calc(100% + 4px)', 
-          left: 0, 
-          right: 0, 
-          zIndex: 9999,
-          maxHeight: '200px',
-          overflowY: 'auto'
-        }}>
+    {isAreasDropdownOpen && (
+      <div className={`${styles.formSelect} ${styles.dropdownScroll}`}>
         {loadingData ? (
-          <div style={{ padding: '1rem', textAlign: 'center', fontStyle: 'italic' }}>Cargando...</div>
+          <div className={styles.loadingState}>Cargando...</div>
         ) : (
           areas.map((area) => (
             <div 
               key={area._id} 
-              style={{ 
-                padding: '0.75rem',
-                cursor: 'pointer',
-                backgroundColor: formData.area.includes(area.area_id) ? '#2563eb' : 'transparent',
-                color: formData.area.includes(area.area_id) ? 'white' : 'inherit',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
+              className={`${styles.areaItem} ${formData.area.includes(area.area_id) ? styles.selected : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
                 handleAreaToggle(area.area_id);
-              }}
-              onMouseEnter={(e) => {
-                if (!formData.area.includes(area.area_id)) {
-                  e.currentTarget.style.backgroundColor = '#2a2d47';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!formData.area.includes(area.area_id)) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }
               }}
             >
               <span>{area.nombre}</span>
@@ -654,7 +803,7 @@ className={`${styles.formSelect} ${errors.area ? styles.formSelectError : ''}`}
       </div>
     )}
   </div>
-{errors.area && <span className={styles.errorMessage}>{errors.area}</span>}
+  {errors.area && <span className={styles.errorMessage}>{errors.area}</span>}
 </div>
 
 {/* Puestos */}
@@ -662,9 +811,8 @@ className={`${styles.formSelect} ${errors.area ? styles.formSelectError : ''}`}
   <label className={styles.formLabel}>Puestos</label>
   <div ref={puestosDropdownRef} style={{ position: 'relative' }}>
     <div 
-className={`${styles.formSelect} ${errors.position ? styles.formSelectError : ''}`}
+      className={`${styles.formSelect} ${styles.multiSelectTrigger} ${errors.position ? styles.formSelectError : ''}`}
       onClick={() => setIsPuestosDropdownOpen(!isPuestosDropdownOpen)}
-      style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
     >
       <span>
         {formData.position.length === 0 
@@ -681,104 +829,55 @@ className={`${styles.formSelect} ${errors.position ? styles.formSelectError : ''
       />
     </div>
     
-      {isPuestosDropdownOpen && (
-  <div className={`${styles.formSelect} ${styles.dropdownScroll}`} style={{ 
-    position: 'absolute', 
-    top: 'calc(100% + 4px)', 
-    left: 0, 
-    right: 0, 
-    zIndex: 9999,
-    maxHeight: '200px',
-    overflowY: 'auto'
-  }}>
-    {loadingPuestos ? (
-      <div style={{ padding: '1rem', textAlign: 'center', fontStyle: 'italic' }}>Cargando...</div>
-    ) : puestosPorAreas.length === 0 ? (
-      <div style={{ padding: '1rem', textAlign: 'center', fontStyle: 'italic' }}>Selecciona áreas para ver puestos disponibles</div>
-    ) : (
-      puestosPorAreas.map((areaPuestos) => (
-        <div key={areaPuestos.nombre_area}>
-          <div style={{ 
-            fontWeight: '600',
-            color: '#94a3b8',
-            fontSize: '0.875rem',
-            padding: '0.5rem',
-            borderBottom: '1px solid #3b3f5f',
-            backgroundColor: '#27293d'
-          }}>
-            {areaPuestos.nombre_area}
+    {isPuestosDropdownOpen && (
+      <div className={`${styles.formSelect} ${styles.dropdownScroll}`}>
+        {loadingPuestos ? (
+          <div className={styles.loadingState}>Cargando...</div>
+        ) : puestosPorAreas.length === 0 ? (
+          <div className={styles.emptyDropdownState}>
+            Selecciona áreas para ver puestos disponibles
           </div>
-          
-          {/* ✅ AGREGAR OPCIÓN "TODOS" */}
-          <div 
-            style={{ 
-              padding: '0.5rem 0.75rem 0.5rem 1.5rem',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              backgroundColor: isAllAreaSelected(areaPuestos) ? '#2563eb' : 'transparent',
-              color: isAllAreaSelected(areaPuestos) ? 'white' : '#ffffffff',
-              fontWeight: '600',
-              borderBottom: '1px solid #3b3f5f'
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAllAreaToggle(areaPuestos);
-            }}
-            onMouseEnter={(e) => {
-              if (!isAllAreaSelected(areaPuestos)) {
-                e.currentTarget.style.backgroundColor = '#2a2d47';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isAllAreaSelected(areaPuestos)) {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }
-            }}
-          >
-            <span>Todos los puestos</span>
-            {isAllAreaSelected(areaPuestos) && <Check size={16} />}
-          </div>
-          
-          {/* Puestos individuales */}
-          {areaPuestos.data.map((puesto) => (
-            <div 
-              key={puesto._id}
-              style={{ 
-                padding: '0.5rem 0.75rem 0.5rem 1.5rem',
-                cursor: 'pointer',
-                fontSize: '0.9rem',
-                backgroundColor: formData.position.includes(puesto.puesto_id) ? '#2563eb' : 'transparent',
-                color: formData.position.includes(puesto.puesto_id) ? 'white' : 'inherit',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePositionToggle(puesto.puesto_id);
-              }}
-              onMouseEnter={(e) => {
-                if (!formData.position.includes(puesto.puesto_id)) {
-                  e.currentTarget.style.backgroundColor = '#2a2d47';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!formData.position.includes(puesto.puesto_id)) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }
-              }}
-            >
-              <span>{puesto.nombre}</span>
-              {formData.position.includes(puesto.puesto_id) && <Check size={16} />}
+        ) : (
+          puestosPorAreas.map((areaPuestos) => (
+            <div key={areaPuestos.nombre_area}>
+              {/* Header del área */}
+              <div className={styles.areaGroupHeader}>
+                {areaPuestos.nombre_area}
+              </div>
+              
+              {/* Opción "Todos los puestos" */}
+              <div 
+                className={`${styles.allPuestosOption} ${isAllAreaSelected(areaPuestos) ? styles.selected : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAllAreaToggle(areaPuestos);
+                }}
+              >
+                <span>Todos los puestos</span>
+                {isAllAreaSelected(areaPuestos) && <Check size={16} />}
+              </div>
+              
+              {/* Puestos individuales */}
+              {areaPuestos.data.map((puesto) => (
+                <div 
+                  key={puesto._id}
+                  className={`${styles.puestoItem} ${formData.position.includes(puesto.puesto_id) ? styles.selected : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePositionToggle(puesto.puesto_id);
+                  }}
+                >
+                  <span>{puesto.nombre}</span>
+                  {formData.position.includes(puesto.puesto_id) && <Check size={16} />}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ))
+          ))
+        )}
+      </div>
     )}
   </div>
-)}
-  </div>
-{errors.position && <span className={styles.errorMessage}>{errors.position}</span>}
+  {errors.position && <span className={styles.errorMessage}>{errors.position}</span>}
 </div>
 
         {/* Archivos */}
@@ -951,31 +1050,155 @@ className={`${styles.formSelect} ${errors.position ? styles.formSelectError : ''
         {errors.tags && <span className={styles.errorMessage}>{errors.tags}</span>}
       </div>
 
-        {/* Alimentar AI */}
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Alimentar AI</label>
-          <select 
-            className={styles.formSelect}
-            value={formData.aiModel}
-            onChange={(e) => handleInputChange('aiModel', e.target.value)}
-          >
-            <option value="">Selecciona una AI</option>
-            <option value="Club-Chelero">Club Chelero</option>
-            <option value="Alacel">Alacel</option>
-          </select>
-          <div className={styles.aiSuggestion}>
-            <input 
-              type="checkbox" 
-              id="aiSuggestion" 
-              className={styles.checkbox}
-              checked={formData.suggestInHelpDesk}
-              onChange={(e) => handleInputChange('suggestInHelpDesk', e.target.checked)}
-            />
-            <label htmlFor="aiSuggestion" className={styles.checkboxLabel}>
-              Sugerir en help desk
-            </label>
-          </div>
+{/* Modelos IA - Selección Múltiple */}
+<div className={styles.formGroup}>
+  <label className={styles.formLabel}>
+    <u>Alimentar AI</u>
+  </label>
+  <div ref={modelosDropdownRef} style={{ position: 'relative' }}>
+    <div 
+      className={`${styles.formSelect} ${styles.multiSelectTrigger}`}
+      onClick={() => setIsModelosDropdownOpen(!isModelosDropdownOpen)}
+    >
+      <span>
+        {loadingModelos 
+          ? 'Cargando modelos...'
+          : formData.aiModel.length === 0 
+            ? 'Seleccionar modelos de IA'
+            : `${formData.aiModel.length} modelo${formData.aiModel.length !== 1 ? 's' : ''} seleccionado${formData.aiModel.length !== 1 ? 's' : ''}`
+        }
+      </span>
+      <ChevronDown size={16} style={{ 
+        transform: isModelosDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+        transition: 'transform 0.2s ease'
+      }} />
+    </div>
+
+    {isModelosDropdownOpen && !loadingModelos && (
+      <div className={styles.multiSelectDropdown}>
+        {/* Opción "Seleccionar todos" */}
+        <div
+          className={`${styles.selectAllOption} ${formData.aiModel.length === modelosIA.length ? styles.selected : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleSelectAllModelos();
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={formData.aiModel.length === modelosIA.length}
+            onChange={() => {}}
+            style={{ marginRight: '0.5rem' }}
+          />
+          Seleccionar todos
         </div>
+
+        {modelosIA.map((modelo) => (
+          <div
+            key={modelo._id}
+            className={`${styles.dropdownItem} ${formData.aiModel.includes(modelo._id) ? styles.selected : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleModeloToggle(modelo._id);
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={formData.aiModel.includes(modelo._id)}
+              onChange={() => {}}
+              style={{ marginRight: '0.5rem' }}
+            />
+            <span>{modelo.nombre}</span>
+            {formData.aiModel.includes(modelo._id) && <Check size={16} style={{ marginLeft: 'auto', color: '#10b981' }} />}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
+
+{/* Secciones - Solo se muestra si hay modelos seleccionados */}
+{formData.aiModel.length > 0 && Object.keys(seccionesAgrupadas).length > 0 && (
+  <div className={styles.formGroup}>
+    <label className={styles.formLabel}>
+      Secciones
+    </label>
+    <div ref={seccionesDropdownRef} style={{ position: 'relative' }}>
+      <div 
+        className={styles.formSelect}
+        style={{ 
+          cursor: 'pointer',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}
+        onClick={() => setIsSeccionesDropdownOpen(!isSeccionesDropdownOpen)}
+      >
+        <span>
+          {formData.aiSection.length === 0 
+            ? 'Seleccionar secciones'
+            : `${formData.aiSection.length} sección${formData.aiSection.length !== 1 ? 'es' : ''} seleccionada${formData.aiSection.length !== 1 ? 's' : ''}`
+          }
+        </span>
+        <ChevronDown size={16} style={{ 
+          transform: isSeccionesDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+          transition: 'transform 0.2s ease'
+        }} />
+      </div>
+
+      {isSeccionesDropdownOpen && (
+        <div className={`${styles.multiSelectDropdown} ${styles.multiSelectDropdownSections}`}>
+          {Object.entries(seccionesAgrupadas).map(([modeloId, grupo]) => (
+            <div key={modeloId} className={styles.sectionGroup}>
+              {/* Header del grupo con nombre del modelo */}
+              <div
+                className={styles.groupHeader}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectAllSeccionesDelModelo(modeloId);
+                }}
+              >
+                <span> {grupo.modeloNombre}</span>
+                <span className={styles.groupCounter}>
+                  ({grupo.secciones.filter(s => formData.aiSection.includes(s._id)).length}/{grupo.secciones.length})
+                </span>
+              </div>
+
+              {/* Secciones del modelo */}
+              {grupo.secciones.map((seccion) => (
+                <div
+                  key={seccion._id}
+                  className={`${styles.sectionItem} ${formData.aiSection.includes(seccion._id) ? styles.selected : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSeccionToggle(seccion._id);
+                  }}
+                >
+                  <div className={styles.sectionContent}>
+                    <input
+                      type="checkbox"
+                      checked={formData.aiSection.includes(seccion._id)}
+                      onChange={() => {}}
+                    />
+                    <span style={{ fontWeight: 500 }}>{seccion.nombre}</span>
+                    {formData.aiSection.includes(seccion._id) && (
+                      <Check size={14} style={{ marginLeft: 'auto', color: '#10b981' }} />
+                    )}
+                  </div>
+                  {seccion.descripcion && (
+                    <span className={styles.sectionDescription}>
+                      {seccion.descripcion}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+)}
         {/* Botones - diferentes según el modo */}
         <div className={styles.formActions} style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', flexDirection: "column"  }}>
           

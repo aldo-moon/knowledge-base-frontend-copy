@@ -21,8 +21,8 @@ export const NewButton: React.FC<NewButtonProps> = ({ onOptionClick }) => {
     { icon: FolderPlus, label: 'Nueva carpeta', action: 'new-folder' },
     { icon: MessageSquare, label: 'Nuevo Tema', action: 'new-topic' },
     { icon: Camera, label: 'Multimedia', action: 'multimedia' },
-    { icon: LayoutTemplate, label: 'Nuevo Modelo', action: 'multimedia' },
-    { icon: FileBox, label: 'Nueva Sección', action: 'multimedia' }
+    { icon: LayoutTemplate, label: 'Nuevo Modelo', action: 'new-modelo' },
+    { icon: FileBox, label: 'Nueva Sección', action: 'new-section' }
   ];
 
   // Cerrar dropdown cuando se hace clic fuera
