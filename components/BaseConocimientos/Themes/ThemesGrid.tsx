@@ -11,6 +11,8 @@ interface Theme {
   folder_id?: string;
   keywords?: string[];
   creation_date?: string;
+  isDraft?: boolean; // ✅ Nueva propiedad
+
 }
 
 interface ThemesGridProps {
@@ -42,6 +44,13 @@ export const ThemesGrid: React.FC<ThemesGridProps> = ({
   selectedItems,
   onItemSelect
 }) => {
+    console.log('🔍 ThemesGrid recibió:', {
+    totalThemes: themes.length,
+    themes: themes,
+    themesWithDraft: themes.filter(t => t?.isDraft).length
+  });
+
+
   if (loading) {
     return (
       <div className={styles.contentSection}>
@@ -66,20 +75,29 @@ export const ThemesGrid: React.FC<ThemesGridProps> = ({
     <div className={styles.contentSection}>
       <h3 className={styles.sectionTitle}>Temas</h3>
       <div className={styles.themesGrid}>
-        {themes.map((theme) => (
-          <ThemeCard
-            key={theme._id}
-            theme={theme}
-            isFavorite={themeFavorites.has(theme._id)}
-            onSelect={onThemeSelect || (() => {})} // ✅ Proporcionar fallback
-            onThemeDoubleClick={onThemeDoubleClick}
-            onMenuAction={onThemeMenuAction}
-            onToggleFavorite={onToggleThemeFavorite}
-            // Props de papelera si las necesitas
-
-          />
-        ))}
-      </div>
+{themes.filter(theme => {
+  if (!theme) {
+    console.log('❌ Tema null encontrado');
+    return false;
+  }
+  if (!theme._id) {
+    console.log('❌ Tema sin _id:', theme);
+    return false;
+  }
+  return true;
+}).map((theme) => (
+  <ThemeCard
+    key={theme._id}
+    theme={theme}
+    isFavorite={themeFavorites.has(theme._id)}
+    isDraft={theme.isDraft} // ✅ Asegúrate de pasar isDraft
+    onSelect={onThemeSelect || (() => {})}
+    onThemeDoubleClick={onThemeDoubleClick}
+    onMenuAction={onThemeMenuAction}
+    onToggleFavorite={onToggleThemeFavorite}
+  />
+))}
+</div>
     </div>
   );
 };

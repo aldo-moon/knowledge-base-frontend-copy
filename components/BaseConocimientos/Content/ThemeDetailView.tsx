@@ -5,6 +5,8 @@ import { archivoService } from '../../../services/archivoService';
 import styles from './../../../styles/base-conocimientos.module.css';
 import { temaService } from '../../../services/temaService';
 import FilePreview from '../Files/FilePreview'
+import { authService } from '../../../services/authService';
+
 
 interface Theme {
   _id: string;
@@ -22,6 +24,8 @@ interface Theme {
   area_id?: string;
   puesto_id?: string;
   files_attachment_id?: string[];
+    isDraft?: boolean; // ✅ Nueva propiedad
+
 }
 
 interface ThemeDetailViewProps {
@@ -56,7 +60,7 @@ export const ThemeDetailView: React.FC<ThemeDetailViewProps> = ({
   const [viewsCount, setViewsCount] = useState<number>(0);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const [attachments, setAttachments] = useState<{images: string[], documents: string[]}>({
   images: [],
@@ -185,13 +189,14 @@ if (img.parentNode) {
 
 
 
-  useEffect(() => {
-    loadTheme();
-  }, [themeId]);
+    useEffect(() => {
+      loadTheme();
+    }, [themeId]);
 
-  useEffect(() => {
-  const userId = localStorage.getItem('user_id');
-  setCurrentUserId(userId);
+useEffect(() => {
+  const userId = authService.getCurrentUserId(); // Obtiene 'id_usuario' de las cookies
+  setCurrentUserId(userId || null); // ✅ Convertir undefined a null
+  console.log('🔍 Current User ID desde cookies:', userId);
 }, []);
 
     const loadTheme = async () => {

@@ -2,15 +2,15 @@
 import api from '../utils/api';
 
 export const temaService = {
-  // ✅ FUNCIÓN ACTUALIZADA: Obtener temas por carpeta con user_id en el body
   getTemasByFolder: async (folderId, userId) => {
     try {
-      // ✅ CAMBIO: De POST a GET, user_id como query parameter
       const response = await api.get(`/temas/filter/prio/${folderId}?user_id=${userId}`);
       
-      // La respuesta mantiene la misma estructura:
-      // { id_carpeta: "...", usuario: "...", content: [...] }
-      return response.data.content || [];
+      // Ahora la respuesta tiene content y borrador
+      return {
+        content: response.data.content || [],
+        borrador: response.data.borrador || []
+      };
     } catch (error) {
       console.error("❌ Error al obtener temas por carpeta:", error);
       throw error;

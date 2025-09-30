@@ -13,7 +13,7 @@ import {
 import styles from './../../../styles/base-conocimientos.module.css';
 
 interface SidebarItem {
-  icon: React.ComponentType<any>; // ← Cambiar de React.ElementType
+  icon: React.ComponentType<any>;
   label: string;
   active?: boolean;
   expandable?: boolean;

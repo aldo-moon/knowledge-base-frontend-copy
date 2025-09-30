@@ -57,7 +57,6 @@ generateToken: async (id_usuario, id_cliente = null) => {
 
 
 
-  // ✅ NUEVA FUNCIÓN: Generar URL de navegación según las reglas
 generarUrlNavegacion: async (aplicacion, id_usuario, id_cliente) => {
   const { tipo, externo, script } = aplicacion;
   

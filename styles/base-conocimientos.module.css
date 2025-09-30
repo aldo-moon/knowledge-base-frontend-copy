@@ -6419,3 +6419,89 @@ max-width: 300px;
 .areaItem:hover {
   background: #2a2d47;
 }
+
+
+
+
+/* Estilo para temas normales (ya existente) */
+.themeCard {
+  background: #30334d;
+  border-radius: 1rem;
+  padding: 0.3rem 0rem 0 0rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  border: 2px solid #6262bf;
+  width: 200px;
+  height: 190px;
+}
+
+/* ✅ NUEVO: Estilo para temas borrador */
+.draftTheme {
+  border: 2px dashed #ff9800 !important; /* Borde punteado naranja */
+  background: rgba(255, 152, 0, 0.05) !important; /* Fondo ligeramente naranja */
+}
+
+.draftTheme:hover {
+  background: rgba(255, 152, 0, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+}
+
+/* O si prefieres azul para borradores: */
+/*
+.draftTheme {
+  border: 2px dashed #2196f3 !important;
+  background: rgba(33, 150, 243, 0.05) !important;
+}
+
+.draftTheme:hover {
+  background: rgba(33, 150, 243, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================= */
+/* ESTILOS PARA EL EDITOR QUILL */
+/* ========================================= */
+
+/* Contenedor del editor personalizado */
+.customQuillEditor :global(.ql-editor) {
+  min-height: 300px;
+  color: white;
+  background: #1e1e2f;
+  border-radius: 0.5rem;
+}
+
+/* ✅ NUEVO: Estilos para imágenes dentro del editor */
+.customQuillEditor :global(.ql-editor img) {
+  max-width: 300px !important;
+  max-height: 200px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain;
+  display: block;
+  margin: 1rem auto;
+  border-radius: 0.5rem;
+  border: 2px solid #6262bf;
+}
+
+/* Para pantallas pequeñas */
+@media (max-width: 768px) {
+  .customQuillEditor :global(.ql-editor img) {
+    max-width: 100% !important;
+    max-height: 250px !important;
+  }
+}

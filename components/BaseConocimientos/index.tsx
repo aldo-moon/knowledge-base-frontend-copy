@@ -33,6 +33,7 @@ import ThemeCommentsPanel from './Details/ThemeCommentsPanel';
 import TopHeader from './Header/TopHeader';
 import ModeloIACrudModal from './Modals/ModeloIACrudModal';
 import SeccionCrudModal from './Modals/SeccionCrudModal';
+import MoveThemeModal from './Modals/MoveThemeModal';
 
 
 
@@ -160,6 +161,8 @@ interface Theme {
   title_name: string;
   description?: string;
   priority?: number;
+  isDraft?: boolean;
+  folder_id?: string; 
 }
 
 interface FolderDetails {
@@ -217,6 +220,7 @@ interface FavoritesResponse {
   content_folder?: FavoriteFolder[];
   content_topic?: FavoriteTopic[];
   content_file?: FavoriteFile[];
+  content_topic_draft?: FavoriteTopic[]; 
 }
 
 
@@ -270,7 +274,8 @@ const handleCancelThemeDelete = () => {
   setThemeToDelete(null);
 };
 const [fileFavorites, setFileFavorites] = useState<Set<string>>(new Set());
-
+const [isMoveThemeModalOpen, setIsMoveThemeModalOpen] = useState(false);
+const [themeToMove, setThemeToMove] = useState<Theme | null>(null);
 const [isModeloIAModalOpen, setIsModeloIAModalOpen] = useState(false);
 const [isSeccionModalOpen, setIsSeccionModalOpen] = useState(false);
 
@@ -285,6 +290,7 @@ const [isRenameFileModalOpen, setIsRenameFileModalOpen] = useState<boolean>(fals
 const [isDeleteFileModalOpen, setIsDeleteFileModalOpen] = useState<boolean>(false);
 const [selectedFile, setSelectedFile] = useState<File | null>(null);
 const [fileToDelete, setFileToDelete] = useState<File | null>(null);
+const [originalFolderId, setOriginalFolderId] = useState<string | null>(null);
 
   // Estados de filtros - inicializar desde URL
   const [areFiltersVisible, setAreFiltersVisible] = useState(false);
@@ -301,11 +307,15 @@ const [themeFavorites, setThemeFavorites] = useState<Set<string>>(new Set());
 const [themeToEdit, setThemeToEdit] = useState<Theme | null>(null);
 const [isEditingTheme, setIsEditingTheme] = useState(false);
 
-  const [userContent, setUserContent] = useState({
-    folders: [],
-    themes: [],
-    files: []
-  }); // Contenido completo del usuario
+const [userContent, setUserContent] = useState<{
+  folders: Folder[];
+  themes: Theme[];
+  files: File[];
+}>({
+  folders: [],
+  themes: [],
+  files: []
+});
   const [userContentLoading, setUserContentLoading] = useState(false);
   const [userContentError, setUserContentError] = useState(null);
 
@@ -536,8 +546,10 @@ const refreshUserData = async () => {
     console.log('Actualizando datos del usuario...');
     const userData = await usuarioService.getAllContentByUser(CURRENT_USER_ID);
     
-    // Actualizar sidebar
-const transformedFolders = (userData.carpetas || []).map((folder: Folder) => ({
+    console.log('📦 Datos completos del usuario:', userData);
+    
+    // Actualizar sidebar (solo carpetas)
+    const transformedFolders = (userData.carpetas || []).map((folder: Folder) => ({
       _id: folder._id,
       folder_name: folder.folder_name
     }));
@@ -547,24 +559,50 @@ const transformedFolders = (userData.carpetas || []).map((folder: Folder) => ({
       'Mis archivos': transformedFolders
     }));
 
+    // ✅ PROCESAR TEMAS: Combinar temas_publicados y temas_borradores
+let allUserThemes: Theme[] = [];
+    
+    if (userData.temas) {
+      const publicados = (userData.temas.temas_publicados || []).map((tema: any) => ({
+        ...tema,
+        isDraft: false
+      }));
+      
+      const borradores = (userData.temas.temas_borradores || []).map((tema: any) => ({
+        ...tema,
+        isDraft: true
+      }));
+      
+      allUserThemes = [...publicados, ...borradores];
+    }
+    
+    console.log('📝 Temas del usuario (publicados + borradores):', allUserThemes);
+
     // Actualizar contenido completo
     setUserContent({
       folders: userData.carpetas || [],
-      themes: userData.temas || [],
+      themes: allUserThemes,
       files: userData.archivos || []
     });
 
-    console.log('Datos del usuario actualizados');
+    console.log('✅ Datos del usuario actualizados correctamente');
   } catch (error) {
-    console.error("Error actualizando datos del usuario:", error);
+    console.error("❌ Error actualizando datos del usuario:", error);
   }
 };
 
 
 // Handler actualizado para click en sidebar
 const handleContentSidebarItemClick = (item: ContentSidebarItem) => {
+  // ✅ Limpiar estados del DetailsPanel
+  setSelectedFolderDetails(null);
+  setSelectedFolder(null);
+  setSelectedTemaId(null);
+  setIsEditingTheme(false);
+  setThemeToEdit(null);
+  
   // Si hace clic en el item principal, cambiar la sección
-  if (item.label === 'Mis archivos' || item.label === 'Contenedor' || item.label === 'Favoritos') {
+  if (item.label === 'Mis archivos' || item.label === 'Contenedor' || item.label === 'Favoritos' || item.label === 'Papelera') {
     handleSectionChange(item.label);
   }
   console.log(`Clicked sidebar item: ${item.label}`);
@@ -583,16 +621,18 @@ const handleBreadcrumbNavigate = (targetIndex: number) => {
 const handleSubfolderClick = (folderId: string, folderName: string) => {
   console.log('Navegando a carpeta:', folderName, 'ID:', folderId);
   
-  // CAMBIO CLAVE: Siempre cambiar a vista de navegación normal cuando se hace clic en una carpeta
-  navigateToSection('Contenedor')  
-
-  // Navegar a la carpeta usando tu routing existente
-  navigateToFolder(folderId, folderName);
-  
-  // Limpiar cualquier selección de detalles
+  // ✅ Limpiar estados del DetailsPanel
   setSelectedFolderDetails(null);
   setSelectedFolder(null);
   setSelectedTemaId(null);
+  setIsEditingTheme(false);
+  setThemeToEdit(null);
+  
+  // CAMBIO CLAVE: Siempre cambiar a vista de navegación normal cuando se hace clic en una carpeta
+  navigateToSection('Contenedor');  
+
+  // Navegar a la carpeta usando tu routing existente
+  navigateToFolder(folderId, folderName);
 };
 
 
@@ -626,45 +666,58 @@ const handleThemeFormSubmit = async (formData: ThemeFormData) => {
   try {
     console.log('📝 Datos del formulario recibidos:', formData);
 
+    // ✅ Extraer los fileIds de uploadedFiles
+    const fileIds = formData.fileIds || formData.uploadedFiles?.map(file => file.id) || [];
+    
+    console.log('📎 File IDs a guardar:', fileIds);
+
     // Construir objeto tema con archivos adjuntos
-   const temaCompleto = {
+    const temaCompleto = {
       title_name: themeTitle,
       description: themeDescription,
       priority: formData.priority === 'Alta' ? 2 : formData.priority === 'Baja' ? 0 : 1,
       area_id: formData.area,
       puesto_id: formData.position,
-      folder_id: currentFolderId,
+      folder_id: isEditingTheme && themeToEdit ? themeToEdit.folder_id : currentFolderId,
       author_topic_id: CURRENT_USER_ID,
       keywords: Array.isArray(formData.tags) ? formData.tags : [],
-      files_attachment_id: formData.fileIds || [],
+      files_attachment_id: fileIds,
       is_draft: formData.isDraft !== undefined ? formData.isDraft : true,
-      modelo_id: formData.aiModel || [], // ✅ Enviar array de modelos
-      seccion_id: formData.aiSection || [], // ✅ Enviar array de secciones
+      modelo_id: formData.aiModel || [],
+      seccion_id: formData.aiSection || [],
     };
 
-    console.log('📁 Tema completo:', temaCompleto);
+    console.log('📁 Tema completo a enviar:', temaCompleto);
+    console.log('📎 Archivos en tema completo:', temaCompleto.files_attachment_id);
     
     let resultado;
     
     if (isEditingTheme && themeToEdit) {
       // MODO EDICIÓN: Actualizar tema existente
       console.log('🖊️ Actualizando tema existente:', themeToEdit._id);
+      console.log('📁 Manteniendo folder_id original:', themeToEdit.folder_id);
       resultado = await temaService.updateTema(themeToEdit._id, temaCompleto);
       console.log('✅ Tema actualizado exitosamente:', resultado);
     } else {
       // MODO CREACIÓN: Crear nuevo tema
-      console.log('🆕 Creando nuevo tema');
+      console.log('🆕 Creando nuevo tema en carpeta:', currentFolderId);
       resultado = await temaService.createTema(temaCompleto);
       console.log('✅ Tema creado exitosamente:', resultado);
     }
+    
+    // Determinar a qué carpeta volver
+    const folderToReturn = isEditingTheme && originalFolderId ? originalFolderId : currentFolderId;
+    console.log('📁 Volviendo a carpeta:', folderToReturn);
     
     // Limpiar estados
     setThemeTitle('');
     setThemeDescription('');
     setIsEditingTheme(false);  
-    setThemeToEdit(null);          
-    // Volver a la vista anterior y recargar contenido
-    navigateBackFromTheme(currentFolderId);
+    setThemeToEdit(null);
+    setOriginalFolderId(null);
+    
+    // Volver a la carpeta original
+    navigateBackFromTheme(folderToReturn);
     await loadCarpetas();
     
   } catch (error) {
@@ -672,13 +725,17 @@ const handleThemeFormSubmit = async (formData: ThemeFormData) => {
   }
 };
 
-  const handleThemeFormCancel = () => {
-    setThemeTitle('');
-    setThemeDescription('');
-    setIsEditingTheme(false);    // ✅ Limpiar estado de edición
-    setThemeToEdit(null);        // ✅ Limpiar tema en edición
-    navigateBackFromTheme(currentFolderId);
-  };
+const handleThemeFormCancel = () => {
+  const folderToReturn = isEditingTheme && originalFolderId ? originalFolderId : currentFolderId;
+  
+  setThemeTitle('');
+  setThemeDescription('');
+  setIsEditingTheme(false);
+  setThemeToEdit(null);
+  setOriginalFolderId(null); // ✅ Limpiar el folder_id guardado
+  
+  navigateBackFromTheme(folderToReturn);
+};
 
   // Handlers para ContentFilters
   const handleToggleFiltersVisibility = () => {
@@ -851,12 +908,37 @@ const handleThemeMenuAction = (action: string, theme: Theme) => {
       setSelectedTheme(theme);
       setIsRenameThemeModalOpen(true);
       break;
+    case "move": // ✅ Nuevo caso
+      setThemeToMove(theme);
+      setIsMoveThemeModalOpen(true);
+      break;
     case "delete":
       setThemeToDelete(theme);
-      setIsDeleteThemeModalOpen(true); 
+      setIsDeleteThemeModalOpen(true);
       break;
     default:
       break;
+  }
+};
+
+const handleMoveTheme = async (targetFolderId: string) => {
+  if (!themeToMove) return;
+
+  try {
+    console.log(`Moviendo tema ${themeToMove._id} a carpeta ${targetFolderId}`);
+
+    await temaService.updateTema(themeToMove._id, {
+      folder_id: targetFolderId
+    });
+
+    setIsMoveThemeModalOpen(false);
+    setThemeToMove(null);
+
+    await loadCarpetas();
+    await refreshUserData();
+
+  } catch (error) {
+    console.error("Error moviendo tema:", error);
   }
 };
 
@@ -1017,6 +1099,9 @@ const handleToggleThemeFavorite = async (themeId: string) => {
         return newSet;
       });
     }
+        if (activeSection === 'Favoritos') {
+      await loadFavoritesContent();
+    }
   } catch (error) {
     console.error('❌ Error toggling theme favorite:', error);
 
@@ -1062,17 +1147,21 @@ const loadUserFavorites = async () => {
       return;
     }
 
-const folderFavorites: FavoriteFolder[] = favorites.content_folder || [];
-const topicFavorites: FavoriteTopic[] = favorites.content_topic || [];
-const fileFavorites: FavoriteFile[] = favorites.content_file || [];
+    const folderFavorites: FavoriteFolder[] = favorites.content_folder || [];
+    const topicFavorites: FavoriteTopic[] = favorites.content_topic || [];
+    const topicDraftFavorites: FavoriteTopic[] = favorites.content_topic_draft || []; // ✅ Agregar borradores
+    const fileFavorites: FavoriteFile[] = favorites.content_file || [];
 
 
     // Siempre actualizar estados
     const folderIds = folderFavorites.map(folder => folder._id);
     setFolderFavorites(new Set(folderIds));
 
-    const topicIds = topicFavorites.map(topic => topic._id);
-    setThemeFavorites(new Set(topicIds));
+    const allTopicIds = [
+  ...topicFavorites.map(topic => topic._id),
+  ...topicDraftFavorites.map(topic => topic._id)
+  ];
+  setThemeFavorites(new Set(allTopicIds));
 
     const fileIds = fileFavorites.map(file => file._id);
     setFileFavorites(new Set(fileIds));
@@ -1153,7 +1242,6 @@ const handleMultimediaUpload = async (files: globalThis.File[]) => {
 };
 
 
-// ✅ CAMBIO RÁPIDO: En loadCarpetas, cambiar a:
 
 const loadCarpetas = async () => {
   console.log('Loading content for folder:', currentFolderId);
@@ -1163,23 +1251,40 @@ const loadCarpetas = async () => {
     setLoading(true);
     
     const carpetas = await carpetaService.getFolderContent(currentFolderId);
-    console.log('📁 Carpetas response:', carpetas); // <- AGREGAR LOG
-    setFolders(Array.isArray(carpetas) ? carpetas : []); // <- VALIDAR ARRAY
+    console.log('📁 Carpetas response:', carpetas);
+    setFolders(Array.isArray(carpetas) ? carpetas : []);
       
     if (!CURRENT_USER_ID) {
       console.error('❌ No se puede cargar temas: CURRENT_USER_ID es null');
       setThemes([]);
-      setFiles([]); // <- AGREGAR ESTO
+      setFiles([]);
       return;
     }
     
-    const temas = await temaService.getTemasByFolder(currentFolderId, CURRENT_USER_ID);
-    console.log('📝 Temas response:', temas); // <- AGREGAR LOG
-    setThemes(Array.isArray(temas) ? temas : []); // <- VALIDAR ARRAY
+    // ✅ AQUÍ ESTÁ EL CAMBIO PRINCIPAL
+    const temasResponse = await temaService.getTemasByFolder(currentFolderId, CURRENT_USER_ID);
+    console.log('📝 Temas response:', temasResponse);
+    
+    // Combinar content y borrador, marcando cuáles son borradores
+    const contentThemes = (temasResponse.content || []).map((tema: any) => ({
+      ...tema,
+      isDraft: false
+    }));
+
+    const draftThemes = (temasResponse.borrador || []).map((tema: any) => ({
+      ...tema,
+      isDraft: true
+    }));
+    
+    // Combinar ambos arrays
+    const allThemes = [...contentThemes, ...draftThemes];
+    console.log('📝 Temas totales (content + borrador):', allThemes);
+    
+    setThemes(allThemes);
 
     const archivos = await archivoService.getFilesByFolderId(currentFolderId);
-    console.log('📄 Archivos response:', archivos); // <- AGREGAR LOG
-    setFiles(Array.isArray(archivos) ? archivos : []); // <- VALIDAR ARRAY
+    console.log('📄 Archivos response:', archivos);
+    setFiles(Array.isArray(archivos) ? archivos : []);
     
   } catch (error) {
     console.error('Error loading content:', error);
@@ -1305,29 +1410,41 @@ const loadFavoritesContent = async () => {
     // ✅ Tipar las variables extraídas
     const folderFavorites: FavoriteFolder[] = favorites.content_folder || [];
     const topicFavorites: FavoriteTopic[] = favorites.content_topic || [];
+    const topicDraftFavorites: FavoriteTopic[] = favorites.content_topic_draft || []; 
     const fileFavorites: FavoriteFile[] = favorites.content_file || [];
 
+
     // ✅ Obtener datos completos con tipos explícitos
-    const folderDetails = await Promise.all(
-      folderFavorites.map(async (folder: FavoriteFolder) => {
-        try {
-          return await carpetaService.getCarpetaById(folder._id);
-        } catch (error) {
-          return { _id: folder._id, folder_name: folder.folder_name || `Carpeta ${folder._id.slice(-6)}` };
-        }
-      })
-    );
+const folderDetails = await Promise.all(
+  folderFavorites.map(async (folder: FavoriteFolder) => {
+    try {
+      return await carpetaService.getCarpetaById(folder._id);
+    } catch (error) {
+      return { _id: folder._id, folder_name: folder.folder_name || `Carpeta ${folder._id.slice(-6)}` };
+    }
+  })
+);
 
-    const themeDetails = await Promise.all(
-      topicFavorites.map(async (theme: FavoriteTopic) => {
-        try {
-          return await temaService.getTemaById(theme._id);
-        } catch (error) {
-          return { _id: theme._id, title_name: theme.title_name || `Tema ${theme._id.slice(-6)}` };
-        }
-      })
-    );
+// ✅ Combinar temas publicados y borradores
+const allTopicFavorites = [...topicFavorites, ...topicDraftFavorites];
 
+const themeDetails = await Promise.all(
+  allTopicFavorites.map(async (theme: FavoriteTopic) => {
+    try {
+      const themeData = await temaService.getTemaById(theme._id);
+      return {
+        ...themeData,
+        isDraft: topicDraftFavorites.some(draft => draft._id === theme._id) // ✅ Marcar si es borrador
+      };
+    } catch (error) {
+      return { 
+        _id: theme._id, 
+        title_name: theme.title_name || `Tema ${theme._id.slice(-6)}`,
+        isDraft: topicDraftFavorites.some(draft => draft._id === theme._id)
+      };
+    }
+  })
+);
     // ✅ Nuevo: obtener datos de archivos favoritos con tipos
     const fileDetails = await Promise.all(
       fileFavorites.map(async (file: FavoriteFile) => {
@@ -1487,6 +1604,9 @@ const handleToggleFileFavorite = async (fileId: string) => {
           }
         }
     }
+        if (activeSection === 'Favoritos') {
+      await loadFavoritesContent();
+    }
 
   } catch (error) {
     console.error('Error toggling file favorite:', error);
@@ -1594,6 +1714,9 @@ const files = fileIds.map((item: TrashItem) => ({
 const handleThemeEdit = (theme: Theme) => {
   console.log('🖊️ Editando tema:', theme);
   
+  // ✅ Guardar el folder_id original
+  setOriginalFolderId(theme.folder_id || currentFolderId);
+  
   // Guardar tema a editar en estado
   setThemeToEdit(theme);
   setIsEditingTheme(true);
@@ -1602,7 +1725,7 @@ const handleThemeEdit = (theme: Theme) => {
   setThemeTitle(theme.title_name);
   setThemeDescription(theme.description || '');
   
-  // Navegar a modo edición (usando la función que ya tienes)
+  // Navegar a modo edición
   navigateToEditTheme(theme._id);
 };
 
@@ -1826,7 +1949,18 @@ const handleLogout = () => {
         isOpen={isSeccionModalOpen}
         onClose={() => setIsSeccionModalOpen(false)}
       />
-      
+
+      <MoveThemeModal
+      isOpen={isMoveThemeModalOpen}
+      onClose={() => {
+        setIsMoveThemeModalOpen(false);
+        setThemeToMove(null);
+      }}
+      onMove={handleMoveTheme}
+      currentFolderId={themeToMove?.folder_id || currentFolderId}
+      themeName={themeToMove?.title_name || ""}
+    />
+          
     </div>
   );
 };

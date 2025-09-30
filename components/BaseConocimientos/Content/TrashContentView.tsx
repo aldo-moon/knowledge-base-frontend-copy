@@ -34,6 +34,8 @@ interface Theme {
   folder_id?: string;
   keywords?: string[];
   creation_date?: string;
+    isDraft?: boolean; // ✅ Nueva propiedad
+
 }
 
 interface TrashItem {

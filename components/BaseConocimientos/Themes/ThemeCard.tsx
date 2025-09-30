@@ -1,6 +1,6 @@
 // components/BaseConocimientos/Themes/ThemeCard.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreHorizontal, Star, Edit, Trash } from 'lucide-react';
+import { MoreHorizontal, Star, Edit, Trash, FolderOpen } from 'lucide-react';
 import styles from '../../../styles/base-conocimientos.module.css';
 
 interface Theme {
@@ -25,7 +25,9 @@ interface ThemeCardProps {
   onThemeDoubleClick?: (theme: Theme) => void;
   onMenuAction?: (action: string, theme: Theme) => void;
   isFavorite?: boolean;
-  onToggleFavorite?: (themeId: string) => void; 
+  onToggleFavorite?: (themeId: string) => void;
+  isDraft?: boolean; // ✅ Nueva prop
+ 
 }
 
 export const ThemeCard: React.FC<ThemeCardProps> = ({
@@ -34,16 +36,19 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   onThemeDoubleClick,
   onMenuAction,
   isFavorite = false,
-  onToggleFavorite
+  onToggleFavorite,
+  isDraft = false 
+
 }) => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const menuOptions: MenuOption[] = [
-    { icon: Edit, label: 'Cambiar nombre', action: 'rename' },
-    { icon: Trash, label: 'Eliminar', action: 'delete' }
-  ];
+ const menuOptions: MenuOption[] = [
+  { icon: Edit, label: 'Cambiar nombre', action: 'rename' },
+  { icon: FolderOpen, label: 'Cambiar ubicación', action: 'move' }, // ✅ Nueva opción
+  { icon: Trash, label: 'Eliminar', action: 'delete' }
+];
 
   // Cerrar menú cuando se hace clic fuera
   useEffect(() => {
@@ -86,7 +91,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
 
     return (
       <div
-        className={styles.themeCard}
+      className={`${styles.themeCard} ${isDraft ? styles.draftTheme : ''}`} // ✅ Aplicar clase condicional
         onClick={handleCardClick}
         onDoubleClick={handleCardDoubleClick}  
       >

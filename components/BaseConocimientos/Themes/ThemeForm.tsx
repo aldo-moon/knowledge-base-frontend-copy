@@ -25,7 +25,7 @@ interface ThemeFormData {
   uploadedFiles: { id: string; name: string }[];
   tags: string[];  
   currentTag: string;
-  aiModel: string[];  // ✅ Cambiar a array
+  aiModel: string[];  
   aiSection: string[];
   suggestInHelpDesk: boolean;
   isDraft?: boolean;
@@ -92,7 +92,7 @@ interface PuestosPorArea {
 export const ThemeForm: React.FC<ThemeFormProps> = ({
   onSubmit,
   onCancel,
-  currentFolderId = "68acb06886d455d16cceef05",
+  currentFolderId,
   userId = "68adc29785d92b4c84e01c5b",
   isEditMode = false,
   themeToEdit = null
@@ -473,75 +473,83 @@ useEffect(() => {
   };
 
   // Manejar selección de archivos
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    if (files.length === 0) return;
+const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const files = Array.from(event.target.files || []);
+  if (files.length === 0) return;
 
-    // Validar archivos
-    const maxSize = 10 * 1024 * 1024; // 10MB por archivo
-    const oversizedFiles = files.filter(file => file.size > maxSize);
-    
-    if (oversizedFiles.length > 0) {
-      setUploadError(`Archivos demasiado grandes (máx 10MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
-      return;
+  // Validar archivos
+  const maxSize = 10 * 1024 * 1024; // 10MB por archivo
+  const oversizedFiles = files.filter(file => file.size > maxSize);
+  
+  if (oversizedFiles.length > 0) {
+    setUploadError(`Archivos demasiado grandes (máx 10MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
+    return;
+  }
+
+  try {
+    setUploadingFiles(true);
+    setUploadError('');
+
+    // ✅ Usar el folder_id del tema en edición, o el currentFolderId en creación
+    const folderIdToUse = isEditMode && themeToEdit?.folder_id ? themeToEdit.folder_id : currentFolderId;
+
+    console.log('📁 Subiendo archivos para tema...');
+    console.log('Carpeta a usar:', folderIdToUse);
+    console.log('Modo edición:', isEditMode);
+    console.log('Usuario:', userId);
+    console.log('Archivos:', files.length);
+
+    // Subir archivos usando uploadArchivosParaTema
+    const response = await archivoService.uploadArchivosParaTema(
+      files,
+      folderIdToUse,  // ✅ Usar el folder_id correcto
+      userId
+    );
+
+    console.log('✅ Respuesta del servidor:', response);
+
+    // Agregar archivos subidos al estado
+    if (response.array_file) {
+      const newUploadedFiles = response.array_file.map(([id, name]: [string, string]) => ({
+        id,
+        name
+      }));
+
+      setFormData(prev => ({
+        ...prev,
+        uploadedFiles: [...prev.uploadedFiles, ...newUploadedFiles],
+        files: []
+      }));
     }
 
-    try {
-      setUploadingFiles(true);
-      setUploadError('');
+    // Limpiar input
+    event.target.value = '';
 
-      console.log('📁 Subiendo archivos para tema...');
-      console.log('Carpeta:', currentFolderId);
-      console.log('Usuario:', userId);
-      console.log('Archivos:', files.length);
-
-      // Subir archivos usando uploadArchivosParaTema
-      const response = await archivoService.uploadArchivosParaTema(
-        files,
-        currentFolderId,
-        userId
-      );
-
-      console.log('✅ Respuesta del servidor:', response);
-
-      // Agregar archivos subidos al estado
-      if (response.array_file) {
-          const newUploadedFiles = response.array_file.map(([id, name]: [string, string]) => ({
-          id,
-          name
-        }));
-
-        setFormData(prev => ({
-          ...prev,
-          uploadedFiles: [...prev.uploadedFiles, ...newUploadedFiles],
-          files: [] // Limpiar archivos seleccionados
-        }));
-      }
-
-      // Limpiar input
-      event.target.value = '';
-
-    } catch (error) {
-      console.error('❌ Error subiendo archivos:', error);
-      setUploadError('Error al subir archivos. Inténtalo de nuevo.');
-    } finally {
-      setUploadingFiles(false);
-    }
-  };
+  } catch (error) {
+    console.error('❌ Error subiendo archivos:', error);
+    setUploadError('Error al subir archivos. Inténtalo de nuevo.');
+  } finally {
+    setUploadingFiles(false);
+  }
+};
 
 const handleSubmitWithDraft = async (isDraft: boolean) => {
   if (!validateForm()) {
     return;
   }
 
-  // ✅ AGREGAR isDraft directamente al formData
+  // ✅ Incluir fileIds de los archivos subidos
   const formDataWithDraft = {
     ...formData,
-    isDraft // <- Agregar al objeto
+    isDraft,
+    fileIds: formData.uploadedFiles.map(file => file.id) // ✅ Agregar los IDs de los archivos
   };
 
+  console.log('📎 Archivos a guardar:', formDataWithDraft.fileIds);
+  console.log('📋 FormData completo:', formDataWithDraft);
+
   if (onSubmit) {
-    onSubmit(formDataWithDraft); // <- Solo pasar formData
+    onSubmit(formDataWithDraft);
   }
 };
 
@@ -1202,40 +1210,55 @@ useEffect(() => {
         {/* Botones - diferentes según el modo */}
         <div className={styles.formActions} style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', flexDirection: "column"  }}>
           
-          {isEditMode ? (
-            // MODO EDICIÓN: Solo un botón "Guardar cambios"
-            <button
-              type="button"
-              onClick={() => handleSubmitWithDraft(false)} // Al editar, siempre guardar como no-borrador
-              disabled={uploadingFiles}
-              className={styles.createButton}
-            >
-              {uploadingFiles ? 'Guardando...' : 'Guardar cambios'}
-            </button>
-          ) : (
-            // MODO CREACIÓN: Dos botones (Borrador y Publicar)
-            <>
-              <button
-                type="button"
-                onClick={() => handleSubmitWithDraft(true)}
-                disabled={uploadingFiles}
-                className={styles.createButton}
-                style={{ backgroundColor: '#6b7280' }} // Color gris para borrador
-              >
-                {uploadingFiles ? 'Subiendo...' : 'Crear Borrador'}
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => handleSubmitWithDraft(false)}
-                disabled={uploadingFiles}
-                className={styles.createButton}
-                style={{ backgroundColor: '#2563eb' }} // Color azul para publicar
-              >
-                {uploadingFiles ? 'Subiendo...' : 'Publicar Tema'}
-              </button>
-            </>
-          )}
+{isEditMode ? (
+  // MODO EDICIÓN
+  <>
+    <button
+      type="button"
+      onClick={() => handleSubmitWithDraft(themeToEdit?.is_draft ?? false)}
+      disabled={uploadingFiles}
+      className={styles.createButton}
+    >
+      {uploadingFiles ? 'Guardando...' : 'Guardar cambios'}
+    </button>
+    
+    {/* Mostrar botón Publicar solo si es borrador */}
+    {themeToEdit?.is_draft && (
+      <button
+        type="button"
+        onClick={() => handleSubmitWithDraft(false)}
+        disabled={uploadingFiles}
+        className={styles.createButton}
+        style={{ backgroundColor: '#10b981' }}
+      >
+        {uploadingFiles ? 'Publicando...' : 'Publicar Tema'}
+      </button>
+    )}
+  </>
+) : (
+  // MODO CREACIÓN: Dos botones (Borrador y Publicar)
+  <>
+    <button
+      type="button"
+      onClick={() => handleSubmitWithDraft(true)}
+      disabled={uploadingFiles}
+      className={styles.createButton}
+      style={{ backgroundColor: '#6b7280' }}
+    >
+      {uploadingFiles ? 'Subiendo...' : 'Crear Borrador'}
+    </button>
+    
+    <button
+      type="button"
+      onClick={() => handleSubmitWithDraft(false)}
+      disabled={uploadingFiles}
+      className={styles.createButton}
+      style={{ backgroundColor: '#2563eb' }}
+    >
+      {uploadingFiles ? 'Subiendo...' : 'Publicar Tema'}
+    </button>
+  </>
+)}
         </div>
       </form>
     </div>

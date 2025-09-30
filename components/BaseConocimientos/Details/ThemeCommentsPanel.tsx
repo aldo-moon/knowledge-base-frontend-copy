@@ -3,16 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { Send, Loader } from 'lucide-react';
 import styles from './../../../styles/base-conocimientos.module.css';
 import { comentarioService } from '../../../services/comentarioService';
+import { authService } from '../../../services/authService';
+
 
 interface Comment {
   _id: string;
-  comment_user_id: {
-    nombre: string;
-    aPaterno?: string;
-  } | string;
+  comment_user_id: number;
   message: string;
   creation_date: string;
   topic_id: string;
+  nombre: string; // ✅ Agregar campo nombre
 }
 
 interface ThemeCommentsPanelProps {
@@ -31,9 +31,11 @@ const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
 // Y agrega este useEffect:
 useEffect(() => {
-  const userId = localStorage.getItem('user_id');
-  setCurrentUserId(userId);
+  const userId = authService.getCurrentUserId(); // Obtiene 'id_usuario' de las cookies
+  setCurrentUserId(userId || null);
+  console.log('🔍 Current User ID en comentarios:', userId);
 }, []);
+
   useEffect(() => {
     loadComments();
   }, [themeId]);
@@ -110,26 +112,13 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const getAuthorName = (author: Comment['comment_user_id']) => {
-  if (typeof author === 'string') {
-    return 'Usuario';
-  }
-  // ✅ AGREGAR validación para nombre
-  if (!author || !author.nombre) {
-    return 'Usuario';
-  }
-  return `${author.nombre} ${author.aPaterno || ''}`.trim();
+const getAuthorName = (comment: Comment) => {
+  return comment.nombre || 'Usuario';
 };
 
-const getAuthorInitial = (author: Comment['comment_user_id']) => {
-  if (typeof author === 'string') {
-    return 'U';
-  }
-  // ✅ AGREGAR validación para nombre
-  if (!author || !author.nombre) {
-    return 'U';
-  }
-  return author.nombre.charAt(0).toUpperCase();
+const getAuthorInitial = (comment: Comment) => {
+  const nombre = comment.nombre || 'U';
+  return nombre.charAt(0).toUpperCase();
 };
 
   return (
@@ -190,28 +179,27 @@ const getAuthorInitial = (author: Comment['comment_user_id']) => {
             <p>¡Sé el primero en comentar!</p>
           </div>
         ) : (
-         comments.map((comment) => (
-  <div key={comment._id} className={styles.commentItem}>
-    <div className={styles.commentAvatar}>
-      {getAuthorInitial(comment.comment_user_id)}
-    </div>
-    
-    <div className={styles.commentContent}>
-      <div className={styles.commentHeader}>
-        <span className={styles.commentAuthor}>
-          {getAuthorName(comment.comment_user_id)}
-        </span>
-      </div>
-      
-      <p className={styles.commentText}>{comment.message}</p>
-      
-      <span className={styles.commentTime}>
-        {formatDate(comment.creation_date)}
-      </span>
-    </div>
-    
-  </div>
-))
+          comments.map((comment) => (
+            <div key={comment._id} className={styles.commentItem}>
+              <div className={styles.commentAvatar}>
+                {getAuthorInitial(comment)}
+              </div>
+              
+              <div className={styles.commentContent}>
+                <div className={styles.commentHeader}>
+                  <span className={styles.commentAuthor}>
+                    {getAuthorName(comment)}
+                  </span>
+                </div>
+                
+                <p className={styles.commentText}>{comment.message}</p>
+                
+                <span className={styles.commentTime}>
+                  {formatDate(comment.creation_date)}
+                </span>
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>
