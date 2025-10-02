@@ -413,7 +413,7 @@ const navigateBackFromThemeDetail = () => {
   
   const currentQuery = { ...router.query };
   delete currentQuery.slug;
-  delete currentQuery.folderId; // Limpiar el folderId de la query
+  delete currentQuery.folderId;
   
   // Si hay folderId en query, volver a esa carpeta
   if (folderIdFromQuery && folderIdFromQuery !== "68acb06886d455d16cceef05") {
@@ -423,10 +423,17 @@ const navigateBackFromThemeDetail = () => {
       ? '?' + new URLSearchParams(currentQuery as Record<string, string>).toString()
       : '';
     
-    router.push(`/folder/${folderIdFromQuery}${queryString}`);
+    // ✅ Usar replace en lugar de push para evitar el parpadeo
+    router.replace(`/folder/${folderIdFromQuery}${queryString}`, undefined, { shallow: true });
   } else {
     console.log('🔙 Volviendo a vista general');
-    navigateToSection('Contenedor');
+    
+    const queryString = Object.keys(currentQuery).length > 0 
+      ? '?' + new URLSearchParams(currentQuery as Record<string, string>).toString()
+      : '';
+    
+    // ✅ También usar replace aquí
+    router.replace(`/${queryString}`, undefined, { shallow: true });
   }
 };
   

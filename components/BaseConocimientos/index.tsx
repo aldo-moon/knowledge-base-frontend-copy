@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {Folder} from 'lucide-react';
 import styles from '../../styles/base-conocimientos.module.css';
+import { useRouter } from 'next/router';
 
 // Importar componentes modulares
 import HeaderSection from './Header/HeaderSection';
@@ -257,6 +258,7 @@ const BaseConocimientos = () => {
 
   
 
+const router = useRouter();
 
   // Estados básicos - inicializar desde URL
   const urlFilters = getFiltersFromUrl();
@@ -295,6 +297,7 @@ const [isDeleteFileModalOpen, setIsDeleteFileModalOpen] = useState<boolean>(fals
 const [selectedFile, setSelectedFile] = useState<File | null>(null);
 const [fileToDelete, setFileToDelete] = useState<File | null>(null);
 const [originalFolderId, setOriginalFolderId] = useState<string | null>(null);
+const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Estados de filtros - inicializar desde URL
   const [areFiltersVisible, setAreFiltersVisible] = useState(false);
@@ -351,7 +354,6 @@ useEffect(() => {
     console.log('🚀 Inicializando con currentUserId:', currentUserId);
     await initializeFromUrl();
     
-    // ✅ AQUÍ está la clave: loadCarpetas ahora se ejecutará con currentUserId disponible
     await loadCarpetas();
   };
   
@@ -547,6 +549,9 @@ const handleLoad = (itemLabel: LoaderKey) => {
 
 const refreshUserData = async () => {
   try {
+
+    await new Promise(resolve => setTimeout(resolve, 1200)); // 800ms de delay
+
     console.log('Actualizando datos del usuario...');
     const userData = await usuarioService.getAllContentByUser(CURRENT_USER_ID);
     
@@ -1285,42 +1290,45 @@ const loadCarpetas = async () => {
   
   try {
     setLoading(true);
+
+    await new Promise(resolve => setTimeout(resolve, 1200)); // 200ms de delay
     
-    const carpetas = await carpetaService.getFolderContent(currentFolderId);
-    console.log('📁 Carpetas response:', carpetas);
-    setFolders(Array.isArray(carpetas) ? carpetas : []);
+    // ✅ CARGAR TODO EN PARALELO y esperar a que TODO termine
+    const [carpetasData, temasData, archivosData] = await Promise.all([
+      carpetaService.getFolderContent(currentFolderId),
+      CURRENT_USER_ID ? temaService.getTemasByFolder(currentFolderId, CURRENT_USER_ID) : Promise.resolve({ content: [], borrador: [] }),
+      archivoService.getFilesByFolderId(currentFolderId)
+    ]);
+    
+    // Procesar carpetas
+    console.log('📁 Carpetas response:', carpetasData);
+    setFolders(Array.isArray(carpetasData) ? carpetasData : []);
+    
+    // Procesar temas
+    if (CURRENT_USER_ID) {
+      console.log('📝 Temas response:', temasData);
       
-    if (!CURRENT_USER_ID) {
-      console.error('❌ No se puede cargar temas: CURRENT_USER_ID es null');
+      const contentThemes = (temasData.content || []).map((tema: any) => ({
+        ...tema,
+        isDraft: false
+      }));
+
+      const draftThemes = (temasData.borrador || []).map((tema: any) => ({
+        ...tema,
+        isDraft: true
+      }));
+      
+      const allThemes = [...contentThemes, ...draftThemes];
+      console.log('📝 Temas totales (content + borrador):', allThemes);
+      
+      setThemes(allThemes);
+    } else {
       setThemes([]);
-      setFiles([]);
-      return;
     }
     
-    // ✅ AQUÍ ESTÁ EL CAMBIO PRINCIPAL
-    const temasResponse = await temaService.getTemasByFolder(currentFolderId, CURRENT_USER_ID);
-    console.log('📝 Temas response:', temasResponse);
-    
-    // Combinar content y borrador, marcando cuáles son borradores
-    const contentThemes = (temasResponse.content || []).map((tema: any) => ({
-      ...tema,
-      isDraft: false
-    }));
-
-    const draftThemes = (temasResponse.borrador || []).map((tema: any) => ({
-      ...tema,
-      isDraft: true
-    }));
-    
-    // Combinar ambos arrays
-    const allThemes = [...contentThemes, ...draftThemes];
-    console.log('📝 Temas totales (content + borrador):', allThemes);
-    
-    setThemes(allThemes);
-
-    const archivos = await archivoService.getFilesByFolderId(currentFolderId);
-    console.log('📄 Archivos response:', archivos);
-    setFiles(Array.isArray(archivos) ? archivos : []);
+    // Procesar archivos
+    console.log('📄 Archivos response:', archivosData);
+    setFiles(Array.isArray(archivosData) ? archivosData : []);
     
   } catch (error) {
     console.error('Error loading content:', error);
@@ -1328,6 +1336,7 @@ const loadCarpetas = async () => {
     setThemes([]);
     setFiles([]);
   } finally {
+    // ✅ SOLO se desactiva loading cuando TODO terminó
     setLoading(false);
   }
 };
@@ -1344,7 +1353,10 @@ const loadCarpetas = async () => {
 
 const loadSubfolderContent = async (folderId: string, folderName: string) => {
     try {
-      const response = await carpetaService.getFolderContent(folderId);
+
+      await new Promise(resolve => setTimeout(resolve, 1200)); // 600ms de delay
+
+        const response = await carpetaService.getFolderContent(folderId);
       setSidebarFolders(prev => ({
         ...prev,
         [folderId]: response
@@ -1424,6 +1436,8 @@ const loadFavoritesContent = async () => {
   try {
     setFavoritesContentLoading(true);
     setFavoritesContentError(null);
+
+    await new Promise(resolve => setTimeout(resolve, 1200)); // 800ms de delay
 
     const favoritesResponse = await favoritoService.getFavoritoById(CURRENT_USER_ID);
 
@@ -1670,7 +1684,10 @@ const loadTrashContent = async () => {
   try {
     setTrashContentLoading(true);
     setTrashContentError(null);
-    
+
+    await new Promise(resolve => setTimeout(resolve, 1200)); // 800ms de delay
+
+
     console.log('🗑️ Cargando papelera para usuario:', CURRENT_USER_ID);
     
     // Obtener elementos de papelera del usuario
@@ -1797,6 +1814,53 @@ const handleLogout = () => {
   // El authService.logout() ya maneja la redirección
   authService.logout();
 };
+const handleThemeDetailBack = async () => {
+  console.log('🔙 Manejando regreso desde detalle de tema...');
+  
+  // ✅ PRIMERO: Obtener el folderId correcto ANTES de hacer nada
+  const folderIdFromQuery = router.query.folderId as string;
+  const targetFolderId = folderIdFromQuery || "68acb06886d455d16cceef05";
+  
+  console.log('📂 Target folder:', targetFolderId);
+  
+  // ✅ SEGUNDO: Limpiar datos y activar loading
+  setFolders([]);
+  setThemes([]);
+  setFiles([]);
+  setLoading(true);
+  
+  // ✅ TERCERO: Esperar un tick para que React renderice el skeleton
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  try {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    const [carpetasData, temasData, archivosData] = await Promise.all([
+      carpetaService.getFolderContent(targetFolderId),
+      CURRENT_USER_ID ? temaService.getTemasByFolder(targetFolderId, CURRENT_USER_ID) : Promise.resolve({ content: [], borrador: [] }),
+      archivoService.getFilesByFolderId(targetFolderId)
+    ]);
+    
+    // Actualizar estados con datos nuevos
+    setFolders(Array.isArray(carpetasData) ? carpetasData : []);
+    
+    if (CURRENT_USER_ID && temasData) {
+      const contentThemes = (temasData.content || []).map((tema: any) => ({ ...tema, isDraft: false }));
+      const draftThemes = (temasData.borrador || []).map((tema: any) => ({ ...tema, isDraft: true }));
+      setThemes([...contentThemes, ...draftThemes]);
+    }
+    
+    setFiles(Array.isArray(archivosData) ? archivosData : []);
+    
+  } catch (error) {
+    console.error('Error cargando datos:', error);
+  } finally {
+    setLoading(false);
+  }
+  
+  // ✅ CUARTO: AHORA SÍ navegar (cuando TODO está listo)
+  navigateBackFromThemeDetail();
+};
 
   // ============= RENDER =============
 
@@ -1886,7 +1950,7 @@ const handleLogout = () => {
               onThemeTitleChange={setThemeTitle}
               onThemeDescriptionChange={setThemeDescription}
               viewingThemeId={currentThemeId}
-              onThemeDetailBack={navigateBackFromThemeDetail}
+onThemeDetailBack={handleThemeDetailBack}
               onThemeDelete={handleThemeDeleteFromDetail}
               onRestoreItem={() => {}}
               onPermanentDelete={() => {}}

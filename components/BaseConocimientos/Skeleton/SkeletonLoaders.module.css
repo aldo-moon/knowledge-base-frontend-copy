@@ -1,0 +1,144 @@
+/* components/BaseConocimientos/Skeleton/SkeletonLoaders.module.css */
+
+/* Animación de pulso */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Base para todos los elementos skeleton */
+.skeletonBase {
+  background: linear-gradient(
+    90deg,
+    #30334d 0%,
+    #27293d 50%,
+    #30334d 100%
+  );
+  background-size: 200% 100%;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-radius: 4px;
+}
+
+/* Skeleton para Folder Card */
+.folderCardSkeleton {
+  padding: 16px;
+  border: 1px solid #27293d;
+  border-radius: 8px;
+  background-color: #30334d;
+  animation: fadeIn 0.3s ease-out backwards;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeletonIcon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(
+    90deg,
+    #30334d 0%,
+    #27293d 50%,
+    #30334d 100%
+  );
+  background-size: 200% 100%;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-radius: 8px;
+}
+
+.skeletonTextLarge {
+  height: 18px;
+  width: 80%;
+  background: linear-gradient(
+    90deg,
+    #30334d 0%,
+    #27293d 50%,
+    #30334d 100%
+  );
+  background-size: 200% 100%;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-radius: 4px;
+}
+
+.skeletonTextMedium {
+  height: 14px;
+  width: 90%;
+  background: linear-gradient(
+    90deg,
+    #30334d 0%,
+    #27293d 50%,
+    #30334d 100%
+  );
+  background-size: 200% 100%;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-radius: 4px;
+}
+
+.skeletonTextSmall {
+  height: 12px;
+  width: 60%;
+  background: linear-gradient(
+    90deg,
+    #30334d 0%,
+    #27293d 50%,
+    #30334d 100%
+  );
+  background-size: 200% 100%;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-radius: 4px;
+}
+
+/* Skeleton para Theme Card */
+.themeCardSkeleton {
+  padding: 16px;
+  border: 1px solid #27293d;
+  border-radius: 8px;
+  background-color: #30334d;
+  animation: fadeIn 0.3s ease-out backwards;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeletonBadge {
+  width: 80px;
+  height: 24px;
+  background: linear-gradient(
+    90deg,
+    #30334d 0%,
+    #27293d 50%,
+    #30334d 100%
+  );
+  background-size: 200% 100%;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-radius: 12px;
+}
+
+/* Skeleton para File Card */
+.fileCardSkeleton {
+  padding: 12px;
+  border: 1px solid #27293d;
+  border-radius: 8px;
+  background-color: #30334d;
+  animation: fadeIn 0.3s ease-out backwards;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

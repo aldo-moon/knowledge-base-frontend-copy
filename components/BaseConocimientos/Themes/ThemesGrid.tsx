@@ -1,6 +1,7 @@
 // components/BaseConocimientos/Themes/ThemesGrid.tsx
 import React from 'react';
 import ThemeCard from './ThemeCard';
+import { ThemeCardSkeleton } from '../Skeleton/SkeletonLoaders';
 import styles from '../../../styles/base-conocimientos.module.css';
 
 interface Theme {
@@ -11,8 +12,7 @@ interface Theme {
   folder_id?: string;
   keywords?: string[];
   creation_date?: string;
-  isDraft?: boolean; // ✅ Nueva propiedad
-
+  isDraft?: boolean;
 }
 
 interface ThemesGridProps {
@@ -20,12 +20,10 @@ interface ThemesGridProps {
   loading?: boolean;
   error?: string | null;
   themeFavorites?: Set<string>; 
-  onThemeSelect?: (theme: Theme) => void; // ← Ya opcional
+  onThemeSelect?: (theme: Theme) => void;
   onThemeDoubleClick?: (theme: Theme) => void;
   onThemeMenuAction?: (action: string, theme: Theme) => void;
   onToggleThemeFavorite?: (folderId: string) => void;
-  
-  // Props para vista de papelera (igual que en FoldersGrid)
   isTrashView?: boolean;
   selectedItems?: Set<string>;
   onItemSelect?: (itemId: string) => void;
@@ -40,21 +38,21 @@ export const ThemesGrid: React.FC<ThemesGridProps> = ({
   onThemeDoubleClick,
   onThemeMenuAction,
   onToggleThemeFavorite,
-    isTrashView = false,
+  isTrashView = false,
   selectedItems,
   onItemSelect
 }) => {
-    console.log('🔍 ThemesGrid recibió:', {
-    totalThemes: themes.length,
-    themes: themes,
-    themesWithDraft: themes.filter(t => t?.isDraft).length
-  });
 
-
+  // Mostrar skeletons mientras carga
   if (loading) {
     return (
       <div className={styles.contentSection}>
-        <p>Cargando temas...</p>
+        <h3 className={styles.sectionTitle}>Temas</h3>
+        <div className={styles.themesGrid}>
+          {[...Array(4)].map((_, index) => (
+            <ThemeCardSkeleton key={`skeleton-${index}`} index={index} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -67,37 +65,37 @@ export const ThemesGrid: React.FC<ThemesGridProps> = ({
     );
   }
 
-  if (themes.length === 0) {
-    return null; // No mostrar nada si no hay temas
-  }
+if (themes.length === 0 && !loading) {
+  return null;
+}
 
   return (
     <div className={styles.contentSection}>
       <h3 className={styles.sectionTitle}>Temas</h3>
       <div className={styles.themesGrid}>
-{themes.filter(theme => {
-  if (!theme) {
-    console.log('❌ Tema null encontrado');
-    return false;
-  }
-  if (!theme._id) {
-    console.log('❌ Tema sin _id:', theme);
-    return false;
-  }
-  return true;
-}).map((theme) => (
-  <ThemeCard
-    key={theme._id}
-    theme={theme}
-    isFavorite={themeFavorites.has(theme._id)}
-    isDraft={theme.isDraft} // ✅ Asegúrate de pasar isDraft
-    onSelect={onThemeSelect || (() => {})}
-    onThemeDoubleClick={onThemeDoubleClick}
-    onMenuAction={onThemeMenuAction}
-    onToggleFavorite={onToggleThemeFavorite}
-  />
-))}
-</div>
+        {themes.filter(theme => {
+          if (!theme) {
+            console.log('❌ Tema null encontrado');
+            return false;
+          }
+          if (!theme._id) {
+            console.log('❌ Tema sin _id:', theme);
+            return false;
+          }
+          return true;
+        }).map((theme, index) => (
+          <ThemeCard
+            key={theme._id}
+            theme={theme}
+            isFavorite={themeFavorites.has(theme._id)}
+            isDraft={theme.isDraft}
+            onSelect={onThemeSelect || (() => {})}
+            onThemeDoubleClick={onThemeDoubleClick}
+            onMenuAction={onThemeMenuAction}
+            onToggleFavorite={onToggleThemeFavorite}
+          />
+        ))}
+      </div>
     </div>
   );
 };

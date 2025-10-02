@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, Download, ZoomIn, ZoomOut, RotateCw, AlertCircle } from 'lucide-react';
 import styles from '../../../styles/base-conocimientos.module.css';
+import { archivoService } from '../../../services/archivoService';
+import { QRCodeSVG } from 'qrcode.react'; // ✅ AGREGAR ESTA LÍNEA
+
 
 interface FileViewerProps {
   isOpen: boolean;
@@ -20,6 +23,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({ isOpen, onClose, file })
   const [rotation, setRotation] = useState(0);
   const [error, setError] = useState('');
   const [fileUrl, setFileUrl] = useState('');
+  const [videoToken, setVideoToken] = useState<string | null>(null);
+  const [showQR, setShowQR] = useState(false);
+  const [generatingToken, setGeneratingToken] = useState(false);
 
  useEffect(() => {
   if (isOpen) {
@@ -71,16 +77,28 @@ export const FileViewer: React.FC<FileViewerProps> = ({ isOpen, onClose, file })
     return 'unsupported';
   };
 
-  const handleDownload = () => {
-    if (fileUrl) {
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = file.file_name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+
+
+  useEffect(() => {
+  const generateTokenForVideo = async () => {
+    // Solo generar token si es un video
+    if (isOpen && file && getFileType(file.file_name) === 'video') {
+      try {
+        setGeneratingToken(true);
+        const tokenData = await archivoService.generateVideoToken();
+        setVideoToken(tokenData.token);
+        console.log('✅ Token generado para video:', tokenData.token);
+      } catch (error) {
+        console.error('❌ Error generando token:', error);
+      } finally {
+        setGeneratingToken(false);
+      }
     }
   };
+
+  generateTokenForVideo();
+}, [isOpen, file]);
+
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 25, 200));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 25, 50));
@@ -192,41 +210,32 @@ export const FileViewer: React.FC<FileViewerProps> = ({ isOpen, onClose, file })
           <div className={styles.fileViewerControls}>
             {showImageControls && (
               <>
-                <button
-                  className={styles.fileViewerButton}
-                  onClick={handleZoomOut}
-                  title="Alejar"
-                  disabled={zoom <= 50}
-                >
+                <button className={styles.fileViewerButton} onClick={handleZoomOut} title="Alejar" disabled={zoom <= 50}>
                   <ZoomOut size={20} />
                 </button>
                 <span className={styles.fileViewerZoomLevel}>{zoom}%</span>
-                <button
-                  className={styles.fileViewerButton}
-                  onClick={handleZoomIn}
-                  title="Acercar"
-                  disabled={zoom >= 200}
-                >
+                <button className={styles.fileViewerButton} onClick={handleZoomIn} title="Acercar" disabled={zoom >= 200}>
                   <ZoomIn size={20} />
                 </button>
-                <button
-                  className={styles.fileViewerButton}
-                  onClick={handleRotate}
-                  title="Rotar"
-                >
+                <button className={styles.fileViewerButton} onClick={handleRotate} title="Rotar">
                   <RotateCw size={20} />
                 </button>
               </>
             )}
-            
-            {/* <button
-              className={styles.fileViewerButton}
-              onClick={handleDownload}
-              title="Descargar"
-            >
-              <Download size={20} />
-            </button> */}
-            
+
+            {/* ✅ MOVER EL BOTÓN QR AQUÍ (antes del botón de cerrar) */}
+            {/* Botón para generar QR (solo para videos) */}
+            {getFileType(file.file_name) === 'video' && videoToken && (
+              <button
+                className={styles.fileViewerButton}
+                onClick={() => setShowQR(!showQR)}
+                disabled={generatingToken}
+                title="Generar código QR"
+              >
+                {generatingToken ? 'Generando...' : showQR ? 'Ocultar QR' : 'Generar QR'}
+              </button>
+            )}
+                        
             <button
               className={styles.fileViewerCloseButton}
               onClick={onClose}
@@ -234,15 +243,31 @@ export const FileViewer: React.FC<FileViewerProps> = ({ isOpen, onClose, file })
             >
               <X size={24} />
             </button>
+
+
           </div>
         </div>
-
+        
         {/* Content */}
         <div className={styles.fileViewerContent}>
           {error ? (
             <div className={styles.fileViewerError}>
               <AlertCircle size={48} />
               <p>{error}</p>
+            </div>
+          ) : showQR && videoToken ? (
+            <div className={styles.qrContainer}>
+              <h3>Código QR de un solo uso</h3>
+              <p className={styles.qrWarning}>⚠️ Este código solo funcionará una vez</p>
+              <div className={styles.qrCodeWrapper}>
+                <QRCodeSVG 
+                  value={`${window.location.origin}/video/${videoToken}/${file._id}`}  // ✅ Agregar fileId
+                  size={300}
+                  level="H"
+                  includeMargin={true}
+                />
+              </div>
+              <p className={styles.qrUrl}>{`${window.location.origin}/video/${videoToken}/${file._id}`}</p>
             </div>
           ) : (
             renderContent()

@@ -1,6 +1,7 @@
 // components/BaseConocimientos/Files/FilesGrid.tsx
 import React from 'react';
 import FileCard from './FileCard';
+import { FileCardSkeleton } from '../Skeleton/SkeletonLoaders';
 import styles from '../../../styles/base-conocimientos.module.css';
 
 interface File {
@@ -41,10 +42,16 @@ export const FilesGrid: React.FC<FilesGridProps> = ({
   onItemSelect
 }) => {
 
+  // Mostrar skeletons mientras carga
   if (loading) {
     return (
       <div className={styles.contentSection}>
-        <p>Cargando archivos...</p>
+        <h3 className={styles.sectionTitle}>Archivos</h3>
+        <div className={styles.filesGrid}>
+          {[...Array(6)].map((_, index) => (
+            <FileCardSkeleton key={`skeleton-${index}`} index={index} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -52,14 +59,17 @@ export const FilesGrid: React.FC<FilesGridProps> = ({
   if (error) {
     return (
       <div className={styles.contentSection}>
-        <p>Error: {error}</p>
+        <div className={styles.errorMessage}>
+          <p>⚠️ Error al cargar archivos: {error}</p>
+        </div>
       </div>
     );
   }
 
-  if (files.length === 0) {
-    return null;
-  }
+if (files.length === 0 && !loading) {
+  return null;
+}
+
 
   return (
     <div className={styles.contentSection}>

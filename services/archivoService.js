@@ -239,5 +239,28 @@ export const archivoService = {
     };
     
     return fileTypes[extension] || 'other';
-  }
+  },
+
+  // Generar token de un solo uso para video
+  generateVideoToken: async () => {
+    try {
+      const response = await api.get('/archivos/generator');
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error al generar token de video:", error);
+      throw error;
+    }
+  },
+
+  // Validar y consumir token de un solo uso
+  accessOneTimeToken: async (token) => {
+    try {
+      const response = await api.get(`/archivos/abrir-link/${token}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error al acceder al token:", error);
+      throw error;
+    }
+  },
+
 };

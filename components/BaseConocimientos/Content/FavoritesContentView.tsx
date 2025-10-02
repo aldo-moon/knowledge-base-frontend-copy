@@ -140,18 +140,73 @@ export const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 
 
 
-  if (loading) {
-    return (
-      <div className={styles.foldersSection}>
-        <div className={styles.contentHeader}>
+if (loading) {
+  return (
+ <div className={styles.foldersSection}>
+      {/* Header con botón de filtros */}
+      <div className={styles.contentHeaderTop}>
+        <div className={styles.contentHeaderLeft}>
           <h2 className={styles.sectionTitle1}>Favoritos</h2>
+          
         </div>
-        <div className={styles.loadingContainer}>
-          <p>Cargando favoritos...</p>
+        
+        {/*  Botón de filtros agregado */}
+        <div className={styles.contentHeaderActions}>
+          <button 
+            className={`${styles.filterToggleButton} ${areFiltersVisible ? styles.filterToggleActive : ''}`}
+            onClick={onToggleFiltersVisibility}
+          >
+            <SlidersHorizontal size={20} />
+          </button>
         </div>
       </div>
-    );
-  }
+        <div className={styles.contentStats}>
+            <span>{favoriteFolders.length} carpetas</span>
+            <span>{favoriteThemes.length} temas</span>
+            <span>{favoriteFiles.length} archivos</span>  
+
+          </div>
+        
+      
+      
+      {/* Mostrar skeletons mientras carga */}
+      <div className={styles.contentSections}>
+        <FoldersGrid
+          folders={[]}
+          folderFavorites={folderFavorites}
+          loading={true}
+          error={null}
+          onFolderSelect={onFolderSelect}
+          onFolderDoubleClick={onFolderDoubleClick}
+          onFolderMenuAction={onFolderMenuAction}
+          onToggleFolderFavorite={onToggleFolderFavorite}
+        />
+        
+        <ThemesGrid
+          themes={[]}
+          themeFavorites={themeFavorites}
+          loading={true}
+          error={null}
+          onThemeSelect={onThemeSelect}
+          onThemeDoubleClick={onThemeDoubleClick}
+          onThemeMenuAction={onThemeMenuAction}
+          onToggleThemeFavorite={onToggleThemeFavorite}
+        />
+        
+        <FilesGrid
+          files={[]}
+          fileFavorites={fileFavorites}
+          loading={true}
+          error={null}
+          onFileSelect={onFileSelect}
+          onFileDoubleClick={onFileDoubleClick}
+          onFileMenuAction={onFileMenuAction}
+          onToggleFileFavorite={onToggleFileFavorite}
+        />
+      </div>
+    </div>
+  );
+}
 
   if (error) {
     return (

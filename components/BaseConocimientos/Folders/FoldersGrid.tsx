@@ -1,6 +1,7 @@
 // components/BaseConocimientos/Folders/FoldersGrid.tsx
 import React from 'react';
 import FolderCard from './FolderCard';
+import { FolderCardSkeleton } from '../Skeleton/SkeletonLoaders';
 import styles from '../../../styles/base-conocimientos.module.css';
 
 interface Folder {
@@ -18,15 +19,14 @@ interface FoldersGridProps {
   error?: string | null;
   folderFavorites?: Set<string>; 
   onFolderSelect: (folder: Folder) => void;
-  onFolderDoubleClick?: (folder: Folder) => void; // ← Hacer opcional
+  onFolderDoubleClick?: (folder: Folder) => void;
   onFolderMenuAction: (action: string, folder: Folder) => void;
   onToggleFolderFavorite?: (folderId: string) => void;
-  // Props para vista de papelera
   isTrashView?: boolean;
   selectedItems?: Set<string>;
   onItemSelect?: (itemId: string) => void;
 }
-  
+
 export const FoldersGrid: React.FC<FoldersGridProps> = ({
   folders,
   loading = false,
@@ -36,54 +36,50 @@ export const FoldersGrid: React.FC<FoldersGridProps> = ({
   onFolderDoubleClick,
   onFolderMenuAction,
   onToggleFolderFavorite 
-
 }) => {
 
-  // Donde pases las carpetas a FoldersGrid o similar:
-console.log('📁 Pasando folders a FoldersGrid:', folders);
+  // Mostrar skeletons mientras carga
   if (loading) {
     return (
-      <div className={styles.foldersSection}>
-        <p>Cargando carpetas...</p>
+      <div className={styles.contentSection}>
+        <h3 className={styles.sectionTitle}>Carpetas</h3>
+        <div className={styles.foldersGrid}>
+          {[...Array(6)].map((_, index) => (
+            <FolderCardSkeleton key={`skeleton-${index}`} index={index} />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.foldersSection}>
-        <p>Error: {error}</p>
+      <div className={styles.contentSection}>
+        <div className={styles.errorMessage}>
+          <p>⚠️ Error al cargar carpetas: {error}</p>
+        </div>
       </div>
     );
   }
-
-  if (folders.length === 0) {
-    return (
-      <div className={styles.foldersSection}>
-        <p>No hay carpetas disponibles</p>
-      </div>
-    );
-  }
-console.log('🎯 FoldersGrid va a renderizar:', folders?.length, 'carpetas');
+if (folders.length === 0 && !loading) {
+  return null; // Solo ocultar si NO está cargando
+}
 
   return (
-    
     <div className={styles.contentSection}>
       <h3 className={styles.sectionTitle}>Carpetas</h3>
       <div className={styles.foldersGrid}>
         {folders.map((folder, index) => (
           <FolderCard
-  key={folder._id}
-  folder={folder}
-  index={index}
-  isFavorite={folderFavorites.has(folder._id)}
-  onSelect={onFolderSelect}
-  onDoubleClick={onFolderDoubleClick || (() => {})} // ← Proporcionar fallback
-  onMenuAction={onFolderMenuAction}
-  onToggleFavorite={onToggleFolderFavorite}
-  // Props de papelera si las necesitas
-
-/>
+            key={folder._id}
+            folder={folder}
+            index={index}
+            isFavorite={folderFavorites.has(folder._id)}
+            onSelect={onFolderSelect}
+            onDoubleClick={onFolderDoubleClick || (() => {})}
+            onMenuAction={onFolderMenuAction}
+            onToggleFavorite={onToggleFolderFavorite}
+          />
         ))}
       </div>
     </div>

@@ -405,9 +405,11 @@ onFileSelect={onFileSelect as any}
         {/* Sección de Temas */}
         <ThemesGrid
           themes={themes}
+          loading={loading} 
+          error={error}    
           onThemeSelect={onThemeSelect}
           onThemeMenuAction={onThemeMenuAction}
-          onThemeDoubleClick={onThemeDoubleClick}  // NUEVO
+          onThemeDoubleClick={onThemeDoubleClick}
           onToggleThemeFavorite={onToggleThemeFavorite}
           themeFavorites={themeFavorites}
         />
