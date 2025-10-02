@@ -6505,3 +6505,239 @@ max-width: 300px;
     max-height: 250px !important;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==================== FILE VIEWER MODAL ==================== */
+
+.fileViewerOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(5px);
+}
+
+.fileViewerModal {
+  background: #1e1e2f;
+  border-radius: 12px;
+  width: 90vw;
+  height: 90vh;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.fileViewerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: #27293d;
+  border-bottom: 2px solid #6262bf;
+}
+
+.fileViewerTitle {
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50%;
+}
+
+.fileViewerControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fileViewerButton {
+  background: transparent;
+  border: 1px solid #6262bf;
+  color: #6262bf;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.fileViewerButton:hover:not(:disabled) {
+  background: #6262bf;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.fileViewerButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fileViewerZoomLevel {
+  color: #6262bf;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: center;
+}
+
+.fileViewerCloseButton {
+  background: transparent;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-left: 0.5rem;
+}
+
+.fileViewerCloseButton:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.fileViewerContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow: auto;
+  background: #16161f;
+}
+
+.fileViewerImageContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.fileViewerVideo {
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.fileViewerAudioContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: #27293d;
+  border-radius: 12px;
+  min-width: 400px;
+}
+
+.fileViewerAudio {
+  width: 100%;
+  max-width: 500px;
+}
+
+.fileViewerFileName {
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+}
+
+.fileViewerIframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+  background: white;
+}
+
+.fileViewerError,
+.fileViewerUnsupported {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: #ef4444;
+  text-align: center;
+  padding: 2rem;
+}
+
+.fileViewerUnsupported {
+  color: #9ca3af;
+}
+
+.fileViewerHint {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fileViewerModal {
+    width: 95vw;
+    height: 95vh;
+  }
+
+  .fileViewerHeader {
+    padding: 0.75rem 1rem;
+  }
+
+  .fileViewerTitle {
+    font-size: 1rem;
+    max-width: 40%;
+  }
+
+  .fileViewerControls {
+    gap: 0.25rem;
+  }
+
+  .fileViewerButton,
+  .fileViewerCloseButton {
+    padding: 0.4rem;
+  }
+
+  .fileViewerContent {
+    padding: 1rem;
+  }
+
+  .fileViewerAudioContainer {
+    min-width: 300px;
+    padding: 1.5rem;
+  }
+}

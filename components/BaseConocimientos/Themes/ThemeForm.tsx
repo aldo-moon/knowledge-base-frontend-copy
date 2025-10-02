@@ -476,13 +476,14 @@ useEffect(() => {
 const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
   const files = Array.from(event.target.files || []);
   if (files.length === 0) return;
-
+  
   // Validar archivos
-  const maxSize = 10 * 1024 * 1024; // 10MB por archivo
+  
+  const maxSize = 500 * 1024 * 1024; // 500MB por archivo
   const oversizedFiles = files.filter(file => file.size > maxSize);
   
   if (oversizedFiles.length > 0) {
-    setUploadError(`Archivos demasiado grandes (máx 10MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
+    setUploadError(`Archivos demasiado grandes (máx 500MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
     return;
   }
 

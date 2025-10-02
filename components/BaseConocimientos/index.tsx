@@ -34,7 +34,8 @@ import TopHeader from './Header/TopHeader';
 import ModeloIACrudModal from './Modals/ModeloIACrudModal';
 import SeccionCrudModal from './Modals/SeccionCrudModal';
 import MoveThemeModal from './Modals/MoveThemeModal';
-
+import FileViewerModal from './Modals/FileViewerModal';
+import ChatbotWidget from './ChatbotWidget/index'; 
 
 
 // Importar servicios
@@ -280,6 +281,9 @@ const [isModeloIAModalOpen, setIsModeloIAModalOpen] = useState(false);
 const [isSeccionModalOpen, setIsSeccionModalOpen] = useState(false);
 
 const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+// Agregar al inicio del archivo con los demás estados
+const [fileViewerOpen, setFileViewerOpen] = useState(false);
+const [fileToView, setFileToView] = useState<File | null>(null);
 
     // Estados para componentes modulares
   const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
@@ -925,11 +929,44 @@ const handleMoveTheme = async (targetFolderId: string) => {
   if (!themeToMove) return;
 
   try {
-    console.log(`Moviendo tema ${themeToMove._id} a carpeta ${targetFolderId}`);
+    console.log(`📁 Moviendo tema ${themeToMove._id} a carpeta ${targetFolderId}`);
 
+    // ✅ Obtener los datos completos del tema (incluyendo archivos adjuntos)
+    const fullThemeData = await temaService.getTemaById(themeToMove._id);
+    console.log('🔍 Tema completo obtenido:', fullThemeData);
+    console.log('🔍 Archivos adjuntos:', fullThemeData.files_attachment_id);
+
+    // ✅ Actualizar el tema con la nueva carpeta
     await temaService.updateTema(themeToMove._id, {
       folder_id: targetFolderId
     });
+
+    // ✅ Si el tema tiene archivos adjuntos, moverlos también
+    if (fullThemeData.files_attachment_id && fullThemeData.files_attachment_id.length > 0) {
+      console.log(`📎 Moviendo ${fullThemeData.files_attachment_id.length} archivos adjuntos`);
+      
+      const moveResults = await Promise.all(
+        fullThemeData.files_attachment_id.map(async (fileId: string) => {
+          try {
+            console.log(`🔄 Intentando mover archivo ${fileId} a carpeta ${targetFolderId}`);
+            const result = await archivoService.updateArchivoById(fileId, {
+              folder_id: targetFolderId
+            });
+            console.log(`✅ Archivo ${fileId} movido exitosamente`);
+            return { success: true, fileId };
+          } catch (error) {
+            console.error(`❌ Error moviendo archivo ${fileId}:`, error);
+            return { success: false, fileId, error };
+          }
+        })
+      );
+      
+      console.log('📊 Resultados de mover archivos:', moveResults);
+    } else {
+      console.log('⚠️ No hay archivos adjuntos para mover');
+    }
+
+    console.log('✅ Tema y archivos movidos exitosamente');
 
     setIsMoveThemeModalOpen(false);
     setThemeToMove(null);
@@ -938,10 +975,9 @@ const handleMoveTheme = async (targetFolderId: string) => {
     await refreshUserData();
 
   } catch (error) {
-    console.error("Error moviendo tema:", error);
+    console.error("❌ Error moviendo tema:", error);
   }
 };
-
 const handleRenameTheme = async (newName: string) => {
   try {
     if (!selectedTheme) return;
@@ -1479,14 +1515,25 @@ const themeDetails = await Promise.all(
 
 
 // ✅ Funciones con tipos explícitos
-const handleFileSelection = (file: File) => {
+const handleFileSelection = async (file: File) => {
   console.log('Archivo seleccionado:', file.file_name);
-  // Lógica para mostrar detalles del archivo
+  
+  try {
+    // Obtener datos completos del archivo incluyendo la URL de S3
+    const fullFileData = await archivoService.getArchivoById(file._id);
+    console.log('📁 Datos completos del archivo:', fullFileData);
+    
+    setFileToView(fullFileData);
+    setFileViewerOpen(true);
+  } catch (error) {
+    console.error('Error obteniendo datos del archivo:', error);
+  }
 };
+
 
 const handleFileDoubleClick = (file: File) => {
   console.log('Doble click en archivo:', file.file_name);
-  // Lógica para abrir/descargar archivo
+  // Falta implementar esta función
 };
 
 const handleFileMenuAction = (action: string, file: File) => {
@@ -1960,7 +2007,20 @@ const handleLogout = () => {
       currentFolderId={themeToMove?.folder_id || currentFolderId}
       themeName={themeToMove?.title_name || ""}
     />
-          
+      {/* File Viewer Modal */}
+      {fileViewerOpen && fileToView && (
+        <FileViewerModal
+          isOpen={fileViewerOpen}
+          onClose={() => {
+            setFileViewerOpen(false);
+            setFileToView(null);
+          }}
+          file={fileToView}
+        />
+      )}
+      {/* Widget de Chatbot */}
+<ChatbotWidget />
+                
     </div>
   );
 };

@@ -22,8 +22,7 @@ interface FilePreviewProps {
 }
 
 
-export const FilePreview: React.FC<FilePreviewProps> = ({ file, onDownload, onMenuAction, className }) => {
-  const [previewError, setPreviewError] = useState(false);
+export const FilePreview: React.FC<FilePreviewProps> = ({ file, onDownload, onMenuAction, className, onSelect }) => {  const [previewError, setPreviewError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -232,8 +231,12 @@ useEffect(() => {
     return fileName.split('.').pop()?.toUpperCase() || '';
   };
 
-  return (
-    <div className={`${styles.filePreviewCard} ${className || ''}`}>
+return (
+  <div 
+    className={`${styles.filePreviewCard} ${className || ''}`}
+    onClick={() => onSelect && onSelect(file)}
+    style={{ cursor: onSelect ? 'pointer' : 'default' }}
+  >
       <div className={styles.filePreviewContainer}>
         {renderPreview()}
       </div>

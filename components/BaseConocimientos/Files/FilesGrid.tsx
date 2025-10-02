@@ -16,7 +16,7 @@ interface FilesGridProps {
   loading?: boolean;
   error?: string | null;
   fileFavorites?: Set<string>;
-  onFileSelect?: (file: File) => void; // ← Hacer opcional
+  onFileSelect?: (file: File) => void; 
   onFileDoubleClick?: (file: File) => void;
   onFileMenuAction?: (action: string, file: File) => void;
   onToggleFileFavorite?: (fileId: string) => void;

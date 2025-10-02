@@ -6,6 +6,7 @@ import styles from './../../../styles/base-conocimientos.module.css';
 import { temaService } from '../../../services/temaService';
 import FilePreview from '../Files/FilePreview'
 import { authService } from '../../../services/authService';
+import FileViewer from '../Modals/FileViewerModal';
 
 
 interface Theme {
@@ -24,7 +25,7 @@ interface Theme {
   area_id?: string;
   puesto_id?: string;
   files_attachment_id?: string[];
-    isDraft?: boolean; // ✅ Nueva propiedad
+    isDraft?: boolean;
 
 }
 
@@ -61,7 +62,8 @@ export const ThemeDetailView: React.FC<ThemeDetailViewProps> = ({
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
 const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
+const [fileViewerOpen, setFileViewerOpen] = useState(false);
+const [fileToView, setFileToView] = useState<AttachedFile | null>(null);
   const [attachments, setAttachments] = useState<{images: string[], documents: string[]}>({
   images: [],
   documents: []
@@ -86,6 +88,12 @@ const calculatePercentage = (views: number): number => {
   // Meta de ejemplo: 725 vistas
   const goal = 725;
   return Math.min(Math.round((views / goal) * 100), 100);
+};
+
+const handleFileClick = (file: AttachedFile) => {
+  console.log('Click en archivo:', file.file_name);
+  setFileToView(file);
+  setFileViewerOpen(true);
 };
 
 const loadAttachedFiles = async (fileIds: string[]) => {
@@ -407,11 +415,8 @@ useEffect(() => {
                         <FilePreview
                           key={file._id}
                           file={file}
-                          onDownload={(file) => {
-                            if (file.s3_path) {
-                              window.open(file.s3_path, '_blank');
-                            }
-                          }}
+                          onDownload={handleFileDownload}
+                          onSelect={handleFileClick}
                         />
                       ))}
                     </div>
@@ -447,6 +452,17 @@ useEffect(() => {
         </div>
 
       </div>
+            {/* File Viewer Modal */}
+      {fileViewerOpen && fileToView && (
+        <FileViewer
+          isOpen={fileViewerOpen}
+          onClose={() => {
+            setFileViewerOpen(false);
+            setFileToView(null);
+          }}
+          file={fileToView}
+        />
+      )}
     </div>
   );
 };
