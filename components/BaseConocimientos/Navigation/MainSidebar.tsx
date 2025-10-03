@@ -69,7 +69,7 @@ useEffect(() => {
       // ✅ CAMBIO: Pasar currentUserId (necesitas recibirlo como prop)
       const sidebarData = await aplicacionService.procesarAplicacionesParaSidebar(currentUserId);
       
-      console.log('📱 Aplicaciones cargadas:', sidebarData);
+      //console.log('📱 Aplicaciones cargadas:', sidebarData);
       setAplicaciones(sidebarData);
       
       if (sidebarData.length > 0) {
@@ -78,7 +78,7 @@ useEffect(() => {
 
       
     } catch (err) {
-      console.error('❌ Error cargando aplicaciones:', err);
+      console.error('Error cargando aplicaciones:', err);
       setError('Error al cargar las aplicaciones');
     } finally {
       setLoading(false);

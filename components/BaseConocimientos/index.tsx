@@ -345,13 +345,10 @@ const [trashContentError, setTrashContentError] = useState<string | null>(null);
   // Inicializar desde URL al montar el componente
 useEffect(() => {
   const initialize = async () => {
-    // ✅ Solo ejecutar si el usuario está disponible
     if (!currentUserId) {
-      console.log('⏳ Esperando currentUserId para inicializar...');
       return;
     }
     
-    console.log('🚀 Inicializando con currentUserId:', currentUserId);
     await initializeFromUrl();
     
     await loadCarpetas();
@@ -410,14 +407,13 @@ useEffect(() => {
 // Verificar autenticación al cargar
 useEffect(() => {
   const checkAuth = async () => {
-    console.log('🔄 Inicializando autenticación...');
     const authResult = await authService.initializeAuth();
     
     if (authResult.success) {
       setCurrentUserId(authResult.id_usuario);
-      console.log(`✅ Autenticado via ${authResult.source}:`, authResult.id_usuario);
+     // console.log(` Autenticado via ${authResult.source}:`, authResult.id_usuario);
     } else {
-      console.log('❌ No se pudo autenticar, redirigiendo al sistema padre...');
+     // console.log(' No se pudo autenticar, redirigiendo al sistema padre...');
       setTimeout(() => {
         window.location.href = "https://www.aemretail.com/navreport/logout.php";
       }, 500);
@@ -550,12 +546,12 @@ const handleLoad = (itemLabel: LoaderKey) => {
 const refreshUserData = async () => {
   try {
 
-    await new Promise(resolve => setTimeout(resolve, 1200)); // 800ms de delay
+    await new Promise(resolve => setTimeout(resolve, 800)); // 800ms de delay
 
-    console.log('Actualizando datos del usuario...');
+    //console.log('Actualizando datos del usuario...');
     const userData = await usuarioService.getAllContentByUser(CURRENT_USER_ID);
     
-    console.log('📦 Datos completos del usuario:', userData);
+    //console.log('📦 Datos completos del usuario:', userData);
     
     // Actualizar sidebar (solo carpetas)
     const transformedFolders = (userData.carpetas || []).map((folder: Folder) => ({
@@ -585,7 +581,7 @@ let allUserThemes: Theme[] = [];
       allUserThemes = [...publicados, ...borradores];
     }
     
-    console.log('📝 Temas del usuario (publicados + borradores):', allUserThemes);
+    //console.log('📝 Temas del usuario (publicados + borradores):', allUserThemes);
 
     // Actualizar contenido completo
     setUserContent({
@@ -594,7 +590,7 @@ let allUserThemes: Theme[] = [];
       files: userData.archivos || []
     });
 
-    console.log('✅ Datos del usuario actualizados correctamente');
+    //console.log('✅ Datos del usuario actualizados correctamente');
   } catch (error) {
     console.error("❌ Error actualizando datos del usuario:", error);
   }
@@ -1154,37 +1150,37 @@ const handleToggleThemeFavorite = async (themeId: string) => {
 const loadUserFavorites = async () => {
   try {
     const userId = CURRENT_USER_ID;
-    console.log('🔍 Cargando favoritos para usuario:', userId);
+    //console.log('🔍 Cargando favoritos para usuario:', userId);
 
     const favoritesResponse = await favoritoService.getFavoritoById(userId);
-    console.log('🔍 Respuesta completa de favoritos:', favoritesResponse);
+    //console.log('🔍 Respuesta completa de favoritos:', favoritesResponse);
 
     if (!favoritesResponse) {
-      console.log('⚠️ No hay favoritos para este usuario');
+      //console.log('⚠️ No hay favoritos para este usuario');
       return;
     }
 
     let favorites = null;
     
     if (Array.isArray(favoritesResponse)) {
-      console.log('🔍 Favoritos es array, length:', favoritesResponse.length);
+      //console.log('🔍 Favoritos es array, length:', favoritesResponse.length);
       if (favoritesResponse.length === 0) {
-        console.log('⚠️ Usuario sin favoritos guardados');
+        //console.log('⚠️ Usuario sin favoritos guardados');
         return;
       }
       favorites = favoritesResponse[0];
     } else if (typeof favoritesResponse === 'object') {
-      console.log('🔍 Favoritos es objeto directo');
+      //console.log('🔍 Favoritos es objeto directo');
       favorites = favoritesResponse;
     } else {
-      console.log('⚠️ Tipo de favoritos no reconocido:', typeof favoritesResponse);
+      //console.log('⚠️ Tipo de favoritos no reconocido:', typeof favoritesResponse);
       return;
     }
 
-    console.log('🔍 Estructura de favoritos procesada:', favorites);
+    //console.log('🔍 Estructura de favoritos procesada:', favorites);
 
     if (!favorites || typeof favorites !== 'object') {
-      console.log('⚠️ Favoritos inválidos después de procesamiento');
+      //console.log('⚠️ Favoritos inválidos después de procesamiento');
       return;
     }
 
@@ -1235,11 +1231,11 @@ useEffect(() => {
   const initializeData = async () => {
     // ✅ Solo ejecutar si el usuario está autenticado
     if (!currentUserId) {
-      console.log('⏳ Esperando autenticación del usuario...');
+      //console.log('⏳ Esperando autenticación del usuario...');
       return;
     }
     
-    console.log('🚀 Iniciando carga de datos para usuario:', currentUserId);
+    //console.log('🚀 Iniciando carga de datos para usuario:', currentUserId);
     
     await Promise.all([
       loadUserFavorites(),     
@@ -1254,13 +1250,11 @@ useEffect(() => {
 
 
 
-// ✅ La función ya debería estar así (como la cambiamos antes)
-// En index.tsx
 const handleMultimediaUpload = async (files: globalThis.File[]) => {
   try {
-    console.log('📁 Subiendo archivos a carpeta:', currentFolderId);
-    console.log('👤 Usuario:', CURRENT_USER_ID);
-    console.log('📄 Archivos:', files.length);
+    //console.log('📁 Subiendo archivos a carpeta:', currentFolderId);
+    //console.log('👤 Usuario:', CURRENT_USER_ID);
+    //console.log('📄 Archivos:', files.length);
     
     // files son archivos nativos del navegador para upload
     const response = await archivoService.uploadArchivos(
@@ -1269,7 +1263,7 @@ const handleMultimediaUpload = async (files: globalThis.File[]) => {
       CURRENT_USER_ID
     );
     
-    console.log('✅ Respuesta del servidor:', response);
+    //console.log('✅ Respuesta del servidor:', response);
     
     await loadCarpetas();
     
@@ -1286,12 +1280,11 @@ const handleMultimediaUpload = async (files: globalThis.File[]) => {
 
 const loadCarpetas = async () => {
   console.log('Loading content for folder:', currentFolderId);
-  console.log('🔍 CURRENT_USER_ID:', CURRENT_USER_ID);
   
   try {
     setLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1200)); // 200ms de delay
+    await new Promise(resolve => setTimeout(resolve, 500)); // 200ms de delay
     
     // ✅ CARGAR TODO EN PARALELO y esperar a que TODO termine
     const [carpetasData, temasData, archivosData] = await Promise.all([
@@ -1301,12 +1294,12 @@ const loadCarpetas = async () => {
     ]);
     
     // Procesar carpetas
-    console.log('📁 Carpetas response:', carpetasData);
+    //console.log('📁 Carpetas response:', carpetasData);
     setFolders(Array.isArray(carpetasData) ? carpetasData : []);
     
     // Procesar temas
     if (CURRENT_USER_ID) {
-      console.log('📝 Temas response:', temasData);
+      //console.log('📝 Temas response:', temasData);
       
       const contentThemes = (temasData.content || []).map((tema: any) => ({
         ...tema,
@@ -1319,7 +1312,7 @@ const loadCarpetas = async () => {
       }));
       
       const allThemes = [...contentThemes, ...draftThemes];
-      console.log('📝 Temas totales (content + borrador):', allThemes);
+      //console.log('📝 Temas totales (content + borrador):', allThemes);
       
       setThemes(allThemes);
     } else {
@@ -1327,7 +1320,7 @@ const loadCarpetas = async () => {
     }
     
     // Procesar archivos
-    console.log('📄 Archivos response:', archivosData);
+    //console.log('📄 Archivos response:', archivosData);
     setFiles(Array.isArray(archivosData) ? archivosData : []);
     
   } catch (error) {
@@ -1354,7 +1347,7 @@ const loadCarpetas = async () => {
 const loadSubfolderContent = async (folderId: string, folderName: string) => {
     try {
 
-      await new Promise(resolve => setTimeout(resolve, 1200)); // 600ms de delay
+      await new Promise(resolve => setTimeout(resolve, 600)); // 600ms de delay
 
         const response = await carpetaService.getFolderContent(folderId);
       setSidebarFolders(prev => ({
@@ -1377,7 +1370,7 @@ const handleSubfolderExpandClick = async (
 ) => {
   event.stopPropagation();
   
-  console.log(`🔄 Expandir/contraer subcarpeta: ${folderName}`);
+  //console.log(`🔄 Expandir/contraer subcarpeta: ${folderName}`);
 
   setExpandedSidebarItems(prev => ({
     ...prev,
@@ -1437,7 +1430,7 @@ const loadFavoritesContent = async () => {
     setFavoritesContentLoading(true);
     setFavoritesContentError(null);
 
-    await new Promise(resolve => setTimeout(resolve, 1200)); // 800ms de delay
+    await new Promise(resolve => setTimeout(resolve, 800)); // 800ms de delay
 
     const favoritesResponse = await favoritoService.getFavoritoById(CURRENT_USER_ID);
 
@@ -1685,7 +1678,7 @@ const loadTrashContent = async () => {
     setTrashContentLoading(true);
     setTrashContentError(null);
 
-    await new Promise(resolve => setTimeout(resolve, 1200)); // 800ms de delay
+    await new Promise(resolve => setTimeout(resolve, 800)); // 800ms de delay
 
 
     console.log('🗑️ Cargando papelera para usuario:', CURRENT_USER_ID);
@@ -1830,7 +1823,7 @@ const handleThemeDetailBack = async () => {
   setLoading(true);
   
   // ✅ TERCERO: Esperar un tick para que React renderice el skeleton
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(resolve, 1200));
   
   try {
     await new Promise(resolve => setTimeout(resolve, 100));

@@ -158,7 +158,7 @@ const getPriorityText = (priorityNum: string | number | undefined) => {
 
           <div className={styles.folderDetailsInfo}>
             <div className={styles.detailItem}>
-              <span className={styles.detailLabel}>Autor:</span>
+              <span className={styles.detailLabel}>CREADOR:</span>
               <span className={styles.detailValue}>
                   {temaDetails.author_topic_id
                     ? typeof temaDetails.author_topic_id === 'object'
@@ -168,7 +168,7 @@ const getPriorityText = (priorityNum: string | number | undefined) => {
                 </span>
               </div>
             <div className={styles.detailItem}>
-              <span className={styles.detailLabel}>Creado:</span>
+              <span className={styles.detailLabel}>FECHA DE CREACIÓN:</span>
               <span className={styles.detailValue}>{new Date(temaDetails.creation_date).toLocaleDateString()}</span>
             </div>
             <div className={styles.detailItem}>

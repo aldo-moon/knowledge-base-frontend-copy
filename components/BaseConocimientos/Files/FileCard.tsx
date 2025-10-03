@@ -42,7 +42,7 @@ export const FileCard: React.FC<FileCardProps> = ({
   const [previewError, setPreviewError] = useState(false);
   const [fullFileData, setFullFileData] = useState<any>(null);
   const [loadingFileData, setLoadingFileData] = useState(true);
-  const [isLoading, setIsLoading] = useState(true); // 👈 agrega esto
+  const [isLoading, setIsLoading] = useState(true); 
 
 
 useEffect(() => {
@@ -51,9 +51,9 @@ useEffect(() => {
       setLoadingFileData(true);
       const fileData = await archivoService.getArchivoById(file._id);
       setFullFileData(fileData);
-      console.log('Datos completos del archivo:', fileData);
+      //console.log('Datos completos del archivo:', fileData);
     } catch (error) {
-      console.error('Error cargando datos del archivo:', error);
+      //console.error('Error cargando datos del archivo:', error);
     } finally {
       setLoadingFileData(false);
     }
@@ -89,7 +89,7 @@ const renderPreview = () => {
   return <img src="/knowledge/Imagen.svg" alt="Archivo" className={styles.themeIcon1} />;
   }
 
-  console.log('Datos completos:', fullFileData);
+  //console.log('Datos completos:', fullFileData);
   
   const fileType = getFileType(fullFileData.file_name, fullFileData.type_file);
   

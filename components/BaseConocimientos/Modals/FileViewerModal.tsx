@@ -258,16 +258,19 @@ export const FileViewer: React.FC<FileViewerProps> = ({ isOpen, onClose, file })
           ) : showQR && videoToken ? (
             <div className={styles.qrContainer}>
               <h3>Código QR de un solo uso</h3>
-              <p className={styles.qrWarning}>⚠️ Este código solo funcionará una vez</p>
               <div className={styles.qrCodeWrapper}>
                 <QRCodeSVG 
-                  value={`${window.location.origin}/video/${videoToken}/${file._id}`}  // ✅ Agregar fileId
+                  value={`${window.location.origin}/knowledge/video-viewer?token=${videoToken}&fileId=${file._id}`
+}
                   size={300}
                   level="H"
                   includeMargin={true}
                 />
               </div>
-              <p className={styles.qrUrl}>{`${window.location.origin}/video/${videoToken}/${file._id}`}</p>
+              <p className={styles.qrUrl}>
+                {`${window.location.origin}/knowledge/video-viewer?token=${videoToken}&fileId=${file._id}`
+}
+              </p>
             </div>
           ) : (
             renderContent()
