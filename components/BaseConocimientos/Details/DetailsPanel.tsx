@@ -169,7 +169,16 @@ const getPriorityText = (priorityNum: string | number | undefined) => {
               </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>FECHA DE CREACIÓN:</span>
-              <span className={styles.detailValue}>{new Date(temaDetails.creation_date).toLocaleDateString()}</span>
+            <span className={styles.detailValue}>
+              {new Date(temaDetails.creation_date).toLocaleString('es-MX', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+              }).replace(/(\d+)\/(\d+)\/(\d+),/, '$3-$1-$2')}
+            </span>            
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Prioridad:</span>

@@ -62,7 +62,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           // Usar la función de formateo para obtener datos consistentes
           const formattedData = usuarioService.formatUserData(rawUserData);
           setUserData(formattedData);
-          console.log('✅ Datos del usuario cargados:', formattedData);
+          //console.log('✅ Datos del usuario cargados:', formattedData);
         } else {
           console.log('⚠️ No se encontraron datos para el usuario:', currentUserId);
           // Fallback si no se encuentran datos

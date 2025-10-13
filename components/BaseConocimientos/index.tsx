@@ -297,8 +297,7 @@ const [isDeleteFileModalOpen, setIsDeleteFileModalOpen] = useState<boolean>(fals
 const [selectedFile, setSelectedFile] = useState<File | null>(null);
 const [fileToDelete, setFileToDelete] = useState<File | null>(null);
 const [originalFolderId, setOriginalFolderId] = useState<string | null>(null);
-const [isTransitioning, setIsTransitioning] = useState(false);
-
+const isNavigatingBack = useRef(false); // 👈 AGREGAR esto con los otros useRef
   // Estados de filtros - inicializar desde URL
   const [areFiltersVisible, setAreFiltersVisible] = useState(false);
   const [activeContentFilters, setActiveContentFilters] = useState<string[]>(urlFilters.activeFilters);
@@ -349,14 +348,18 @@ useEffect(() => {
       return;
     }
     
-    await initializeFromUrl();
+    // ✅ Si estamos navegando de vuelta, no reinicializar
+    if (isNavigatingBack.current) {
+      isNavigatingBack.current = false;
+      return;
+    }
     
+    await initializeFromUrl();
     await loadCarpetas();
   };
   
   initialize();
-}, [currentFolderId, currentUserId]); // ← Agregar currentUserId como dependencia
-
+}, [currentFolderId, currentUserId]);
 
 // En tu componente principal (index.tsx), agregar este useEffect:
 
@@ -708,6 +711,16 @@ const handleThemeFormSubmit = async (formData: ThemeFormData) => {
       console.log('🆕 Creando nuevo tema en carpeta:', currentFolderId);
       resultado = await temaService.createTema(temaCompleto);
       console.log('✅ Tema creado exitosamente:', resultado);
+      
+      // ✨ NUEVO: Mostrar logs del proceso de embeddings
+      if (resultado.logs && resultado.logs.length > 0) {
+        console.group('🤖 Proceso de Embeddings y PostgreSQL');
+        resultado.logs.forEach((log: string) => console.log(log));
+        console.groupEnd();
+        
+        // Opcional: Mostrar resumen
+        console.log(`📊 Resumen: ${resultado.chunks_generados} chunk(s) procesados y guardados en PostgreSQL`);
+      }
     }
     
     // Determinar a qué carpeta volver
@@ -727,6 +740,13 @@ const handleThemeFormSubmit = async (formData: ThemeFormData) => {
     
   } catch (error) {
     console.error('❌ Error procesando tema:', error);
+    
+    // ✨ NUEVO: Mostrar logs de error si existen
+    if (error.response?.data?.logs) {
+      console.group('❌ Logs del error');
+      error.response.data.logs.forEach((log: string) => console.log(log));
+      console.groupEnd();
+    }
   }
 };
 
@@ -784,12 +804,26 @@ const handleFolderSelection = async (folder: Folder) => {
       creator: folderDetails.user_creator_id?.nombre && folderDetails.user_creator_id?.aPaterno 
         ? `${folderDetails.user_creator_id.nombre} ${folderDetails.user_creator_id.aPaterno}`
         : folderDetails.user_creator_id?.nombre || 'Desconocido',
-      createdDate: new Date(folderDetails.creation_date).toLocaleDateString(),
+      createdDate: new Date(folderDetails.creation_date).toLocaleString('es-MX', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).replace(/(\d+)\/(\d+)\/(\d+),/, '$3-$1-$2'),
       type: 'Carpeta',
       access: 'Todos',
       lastOpened: 'N/A',
       lastModified: folderDetails.last_update ? 
-        new Date(folderDetails.last_update).toLocaleDateString() : 'N/A'
+        new Date(folderDetails.last_update).toLocaleString('es-MX', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }).replace(/(\d+)\/(\d+)\/(\d+),/, '$3-$1-$2') : 'N/A'
     };
     
     console.log('🔍 transformedDetails.creator:', transformedDetails.creator);
@@ -800,12 +834,15 @@ const handleFolderSelection = async (folder: Folder) => {
     console.error('Error getting folder details:', error);
   }
 };
-
-  const handleFolderDoubleClick = async (folder: Folder) => {
-    console.log('Double click en carpeta:', folder.folder_name);
-    navigateToFolder(folder._id, folder.folder_name);
-    setSelectedFolderDetails(null);
-  };
+const handleFolderDoubleClick = async (folder: Folder) => {
+  console.log('Double click en carpeta:', folder.folder_name);
+  
+  // ✅ Resetear la bandera para permitir carga normal
+  isNavigatingBack.current = false;
+  
+  navigateToFolder(folder._id, folder.folder_name);
+  setSelectedFolderDetails(null);
+};
 
 const handleFolderMenuAction = (action: string, folder: Folder) => {
   switch(action) {
@@ -1034,7 +1071,8 @@ const handleDeleteTheme = async () => {
 
 // AGREGAR función para manejar doble click en temas
 const handleThemeDoubleClick = (theme: any) => {
-  console.log('🔍 handleThemeDoubleClick:', {
+  console.log('🔍 handleThemeDoubleClick:', 
+    {
     themeId: theme._id,
     currentFolderId: currentFolderId,
     currentFolderIdType: typeof currentFolderId,
@@ -1505,7 +1543,7 @@ const themeDetails = await Promise.all(
       files: fileDetails
     });
 
-    console.log('🔍 setFavoritesContent llamado con files:', fileDetails);
+    //console.log('🔍 setFavoritesContent llamado con files:', fileDetails);
 
   } catch (error) {
     console.error('Error cargando contenido de favoritos:', error);
@@ -1521,9 +1559,14 @@ const themeDetails = await Promise.all(
 
 
 
-// ✅ Funciones con tipos explícitos
-const handleFileSelection = async (file: File) => {
+const handleFileSelection = (file: File) => {
   console.log('Archivo seleccionado:', file.file_name);
+  // Solo para selección visual o para mostrar en DetailsPanel si lo necesitas
+  // Por ahora lo dejamos vacío o puedes agregar lógica de selección
+};
+
+const handleFileDoubleClick = async (file: File) => {
+  console.log('Doble click en archivo:', file.file_name);
   
   try {
     // Obtener datos completos del archivo incluyendo la URL de S3
@@ -1535,12 +1578,6 @@ const handleFileSelection = async (file: File) => {
   } catch (error) {
     console.error('Error obteniendo datos del archivo:', error);
   }
-};
-
-
-const handleFileDoubleClick = (file: File) => {
-  console.log('Doble click en archivo:', file.file_name);
-  // Falta implementar esta función
 };
 
 const handleFileMenuAction = (action: string, file: File) => {
@@ -1807,26 +1844,23 @@ const handleLogout = () => {
   // El authService.logout() ya maneja la redirección
   authService.logout();
 };
+
+
 const handleThemeDetailBack = async () => {
-  console.log('🔙 Manejando regreso desde detalle de tema...');
+  console.log('🔙 Volviendo desde detalle de tema...');
   
-  // ✅ PRIMERO: Obtener el folderId correcto ANTES de hacer nada
+  // Leer el folderId de la query
   const folderIdFromQuery = router.query.folderId as string;
-  const targetFolderId = folderIdFromQuery || "68acb06886d455d16cceef05";
+  const targetFolderId = folderIdFromQuery || currentFolderId;
   
-  console.log('📂 Target folder:', targetFolderId);
+  console.log('📂 Volviendo a carpeta:', targetFolderId);
   
-  // ✅ SEGUNDO: Limpiar datos y activar loading
-  setFolders([]);
-  setThemes([]);
-  setFiles([]);
-  setLoading(true);
+  // ✅ Activar bandera para evitar initializeFromUrl
+  isNavigatingBack.current = true;
   
-  // ✅ TERCERO: Esperar un tick para que React renderice el skeleton
-  await new Promise(resolve => setTimeout(resolve, 1200));
-  
+  // ✅ Cargar datos de esa carpeta específica ANTES de navegar
   try {
-    await new Promise(resolve => setTimeout(resolve, 100));
+    setLoading(true);
     
     const [carpetasData, temasData, archivosData] = await Promise.all([
       carpetaService.getFolderContent(targetFolderId),
@@ -1834,27 +1868,30 @@ const handleThemeDetailBack = async () => {
       archivoService.getFilesByFolderId(targetFolderId)
     ]);
     
-    // Actualizar estados con datos nuevos
     setFolders(Array.isArray(carpetasData) ? carpetasData : []);
-    
-    if (CURRENT_USER_ID && temasData) {
-      const contentThemes = (temasData.content || []).map((tema: any) => ({ ...tema, isDraft: false }));
-      const draftThemes = (temasData.borrador || []).map((tema: any) => ({ ...tema, isDraft: true }));
-      setThemes([...contentThemes, ...draftThemes]);
-    }
-    
+    setThemes([
+      ...(temasData.content || []),
+      ...(temasData.borrador || []).map((tema: any) => ({ ...tema, isDraft: true }))
+    ]);
     setFiles(Array.isArray(archivosData) ? archivosData : []);
     
   } catch (error) {
-    console.error('Error cargando datos:', error);
+    console.error('Error cargando carpeta:', error);
   } finally {
     setLoading(false);
   }
   
-  // ✅ CUARTO: AHORA SÍ navegar (cuando TODO está listo)
-  navigateBackFromThemeDetail();
+  // ✅ Limpiar folderId de la query antes de navegar
+  const cleanQuery = { ...router.query };
+  delete cleanQuery.folderId;
+  
+  // ✅ Construir la URL correcta
+  if (targetFolderId && targetFolderId !== "68acb06886d455d16cceef05") {
+    router.replace(`/folder/${targetFolderId}`, undefined, { shallow: true });
+  } else {
+    router.replace('/', undefined, { shallow: true });
+  }
 };
-
   // ============= RENDER =============
 
   return (
@@ -1938,12 +1975,13 @@ const handleThemeDetailBack = async () => {
               onToggleFileFavorite={handleToggleFileFavorite} 
               onFileMenuAction={handleFileMenuAction} 
               onFileSelect={handleFileSelection}
+              onFileDoubleClick={handleFileDoubleClick} 
               themeTitle={themeTitle}
               themeDescription={themeDescription}
               onThemeTitleChange={setThemeTitle}
               onThemeDescriptionChange={setThemeDescription}
               viewingThemeId={currentThemeId}
-onThemeDetailBack={handleThemeDetailBack}
+              onThemeDetailBack={handleThemeDetailBack}
               onThemeDelete={handleThemeDeleteFromDetail}
               onRestoreItem={() => {}}
               onPermanentDelete={() => {}}
@@ -2076,7 +2114,7 @@ onThemeDetailBack={handleThemeDetailBack}
         />
       )}
       {/* Widget de Chatbot */}
-<ChatbotWidget />
+      <ChatbotWidget />
                 
     </div>
   );

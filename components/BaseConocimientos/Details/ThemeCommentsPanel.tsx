@@ -33,7 +33,7 @@ const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 useEffect(() => {
   const userId = authService.getCurrentUserId(); // Obtiene 'id_usuario' de las cookies
   setCurrentUserId(userId || null);
-  console.log('🔍 Current User ID en comentarios:', userId);
+  //console.log('🔍 Current User ID en comentarios:', userId);
 }, []);
 
   useEffect(() => {

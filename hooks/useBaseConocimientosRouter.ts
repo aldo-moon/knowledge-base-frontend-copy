@@ -157,7 +157,7 @@ const buildNavigationPathFromUrl = async (targetFolderId: string) => {
 
     try {
       // ✅ USAR CARPETA SERVICE EN LUGAR DE FETCH DIRECTO
-      console.log('🌐 Usando carpetaService.getRutaCarpeta para:', folderIdString);
+      //console.log('🌐 Usando carpetaService.getRutaCarpeta para:', folderIdString);
       
       // Si tienes un método getRutaCarpeta, usarlo
       // Si no, usar getCarpetaById y construir la ruta manualmente

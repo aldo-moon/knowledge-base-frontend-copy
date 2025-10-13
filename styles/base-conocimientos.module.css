@@ -2146,6 +2146,7 @@
   color: #6262bf;
   font-size: 0.875rem;
   margin: 0;
+  text-align: center;
 }
 
 /* Sugerencia de AI */
@@ -6788,4 +6789,79 @@ max-width: 300px;
   word-break: break-all;
   text-align: center;
   max-width: 400px;
+}
+
+
+
+.spinningIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.progressBar {
+  width: 80%;
+  height: 4px;
+  background: #3b3f5f;
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+
+
+
+
+
+.fileUploadArea {
+  transition: all 0.3s ease;
+}
+
+.fileUploadArea.dragging {
+  background: rgba(29, 140, 248, 0.1);
+  border: 2px dashed #1d8cf8;
+  transform: scale(1.02);
+}
+
+.spinningIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.progressBar {
+  width: 80%;
+  height: 4px;
+  background: #3b3f5f;
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(135deg, #1d8cf8 0%, #3358f4 100%);
+  transition: width 0.3s ease;
+  border-radius: 2px;
 }

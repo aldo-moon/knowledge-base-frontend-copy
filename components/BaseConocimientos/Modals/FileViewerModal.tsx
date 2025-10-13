@@ -267,10 +267,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({ isOpen, onClose, file })
                   includeMargin={true}
                 />
               </div>
-              <p className={styles.qrUrl}>
+{/*               <p className={styles.qrUrl}>
                 {`${window.location.origin}/knowledge/video-viewer?token=${videoToken}&fileId=${file._id}`
 }
-              </p>
+              </p>  */}
             </div>
           ) : (
             renderContent()

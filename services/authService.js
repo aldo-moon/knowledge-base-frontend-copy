@@ -81,7 +81,7 @@ export const authService = {
       const token = urlParams.get('dowjdjfur');
       
       if (token) {
-        console.log('🔑 Token encontrado en URL, verificando...');
+        //console.log('🔑 Token encontrado en URL, verificando...');
         const result = await authService.verificarToken(token);
         
         if (result.success) {
@@ -99,7 +99,7 @@ export const authService = {
       const cookieAuth = authService.getAuthFromCookies();
       
       if (cookieAuth.isAuthenticated) {
-        console.log('🍪 Autenticación encontrada en cookies');
+        //console.log('🍪 Autenticación encontrada en cookies');
         return {
           success: true,
           id_usuario: cookieAuth.id_usuario,

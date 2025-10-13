@@ -13,13 +13,13 @@ export const usuarioService = {
 
   getUserById: async (userId) => {
     try {
-      console.log('🔍 Obteniendo usuario con ID:', userId);
+      //console.log('🔍 Obteniendo usuario con ID:', userId);
       const response = await api.get(`/usuarios/${userId}`);
       
       // Tu backend devuelve un array con Usuario.find()
       const userData = Array.isArray(response.data) ? response.data[0] : response.data;
       
-      console.log('✅ Datos del usuario obtenidos:', userData);
+      //console.log('✅ Datos del usuario obtenidos:', userData);
       return userData || null;
     } catch (error) {
       console.error("❌ Error al obtener datos del usuario:", error);

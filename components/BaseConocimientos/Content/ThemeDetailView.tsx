@@ -204,7 +204,7 @@ if (img.parentNode) {
 useEffect(() => {
   const userId = authService.getCurrentUserId(); // Obtiene 'id_usuario' de las cookies
   setCurrentUserId(userId || null); // ✅ Convertir undefined a null
-  console.log('🔍 Current User ID desde cookies:', userId);
+  //console.log('🔍 Current User ID desde cookies:', userId);
 }, []);
 
     const loadTheme = async () => {
