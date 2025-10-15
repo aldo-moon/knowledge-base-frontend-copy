@@ -7,7 +7,7 @@ import styles from '../../../styles/base-conocimientos.module.css';
 interface ModeloIA {
   _id?: string;
   nombre: string;
-  url_ai: string;
+  prompt_instrucciones: string;
 }
 
 interface ModeloIACrudModalProps {
@@ -24,7 +24,7 @@ export const ModeloIACrudModal: React.FC<ModeloIACrudModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [formData, setFormData] = useState<ModeloIA>({ nombre: '', url_ai: '' });
+  const [formData, setFormData] = useState<ModeloIA>({ nombre: '', prompt_instrucciones: '' });
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [modeloToDelete, setModeloToDelete] = useState<ModeloIA | null>(null);
@@ -52,21 +52,21 @@ export const ModeloIACrudModal: React.FC<ModeloIACrudModalProps> = ({
   // Crear nuevo modelo
   const handleCreate = () => {
     setIsCreating(true);
-    setFormData({ nombre: '', url_ai: '' });
+    setFormData({ nombre: '', prompt_instrucciones: '' });
     setEditingId(null);
   };
 
   // Editar modelo existente
   const handleEdit = (modelo: ModeloIA) => {
     setEditingId(modelo._id || null);
-    setFormData({ nombre: modelo.nombre, url_ai: modelo.url_ai });
+    setFormData({ nombre: modelo.nombre, prompt_instrucciones: modelo.prompt_instrucciones });
     setIsCreating(false);
   };
 
   // Guardar (crear o actualizar)
   const handleSave = async () => {
     try {
-      if (!formData.nombre.trim() || !formData.url_ai.trim()) {
+      if (!formData.nombre.trim()) {  // Prompt es opcional
         setError('Todos los campos son requeridos');
         return;
       }
@@ -88,7 +88,7 @@ export const ModeloIACrudModal: React.FC<ModeloIACrudModalProps> = ({
       // Limpiar formulario
       setIsCreating(false);
       setEditingId(null);
-      setFormData({ nombre: '', url_ai: '' });
+      setFormData({ nombre: '', prompt_instrucciones: '' });
     } catch (error) {
       console.error('Error al guardar:', error);
       setError('Error al guardar el modelo');
@@ -101,7 +101,7 @@ export const ModeloIACrudModal: React.FC<ModeloIACrudModalProps> = ({
   const handleCancel = () => {
     setIsCreating(false);
     setEditingId(null);
-    setFormData({ nombre: '', url_ai: '' });
+    setFormData({ nombre: '', prompt_instrucciones: '' });
     setError(null);
   };
 
@@ -184,18 +184,32 @@ export const ModeloIACrudModal: React.FC<ModeloIACrudModalProps> = ({
                   className={styles.formInput}
                   value={formData.nombre}
                   onChange={(e) => setFormData(prev => ({ ...prev, nombre: e.target.value }))}
-                  placeholder="Ej: GPT-4, Claude, etc."
+                  placeholder="Ejemplo: GPT-4, Claude, etc."
                 />
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel1}>URL del Modelo:</label>
-                <input
-                  type="url"
-                  className={styles.formInput}
-                  value={formData.url_ai}
-                  onChange={(e) => setFormData(prev => ({ ...prev, url_ai: e.target.value }))}
-                  placeholder="https://api.example.com/model"
+                <label className={styles.formLabel1}>
+                  Instrucciones del Asistente (Opcional):
+                </label>
+                <textarea
+                  className={styles.formTextarea}
+                  value={formData.prompt_instrucciones}
+                  onChange={(e) => setFormData(prev => ({ ...prev, prompt_instrucciones: e.target.value }))}
+                   placeholder={`Ejemplo:\nEres un asistente amigable de [tu empresa].\n\nContexto: {contexto}\nPregunta: {pregunta}\n\nInstrucciones:\n- Responde de forma clara\n- Usa el contexto proporcionado\n- Sé breve y preciso`}
+                  rows={8}
                 />
+                <small className={styles.formHelper}>
+                  ⚠️ <strong>IMPORTANTE:</strong> Debes incluir las variables {'{contexto}'} y {'{pregunta}'} 
+                  para que el asistente tenga acceso a la información de la base de datos.
+                </small>
+                
+                {/* ✅ Validación visual */}
+                {formData.prompt_instrucciones && 
+                !formData.prompt_instrucciones.includes('{contexto}') && (
+                  <div className={styles.warning}>
+                    ⚠️ Falta la variable {'{contexto}'} - El asistente no tendrá acceso a la información guardada
+                  </div>
+                )}
               </div>
               <div className={styles.formActions1}>
                 <button 
@@ -241,7 +255,7 @@ export const ModeloIACrudModal: React.FC<ModeloIACrudModalProps> = ({
                   <thead>
                     <tr>
                       <th>Nombre</th>
-                      <th>URL</th>
+                      <th>Instrucciones</th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
@@ -249,12 +263,11 @@ export const ModeloIACrudModal: React.FC<ModeloIACrudModalProps> = ({
                     {modelos.map((modelo) => (
                       <tr key={modelo._id}>
                         <td>{modelo.nombre}</td>
-                        <td className={styles.urlCell}>
-                          <span title={modelo.url_ai}>
-                            {modelo.url_ai.length > 40 
-                              ? `${modelo.url_ai.substring(0, 40)}...` 
-                              : modelo.url_ai
-                            }
+                        <td className={styles.tableCell}>
+                          <span className={styles.promptPreview}>
+                            {modelo.prompt_instrucciones 
+                              ? modelo.prompt_instrucciones.substring(0, 31) + '...' 
+                              : 'Sin instrucciones (usa default)'}
                           </span>
                         </td>
                         <td>
@@ -311,7 +324,7 @@ export const ModeloIACrudModal: React.FC<ModeloIACrudModalProps> = ({
                 {modeloToDelete && (
                   <div className={styles.modeloInfo}>
                     <strong>{modeloToDelete.nombre}</strong>
-                    <span>{modeloToDelete.url_ai}</span>
+                    <span>{modeloToDelete.prompt_instrucciones}</span>
                   </div>
                 )}
               </div>

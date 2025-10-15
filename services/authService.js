@@ -1,7 +1,7 @@
 // services/authService.js
 export const authService = {
   // Bearer token para validación externa
-  AUTH_BEARER_TOKEN: "ff07d4b68ddc474a45031dbdf70f74c2e2d699d7af02c5d571b9b2ff6276434f",
+  AUTH_BEARER_TOKEN: process.env.NEXT_PUBLIC_AUTH_BEARER_TOKEN ,
 
   // Función para obtener datos de cookies
   getCookieValue: (name) => {
@@ -21,45 +21,53 @@ export const authService = {
   },
 
   // Verificar token de URL
-  verificarToken: async (token) => {
-    try {
-      const datos = { token: token };
-      
-      const response = await fetch('https://login.aemretail.com/api/v1/external-session/validate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authService.AUTH_BEARER_TOKEN}`,
-        },
-        body: JSON.stringify(datos)
-      });
+ // Verificar token de URL
+verificarToken: async (token) => {
+  try {
+    const datos = { token: token };
+    
+    const response = await fetch('https://login.aemretail.com/api/v1/external-session/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authService.AUTH_BEARER_TOKEN}`,
+      },
+      body: JSON.stringify(datos)
+    });
 
-      const respuesta = await response.json();
-      
-      if (respuesta.code === 200) {
-        const claims = respuesta.data.dynamic_claims;
-        
-        // Guardar en cookies
-        authService.setCookieValue('id_usuario', claims.id_usuario);
-        if (claims.id_cliente) {
-          authService.setCookieValue('id_cliente', claims.id_cliente);
-        }
-        
-        console.log('✅ Token verificado y cookies actualizadas');
-        return {
-          success: true,
-          id_usuario: claims.id_usuario,
-          id_cliente: claims.id_cliente
-        };
-      } else {
-        console.error('❌ Token inválido');
-        return { success: false };
-      }
-    } catch (error) {
-      console.error('❌ Error verificando token:', error);
+    const respuesta = await response.json();
+    
+    // ✅ Verificar si es 401 o token inválido
+    if (response.status === 401 || respuesta.code === 401) {
+      console.error('❌ Token inválido (401) - Redirigiendo a logout');
+      window.location.href = 'https://www.aemretail.com/navreport/logout.php';
       return { success: false };
     }
-  },
+    
+    if (respuesta.code === 200) {
+      const claims = respuesta.data.dynamic_claims;
+      
+      // Guardar en cookies
+      authService.setCookieValue('id_usuario', claims.id_usuario);
+      if (claims.id_cliente) {
+        authService.setCookieValue('id_cliente', claims.id_cliente);
+      }
+      
+      console.log('✅ Token verificado y cookies actualizadas');
+      return {
+        success: true,
+        id_usuario: claims.id_usuario,
+        id_cliente: claims.id_cliente
+      };
+    } else {
+      console.error('❌ Token inválido');
+      return { success: false };
+    }
+  } catch (error) {
+    console.error('❌ Error verificando token:', error);
+    return { success: false };
+  }
+},
 
   // Obtener IDs desde cookies
   getAuthFromCookies: () => {

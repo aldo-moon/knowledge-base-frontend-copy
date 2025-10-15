@@ -741,12 +741,7 @@ const handleThemeFormSubmit = async (formData: ThemeFormData) => {
   } catch (error) {
     console.error('❌ Error procesando tema:', error);
     
-    // ✨ NUEVO: Mostrar logs de error si existen
-    if (error.response?.data?.logs) {
-      console.group('❌ Logs del error');
-      error.response.data.logs.forEach((log: string) => console.log(log));
-      console.groupEnd();
-    }
+
   }
 };
 

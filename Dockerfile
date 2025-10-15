@@ -1,5 +1,5 @@
 # Imagen base
-FROM node:18.17.0
+FROM node:18.18.0
 
 # Carpeta de trabajo en el contenedor
 WORKDIR /app

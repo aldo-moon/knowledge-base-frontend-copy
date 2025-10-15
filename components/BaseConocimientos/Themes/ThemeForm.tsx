@@ -148,8 +148,8 @@ const [formData, setFormData] = useState<ThemeFormData>({
   uploadedFiles: [],
   tags: isEditMode ? (themeToEdit?.keywords || []) : [],
   currentTag: '',
-  aiModel: [], // ✅ Array vacío
-  aiSection: [],// ✅ Agregar este campo que faltaba
+  aiModel: isEditMode ? (themeToEdit?.modelo_id || []) : [],
+  aiSection: [], // ✅ Temporalmente vacío
   suggestInHelpDesk: false
 });
 
@@ -357,6 +357,77 @@ const handleAllAreaToggle = (areaPuestos: PuestosResponse) => {
   }
 };
 
+// Cargar todas las secciones y restaurar las seleccionadas en modo edición
+useEffect(() => {
+  const loadSecciones = async () => {
+    try {
+      setLoadingSecciones(true);
+      const response = await seccionService.getAllSeccion();
+      setSecciones(Array.isArray(response) ? response : []);
+      
+      if (isEditMode && themeToEdit?.seccion_id && themeToEdit.seccion_id.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          aiSection: themeToEdit.seccion_id
+        }));
+      }
+    } catch (error) {
+      console.error('Error al cargar secciones:', error);
+    } finally {
+      setLoadingSecciones(false);
+    }
+  };
+
+  loadSecciones();
+}, [isEditMode, themeToEdit]);
+
+// Filtrar y agrupar secciones basadas en los modelos seleccionados
+useEffect(() => {
+  // No hacer nada si aún está cargando datos
+  if (loadingModelos || loadingSecciones) {
+    return;
+  }
+  
+  // No hacer nada si no hay modelos IA cargados todavía
+  if (modelosIA.length === 0) {
+    return;
+  }
+
+  if (formData.aiModel.length > 0) {
+    const agrupadas: SeccionesAgrupadas = {};
+    
+    formData.aiModel.forEach(modeloId => {
+      const modelo = modelosIA.find(m => m._id === modeloId);
+      if (modelo) {
+        const seccionesDelModelo = secciones.filter(seccion => 
+          seccion.status && 
+          seccion.modelo_id.includes(modeloId)
+        );
+        
+        if (seccionesDelModelo.length > 0) {
+          agrupadas[modeloId] = {
+            modeloNombre: modelo.nombre,
+            secciones: seccionesDelModelo
+          };
+        }
+      }
+    });
+    
+    setSeccionesAgrupadas(agrupadas);
+    
+    const seccionesValidas = Object.values(agrupadas)
+      .flatMap(grupo => grupo.secciones.map(s => s._id));
+    
+    setFormData(prev => ({
+      ...prev,
+      aiSection: prev.aiSection.filter(id => seccionesValidas.includes(id))
+    }));
+  } else {
+    setSeccionesAgrupadas({});
+    setFormData(prev => ({ ...prev, aiSection: [] }));
+  }
+}, [formData.aiModel, secciones, modelosIA, loadingModelos, loadingSecciones]);
+
 
 const handlePositionToggle = (positionId: string) => {
   // Encontrar a qué área pertenece este puesto
@@ -417,6 +488,61 @@ useEffect(() => {
     loadExistingFiles();
   }
 }, [isEditMode, themeToEdit]);
+
+// Agregar este useEffect para filtrar secciones cuando se selecciona un modelo:
+useEffect(() => {
+  // ✅ No filtrar en modo edición durante la carga inicial
+  if (isEditMode && (loadingModelos || loadingSecciones)) {
+    return;
+  }
+
+  if (formData.aiModel.length > 0) {
+    // Agrupar secciones por modelo
+    const agrupadas: SeccionesAgrupadas = {};
+    
+    formData.aiModel.forEach(modeloId => {
+      const modelo = modelosIA.find(m => m._id === modeloId);
+      if (modelo) {
+        const seccionesDelModelo = secciones.filter(seccion => 
+          seccion.status && 
+          seccion.modelo_id.includes(modeloId)
+        );
+        
+        if (seccionesDelModelo.length > 0) {
+          agrupadas[modeloId] = {
+            modeloNombre: modelo.nombre,
+            secciones: seccionesDelModelo
+          };
+        }
+      }
+    });
+    
+    setSeccionesAgrupadas(agrupadas);
+    
+    // ✅ Solo limpiar secciones inválidas si NO estamos en modo edición inicial
+    if (!isEditMode || modelosIA.length > 0) {
+      const seccionesValidas = Object.values(agrupadas)
+        .flatMap(grupo => grupo.secciones.map(s => s._id));
+      
+      // ✅ Solo actualizar si hay diferencias (evitar limpiar en carga inicial)
+      const seccionesActuales = formData.aiSection;
+      const seccionesAMantener = seccionesActuales.filter(id => seccionesValidas.includes(id));
+      
+      if (seccionesAMantener.length !== seccionesActuales.length && !loadingModelos && !loadingSecciones) {
+        setFormData(prev => ({
+          ...prev,
+          aiSection: seccionesAMantener
+        }));
+      }
+    }
+  } else {
+    setSeccionesAgrupadas({});
+    // ✅ Solo limpiar si no estamos en modo edición
+    if (!isEditMode) {
+      setFormData(prev => ({ ...prev, aiSection: [] }));
+    }
+  }
+}, [formData.aiModel, secciones, modelosIA]); // ✅ Remover isEditMode de las dependencias
 
 
   // Cargar datos iniciales
@@ -577,7 +703,7 @@ useEffect(() => {
   loadModelosIA();
 }, []);
 
-// Agregar este useEffect para cargar todas las secciones:
+// Cargar todas las secciones y restaurar las seleccionadas en modo edición
 useEffect(() => {
   const loadSecciones = async () => {
     try {
@@ -593,6 +719,69 @@ useEffect(() => {
 
   loadSecciones();
 }, []);
+
+// ✅ AGREGAR: Restaurar secciones DESPUÉS de que todo esté cargado
+useEffect(() => {
+  if (isEditMode && 
+      themeToEdit?.seccion_id && 
+      themeToEdit.seccion_id.length > 0 && 
+      !loadingModelos && 
+      !loadingSecciones &&
+      secciones.length > 0 &&
+      modelosIA.length > 0) {
+    setFormData(prev => ({
+      ...prev,
+      aiSection: themeToEdit.seccion_id
+    }));
+  }
+}, [isEditMode, themeToEdit, loadingModelos, loadingSecciones, secciones.length, modelosIA.length]);
+
+// Filtrar y agrupar secciones basadas en los modelos seleccionados
+useEffect(() => {
+  // No hacer nada si aún está cargando datos
+  if (loadingModelos || loadingSecciones) {
+    return;
+  }
+  
+  // No hacer nada si no hay modelos IA cargados todavía
+  if (modelosIA.length === 0) {
+    return;
+  }
+
+  if (formData.aiModel.length > 0) {
+    const agrupadas: SeccionesAgrupadas = {};
+    
+    formData.aiModel.forEach(modeloId => {
+      const modelo = modelosIA.find(m => m._id === modeloId);
+      if (modelo) {
+        const seccionesDelModelo = secciones.filter(seccion => 
+          seccion.status && 
+          seccion.modelo_id.includes(modeloId)
+        );
+        
+        if (seccionesDelModelo.length > 0) {
+          agrupadas[modeloId] = {
+            modeloNombre: modelo.nombre,
+            secciones: seccionesDelModelo
+          };
+        }
+      }
+    });
+    
+    setSeccionesAgrupadas(agrupadas);
+    
+    const seccionesValidas = Object.values(agrupadas)
+      .flatMap(grupo => grupo.secciones.map(s => s._id));
+    
+    setFormData(prev => ({
+      ...prev,
+      aiSection: prev.aiSection.filter(id => seccionesValidas.includes(id))
+    }));
+  } else {
+    setSeccionesAgrupadas({});
+    setFormData(prev => ({ ...prev, aiSection: [] }));
+  }
+}, [formData.aiModel, secciones, modelosIA, loadingModelos, loadingSecciones]);
 
 // Agregar este useEffect para filtrar secciones cuando se selecciona un modelo:
 useEffect(() => {

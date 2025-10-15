@@ -71,7 +71,6 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({
 }) => {
   const [temaDetails, setTemaDetails] = useState<TemaDetails | null>(null);
 
-  // Función para convertir prioridad numérica a texto
 
 
   // Cuando cambie el ID del tema seleccionado, se hace fetch

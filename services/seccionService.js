@@ -1,4 +1,5 @@
 // services/seccionService.js
+
 import api from '../utils/api';
 
 export const seccionService = {
