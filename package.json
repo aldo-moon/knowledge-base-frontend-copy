@@ -15,6 +15,7 @@
     "chart.js": "^3.9.1",
     "classnames": "^2.3.2",
     "jquery": "^3.6.1",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.540.0",
     "perfect-scrollbar": "^1.5.5",
     "qrcode.react": "^4.2.0",

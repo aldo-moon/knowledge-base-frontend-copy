@@ -1,7 +1,11 @@
+// components/BaseConocimientos/ChatbotWidget/ChatBot.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, Loader } from 'lucide-react';
+import { X, Send, Loader } from 'lucide-react';
+import Lottie from 'lottie-react';
 import styles from './ChatbotWidget.module.css';
 import { chatbotService } from '../../../services/chatbotService';
+import chatbotAnimation from '../../../public/Animations/Animation - 1748036348670.json';
+import headerAnimation from '../../../public/Animations/Animation - 1748036609476.json';
 
 interface Message {
   id: number;
@@ -19,11 +23,18 @@ const ChatbotWidget = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => `session-${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
 
-  const MODELO_ID = '68ed53b5506f8032f23fba37'; // TODO: Obtener dinámicamente
-  const USER_ID = null; // TODO: Obtener del contexto de autenticación
+  const welcomeMessages = [
+    "¡Hola! ¿Necesitas ayuda?",
+    "¿Tienes alguna pregunta?",
+    "Estoy aquí para ayudarte"
+  ];
+  const MODELO_ID = '68ed53b5506f8032f23fba37'; // TODO: Id del modelo a usar
+  const USER_ID = null;
 
-  // Auto-scroll al final
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -31,6 +42,26 @@ const ChatbotWidget = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+ useEffect(() => {
+  if (!isOpen) {
+    const messageInterval = setInterval(() => {
+      if (showWelcomeMessage) {
+        // Iniciar animación de salida
+        setIsAnimatingOut(true);
+        setTimeout(() => {
+          setShowWelcomeMessage(false);
+          setIsAnimatingOut(false);
+          setCurrentMessageIndex(prev => (prev + 1) % welcomeMessages.length);
+        }, 500); // Duración de la animación de salida
+      } else {
+        setShowWelcomeMessage(true);
+      }
+    }, 30000);
+
+    return () => clearInterval(messageInterval);
+  }
+}, [isOpen, showWelcomeMessage]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -87,13 +118,44 @@ const ChatbotWidget = () => {
   return (
     <div className={styles.widgetContainer}>
       {!isOpen ? (
+        <div style={{ position: 'relative' }}>
+          {showWelcomeMessage && (
+            <div className={`${styles.speechBubble} ${isAnimatingOut ? styles.fadeOut : ''}`}>
+              {welcomeMessages[currentMessageIndex]}
+              <button 
+                className={styles.closeBubble}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsAnimatingOut(true);
+                  setTimeout(() => {
+                    setShowWelcomeMessage(false);
+                    setIsAnimatingOut(false);
+                  }, 500);
+                }}
+              >
+                ×
+              </button>
+            </div>
+          )}
         <button onClick={() => setIsOpen(true)} className={styles.floatingButton}>
-          <MessageCircle size={28} />
+          <Lottie 
+            animationData={chatbotAnimation}
+            loop={true}
+            style={{ width: 90, height: 90 }}
+          />
         </button>
+      </div>
       ) : (
         <div className={styles.chatWindow}>
           <div className={styles.header}>
-            <span>Asistente Virtual</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <Lottie 
+                animationData={headerAnimation}
+                loop={true}
+                style={{ width: 90, height: 90 }}
+              />
+              <span>Agente SIA</span>
+            </div>
             <button onClick={() => setIsOpen(false)}><X size={20} /></button>
           </div>
           
@@ -103,7 +165,7 @@ const ChatbotWidget = () => {
                 <div>{msg.text}</div>
                 {msg.temas && msg.temas.length > 0 && (
                   <div className={styles.temasRelacionados}>
-                    <small>📚 Temas relacionados:</small>
+                    <small>Temas relacionados:</small>
                     {msg.temas.map(tema => (
                       <span 
                         key={tema.id} 
@@ -118,7 +180,7 @@ const ChatbotWidget = () => {
             ))}
             {isLoading && (
               <div className={styles.bot}>
-                <Loader size={16} className={styles.spinner} /> Pensando...
+                <Loader size={16} className={styles.spinner} />
               </div>
             )}
             <div ref={messagesEndRef} />

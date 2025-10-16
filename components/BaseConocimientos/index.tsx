@@ -36,7 +36,7 @@ import ModeloIACrudModal from './Modals/ModeloIACrudModal';
 import SeccionCrudModal from './Modals/SeccionCrudModal';
 import MoveThemeModal from './Modals/MoveThemeModal';
 import FileViewerModal from './Modals/FileViewerModal';
-import ChatbotWidget from './ChatbotWidget/index'; 
+import ChatbotWidget from './ChatbotWidget/ChatBot'; 
 
 
 // Importar servicios
