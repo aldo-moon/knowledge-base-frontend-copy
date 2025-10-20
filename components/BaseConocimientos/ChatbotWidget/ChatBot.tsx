@@ -26,6 +26,7 @@ const ChatbotWidget = () => {
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [isWelcomeDismissed, setIsWelcomeDismissed] = useState(false); 
 
   const welcomeMessages = [
     "¡Hola! ¿Necesitas ayuda?",
@@ -44,24 +45,23 @@ const ChatbotWidget = () => {
   }, [messages]);
 
  useEffect(() => {
-  if (!isOpen) {
+  if (!isOpen && !isWelcomeDismissed) { 
     const messageInterval = setInterval(() => {
       if (showWelcomeMessage) {
-        // Iniciar animación de salida
         setIsAnimatingOut(true);
         setTimeout(() => {
           setShowWelcomeMessage(false);
           setIsAnimatingOut(false);
           setCurrentMessageIndex(prev => (prev + 1) % welcomeMessages.length);
-        }, 500); // Duración de la animación de salida
+        }, 500);
       } else {
         setShowWelcomeMessage(true);
       }
-    }, 30000);
+    }, 20000);
 
     return () => clearInterval(messageInterval);
   }
-}, [isOpen, showWelcomeMessage]);
+}, [isOpen, showWelcomeMessage, isWelcomeDismissed]); 
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -130,6 +130,7 @@ const ChatbotWidget = () => {
                   setTimeout(() => {
                     setShowWelcomeMessage(false);
                     setIsAnimatingOut(false);
+                    setIsWelcomeDismissed(true); 
                   }, 500);
                 }}
               >

@@ -263,4 +263,14 @@ export const archivoService = {
     }
   },
 
+  getFilesByFolderIdWithUser: async (folderId, userId) => {
+  try {
+    const response = await api.get(`/archivos/content/${folderId}?user_id=${userId}`);
+    return response.data.content || [];
+  } catch (error) {
+    console.error("❌ Error al obtener archivos filtrados:", error);
+    throw error;
+  }
+},
+
 };

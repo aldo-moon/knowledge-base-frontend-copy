@@ -1320,10 +1320,13 @@ const loadCarpetas = async () => {
     await new Promise(resolve => setTimeout(resolve, 500)); // 200ms de delay
     
     // ✅ CARGAR TODO EN PARALELO y esperar a que TODO termine
+    // En index.tsx - loadCarpetas
     const [carpetasData, temasData, archivosData] = await Promise.all([
       carpetaService.getFolderContent(currentFolderId),
       CURRENT_USER_ID ? temaService.getTemasByFolder(currentFolderId, CURRENT_USER_ID) : Promise.resolve({ content: [], borrador: [] }),
-      archivoService.getFilesByFolderId(currentFolderId)
+      CURRENT_USER_ID 
+        ? archivoService.getFilesByFolderIdWithUser(currentFolderId, CURRENT_USER_ID) 
+        : archivoService.getFilesByFolderId(currentFolderId) // Sin filtrar si no hay usuario
     ]);
     
     // Procesar carpetas

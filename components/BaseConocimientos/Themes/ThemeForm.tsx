@@ -7,6 +7,7 @@ import { puestoService } from '../../../services/puestoService';
 import { archivoService } from '../../../services/archivoService';
 import { modeloIAService } from '../../../services/modeloIAService';
 import { seccionService } from '../../../services/seccionService';
+import SiaLoadingOverlay from './SiaLoadingOverlay';
 
 interface ThemeFormProps {
   onSubmit?: (formData: ThemeFormData) => void; 
@@ -35,7 +36,7 @@ interface Area {
   _id: string;
   area_id: string;
   nombre: string;
-  // ... otras propiedades que pueda tener el área
+  
 }
 
 interface PuestoData {
@@ -110,7 +111,8 @@ export const ThemeForm: React.FC<ThemeFormProps> = ({
   const [isAreasDropdownOpen, setIsAreasDropdownOpen] = useState(false);
   const [isPuestosDropdownOpen, setIsPuestosDropdownOpen] = useState(false);
 const [dragCounter, setDragCounter] = useState(0); // 👈 CAMBIAR
-
+  const [isProcessingTheme, setIsProcessingTheme] = useState(false);
+  const [isDraftMode, setIsDraftMode] = useState(false);
   const [modelosIA, setModelosIA] = useState<ModeloIA[]>([]);
 const [secciones, setSecciones] = useState<Seccion[]>([]);
 const [seccionesFiltradas, setSeccionesFiltradas] = useState<Seccion[]>([]);
@@ -148,8 +150,12 @@ const [formData, setFormData] = useState<ThemeFormData>({
   uploadedFiles: [],
   tags: isEditMode ? (themeToEdit?.keywords || []) : [],
   currentTag: '',
-  aiModel: isEditMode ? (themeToEdit?.modelo_id || []) : [],
-  aiSection: [], // ✅ Temporalmente vacío
+  aiModel: isEditMode && themeToEdit?.modelo_id 
+    ? themeToEdit.modelo_id.map((modelo: any) => 
+        typeof modelo === 'object' ? modelo._id : modelo
+      )
+    : [],
+  aiSection: [], 
   suggestInHelpDesk: false
 });
 
@@ -612,24 +618,34 @@ const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
 };
 
 const handleSubmitWithDraft = async (isDraft: boolean) => {
-  if (!validateForm()) {
-    return;
-  }
+    if (!validateForm()) {
+      return;
+    }
 
-  // ✅ Incluir fileIds de los archivos subidos
-  const formDataWithDraft = {
-    ...formData,
-    isDraft,
-    fileIds: formData.uploadedFiles.map(file => file.id) // ✅ Agregar los IDs de los archivos
+    // ✅ ACTIVAR el loader ANTES de enviar
+    setIsProcessingTheme(true);
+    setIsDraftMode(isDraft);
+
+    try {
+      const formDataWithDraft = {
+        ...formData,
+        isDraft,
+        fileIds: formData.uploadedFiles.map(file => file.id)
+      };
+
+      console.log('📎 Archivos a guardar:', formDataWithDraft.fileIds);
+      console.log('📋 FormData completo:', formDataWithDraft);
+
+      if (onSubmit) {
+        await onSubmit(formDataWithDraft); // ✅ Esperar a que termine
+      }
+    } catch (error) {
+      console.error('❌ Error al procesar tema:', error);
+    } finally {
+      // ✅ DESACTIVAR el loader después de completar
+      setIsProcessingTheme(false);
+    }
   };
-
-  console.log('📎 Archivos a guardar:', formDataWithDraft.fileIds);
-  console.log('📋 FormData completo:', formDataWithDraft);
-
-  if (onSubmit) {
-    onSubmit(formDataWithDraft);
-  }
-};
 
   // Eliminar archivo subido
   const removeUploadedFile = async (fileId: string) => {
@@ -982,6 +998,10 @@ const processFiles = async (files: File[]) => {
 
   return (
     <div className={styles.topicFormContent}>
+       <SiaLoadingOverlay 
+        isVisible={isProcessingTheme} 
+        isDraft={isDraftMode}
+      />
       <form className={styles.topicForm} onSubmit={(e) => e.preventDefault()}>
         {/* Prioridad */}
         <div className={styles.formGroup}>
@@ -1464,55 +1484,54 @@ const processFiles = async (files: File[]) => {
         {/* Botones - diferentes según el modo */}
         <div className={styles.formActions} style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', flexDirection: "column"  }}>
           
-        {isEditMode ? (
-          // MODO EDICIÓN
-          <>
-            <button
-              type="button"
-              onClick={() => handleSubmitWithDraft(themeToEdit?.is_draft ?? false)}
-              disabled={uploadingFiles}
-              className={styles.createButton}
-            >
-              {uploadingFiles ? 'Guardando...' : 'Guardar cambios'}
-            </button>
-            
-            {/* Mostrar botón Publicar solo si es borrador */}
-            {themeToEdit?.is_draft && (
+          {isEditMode ? (
+            // MODO EDICIÓN
+            <>
+              <button
+                type="button"
+                onClick={() => handleSubmitWithDraft(themeToEdit?.is_draft ?? false)}
+                disabled={uploadingFiles || isProcessingTheme} // ✅ Deshabilitar durante procesamiento
+                className={styles.createButton}
+              >
+                {isProcessingTheme ? 'Procesando...' : uploadingFiles ? 'Guardando...' : 'Guardar cambios'}
+              </button>
+              
+              {themeToEdit?.is_draft && (
+                <button
+                  type="button"
+                  onClick={() => handleSubmitWithDraft(false)}
+                  disabled={uploadingFiles || isProcessingTheme} // ✅ Deshabilitar durante procesamiento
+                  className={styles.createButton}
+                  style={{ backgroundColor: '#10b981' }}
+                >
+                  {isProcessingTheme ? 'Procesando...' : uploadingFiles ? 'Publicando...' : 'Publicar Tema'}
+                </button>
+              )}
+            </>
+          ) : (
+            // MODO CREACIÓN: Dos botones (Borrador y Publicar)
+            <>
+              <button
+                type="button"
+                onClick={() => handleSubmitWithDraft(true)}
+                disabled={uploadingFiles || isProcessingTheme} // ✅ Deshabilitar durante procesamiento
+                className={styles.createButton}
+                style={{ backgroundColor: '#6b7280' }}
+              >
+                {isProcessingTheme ? 'Procesando...' : uploadingFiles ? 'Subiendo...' : 'Crear Borrador'}
+              </button>
+              
               <button
                 type="button"
                 onClick={() => handleSubmitWithDraft(false)}
-                disabled={uploadingFiles}
+                disabled={uploadingFiles || isProcessingTheme} // ✅ Deshabilitar durante procesamiento
                 className={styles.createButton}
-                style={{ backgroundColor: '#10b981' }}
+                style={{ backgroundColor: '#2563eb' }}
               >
-                {uploadingFiles ? 'Publicando...' : 'Publicar Tema'}
+                {isProcessingTheme ? 'Procesando...' : uploadingFiles ? 'Subiendo...' : 'Publicar Tema'}
               </button>
-            )}
-          </>
-        ) : (
-          // MODO CREACIÓN: Dos botones (Borrador y Publicar)
-          <>
-            <button
-              type="button"
-              onClick={() => handleSubmitWithDraft(true)}
-              disabled={uploadingFiles}
-              className={styles.createButton}
-              style={{ backgroundColor: '#6b7280' }}
-            >
-              {uploadingFiles ? 'Subiendo...' : 'Crear Borrador'}
-            </button>
-            
-            <button
-              type="button"
-              onClick={() => handleSubmitWithDraft(false)}
-              disabled={uploadingFiles}
-              className={styles.createButton}
-              style={{ backgroundColor: '#2563eb' }}
-            >
-              {uploadingFiles ? 'Subiendo...' : 'Publicar Tema'}
-            </button>
-          </>
-        )}
+            </>
+          )}
         </div>
       </form>
     </div>

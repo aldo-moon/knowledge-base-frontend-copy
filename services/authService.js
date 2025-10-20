@@ -21,7 +21,6 @@ export const authService = {
   },
 
   // Verificar token de URL
- // Verificar token de URL
 verificarToken: async (token) => {
   try {
     const datos = { token: token };
@@ -89,7 +88,7 @@ verificarToken: async (token) => {
       const token = urlParams.get('dowjdjfur');
       
       if (token) {
-        //console.log('🔑 Token encontrado en URL, verificando...');
+        console.log('🔑 Token encontrado en URL, verificando...');
         const result = await authService.verificarToken(token);
         
         if (result.success) {
@@ -107,7 +106,7 @@ verificarToken: async (token) => {
       const cookieAuth = authService.getAuthFromCookies();
       
       if (cookieAuth.isAuthenticated) {
-        //console.log('🍪 Autenticación encontrada en cookies');
+        console.log('🍪 Autenticación encontrada en cookies');
         return {
           success: true,
           id_usuario: cookieAuth.id_usuario,

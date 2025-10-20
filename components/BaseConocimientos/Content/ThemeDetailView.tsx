@@ -1,6 +1,6 @@
 // components/BaseConocimientos/Content/ThemeDetailView.tsx
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Edit2, Trash2, Star, Calendar, User, Tag, Eye, Image, FileText, Download, ExternalLink } from 'lucide-react';
+import { ChevronLeft, Edit2, Trash2, Star, Brain, Calendar, User, Tag, Eye, Image, FileText, Download, ExternalLink } from 'lucide-react';
 import { archivoService } from '../../../services/archivoService';
 import styles from './../../../styles/base-conocimientos.module.css';
 import { temaService } from '../../../services/temaService';
@@ -26,7 +26,10 @@ interface Theme {
   puesto_id?: string;
   files_attachment_id?: string[];
     isDraft?: boolean;
-
+     modelo_id?: Array<{        // ✅ AGREGAR ESTA PROPIEDAD
+    _id: string;
+    nombre: string;
+  }> | string[];
 }
 
 interface ThemeDetailViewProps {
@@ -375,18 +378,40 @@ useEffect(() => {
               </div>
             </div>
 
-            {theme.keywords && theme.keywords.length > 0 && (
-              <div className={styles.metadataItem}>
-                <Tag size={16} />
-                <div className={styles.keywordsList}>
-                  {theme.keywords.map((keyword, index) => (
-                    <span key={index} className={styles.keywordTag}>
-                      {keyword}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Keywords existente */}
+{theme.keywords && theme.keywords.length > 0 && (
+  <div className={styles.metadataItem}>
+    <Tag size={16} />
+    <div className={styles.keywordsList}>
+      {theme.keywords.map((keyword, index) => (
+        <span key={index} className={styles.keywordTag}>
+          {keyword}
+        </span>
+      ))}
+    </div>
+  </div>
+)}
+
+{/* ✅ AGREGAR ESTO - Modelos IA */}
+{theme.modelo_id && theme.modelo_id.length > 0 && (
+  <div className={styles.metadataItem}>
+    <Brain size={16} />
+    <div className={styles.keywordsList}>
+      {theme.modelo_id.map((modelo, index) => (
+        <span 
+          key={typeof modelo === 'object' ? modelo._id : index} 
+          className={styles.keywordTag}
+          style={{ 
+            background: 'linear-gradient(135deg, #6262bf 0%, #1d8cf8 100%)',
+            border: 'none'
+          }}
+        >
+          {typeof modelo === 'object' ? modelo.nombre : modelo}
+        </span>
+      ))}
+    </div>
+  </div>
+)}
           </div>
         </div>
 

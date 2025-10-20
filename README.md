@@ -1,185 +1,305 @@
-# [Black Dashboard NextJS](https://demos.creative-tim.com/black-dashboard-react/#/dashboard) [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&logo=twitter)](https://twitter.com/intent/tweet?url=https%3A%2F%2Fdemos.creative-tim.com%2Fblack-dashboard-react%2F%23%2Fadmin%2Fdashboard&text=Black%20Dashboard%20React%20by%20Creative%20Tim%20%7C%20Free%20React%20Admin%20Template&original_referer=https%3A%2F%2Fdemos.creative-tim.com%2Fblack-dashboard-react%2F&via=creativetim&hashtags=react%2Ccreativetim%2Cdark%2Cdashboard%2Cbootstrap%2Creactstrap%2Creactjs)
+# 📚 Sistema de Base de Conocimientos con IA
 
-![version](https://img.shields.io/badge/version-1.2.1-blue.svg) ![license](https://img.shields.io/badge/license-MIT-blue.svg) [![GitHub issues open](https://img.shields.io/github/issues/creativetimofficial/black-dashboard-react.svg?maxAge=2592000)]() [![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/creativetimofficial/black-dashboard-react.svg?maxAge=2592000)]() [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/E4aHAQy)
+Sistema integral de gestión de conocimiento empresarial con búsqueda semántica impulsada por IA, organización por áreas/puestos y chatbot inteligente.
 
-![Product Gif](./github-assets/black-dashboard-react.gif)
-This project is Next.js version of the Black Dashboard React project which is originally made by creativetim.
-It is developed by [Yousef Fatouraee](https://github.com/modulessoft/).
+## 🚀 Características Principales
 
-Black Dashboard NextJS is a beautiful [Bootstrap 4](http://getbootstrap.com/), [Reacstrap](https://reactstrap.github.io/) and [NextJS](https://nextjs.org/) ([create-next-app](https://nextjs.org/docs/api-reference/create-next-app)) coded in TypeScript Admin Dashboard with a huge number of components built to fit together and look amazing. If you are looking for a tool to manage and visualize data about your business, this dashboard is the thing for you. It combines colors that are easy on the eye, spacious cards, beautiful typography, and graphics.
-Black Dashboard React comes packed with all plugins that you might need inside a project and documentation on how to get started. It is light and easy to use, and also very powerful.
+### 📁 Gestión de Contenido
+- **Carpetas jerárquicas** para organización estructurada
+- **Temas con permisos** por área y puesto
+- **Archivos adjuntos** con soporte multimedia
+- **Borradores** para contenido en progreso
+- **Papelera** con soft delete y recuperación
 
-Black Dashboard React features over 16 individual components, giving you the freedom of choosing and combining. This means that there are thousands of possible combinations. All components can take variations in color, that you can easily modify using SASS files. You will save a lot of time going from prototyping to full-functional code because all elements are implemented.
-We thought about everything, so this dashboard comes with 2 versions, Dark Mode and Light Mode.
+### 🤖 Inteligencia Artificial
+- **Chatbot SIA** con respuestas contextuales
+- **Embeddings vectoriales** para búsqueda semántica
+- **Modelos configurables** con instrucciones personalizadas
+- **Secciones temáticas** para mejor organización
+- **Búsqueda por similitud** usando PostgreSQL + pgvector
 
-Special thanks go for the owners of these plugins:
+### 👥 Control de Acceso
+- **Permisos por área y puesto** a nivel de tema
+- **Autores siempre ven su contenido** independiente de permisos
+- **Borradores solo visibles** para el autor
+- **Archivos adjuntos heredan permisos** del tema
 
-- [Perfect Scrollbar](http://utatti.github.io/perfect-scrollbar/) for the nice scrollbars for windows.
-- [React Chartjs](http://jerairrest.github.io/react-chartjs-2/) for the wonderful wrapper for charts.
-- [Chartjs](https://www.chartjs.org/) for the wonderful charts.
+### ⭐ Funcionalidades Extra
+- **Sistema de favoritos** para acceso rápido
+- **Historial de versiones** con soft delete
+- **Vista "Mis Archivos"** con contenido del usuario
+- **Búsqueda avanzada** con filtros múltiples
 
-We are very excited to share this dashboard with you and we look forward to hearing your feedback!
+## 🛠️ Stack Tecnológico
 
-**Example Pages** We wanted to fully display the power of this dashboard, so the kit comes packed with examples showing you how to use the components.
+### Frontend
+- **Next.js** - Framework React
+- **TypeScript** - Tipado estático
+- **CSS Modules** - Estilos componentes
+- **Lucide React** - Iconografía
+- **Lottie** - Animaciones
 
-## Table of Contents
+### Backend
+- **Node.js + Express** - API REST
+- **MongoDB** - Base de datos principal (carpetas, temas, archivos)
+- **PostgreSQL + pgvector** - Almacenamiento de embeddings vectoriales
+- **Python FastAPI** - Servicio de embeddings (sentence-transformers)
 
-- [Versions](#versions)
-- [Demo](#demo)
-- [Quick Start](#quick-start)
-- [Documentation](#documentation)
-- [File Structure](#file-structure)
-- [Browser Support](#browser-support)
-- [Resources](#resources)
-- [Reporting Issues](#reporting-issues)
-- [Technical Support or Questions](#technical-support-or-questions)
-- [Licensing](#licensing)
-- [Useful Links](#useful-links)
+### Servicios Externos
+- **AWS S3** - Almacenamiento de archivos
+- **DeepSeek API** - Generación de respuestas del chatbot
 
-## Versions
-
-[<img src="./github-assets/html.png" width="60" height="60" />](https://www.creative-tim.com/product/black-dashboard)
-[<img src="./github-assets/react.svg" width="60" height="60" />](https://www.creative-tim.com/product/black-dashboard-react)[<img src="./github-assets/vuejs.png" width="60" height="60" />](https://www.creative-tim.com/product/vue-black-dashboard)
-
-| HTML                                                                                                                                                                | React                                                                                                                                                                   | Vue                                                                                                                                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Black Dashboard HTML](https://s3.amazonaws.com/creativetim_bucket/products/93/thumb/opt_bd_thumbnail.jpg)](https://www.creative-tim.com/product/black-dashboard) | [![Black Dashboard React](https://s3.amazonaws.com/creativetim_bucket/products/136/thumb/opt_bd_react.jpg)](https://www.creative-tim.com/product/black-dashboard-react) | [![Vue Black Dashboard](https://s3.amazonaws.com/creativetim_bucket/products/99/thumb/opt_bd_vue_thumbnail.jpg)](https://www.creative-tim.com/product/vue-black-dashboard) |
-
-## Demo
-
-| Dashboard                                                                                                              | User Profile                                                                                                             | Tables                                                                                                                | Maps                                                                                                        | Notification                                                                                                                          |
-| ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Start page](./github-assets/dashboard-page.png)](https://demos.creative-tim.com/black-dashboard-nextjs/#/dashboard) | [![User profile page](./github-assets/user-page.png)](https://demos.creative-tim.com/black-dashboard-nextjs/#/user-page) | [![Tables page ](./github-assets/table-page.png)](https://demos.creative-tim.com/black-dashboard-nextjs/#/table-list) | [![Maps Page](./github-assets/maps-page.png)](https://demos.creative-tim.com/black-dashboard-nextjs/#/maps) | [![Notification page](./github-assets/notifications-page.png)](https://demos.creative-tim.com/black-dashboard-nextjs/#/notifications) |
-
-[View More](https://demos.creative-tim.com/black-dashboard-react/#/dashboard).
-
-## Quick start
-
-Quick start options:
-
-- Clone the repo: `git clone https://github.com/majhoolsoft/black-dashboard-nextjs.git`.
-- [Download from Github](https://github.com/majhoolsoft/black-dashboard-nextjs/archive/Next.js.zip).
-
-## Documentation
-
-The documentation for the Black Dashboard React is hosted at our [website](https://demos.creative-tim.com/black-dashboard-react/#/documentation/tutorial).
-
-## File Structure
-
-Within the download you'll find the following directories and files:
-
+## 📦 Estructura del Proyecto
 ```
-black-dashboard-nextjs
-.
-├── package.json
-├── CHANGELOG.md
-├── ISSUE_TEMPLATE.md
-├── LICENSE.md
-├── README.md
-├── routes.js
-├── assets
-    │   ├── css
-    │   ├── demo
-    │   ├── fonts
-    │   ├── img
-    │   └── scss
-    │       ├── black-dashboard
-    │       │   ├── bootstrap
-    │       │   │   ├── mixins
-    │       │   │   └── utilities
-    │       │   ├── custom
-    │       │   │   ├── cards
-    │       │   │   ├── mixins
-    │       │   │   ├── utilities
-    │       │   │   └── vendor
-    │       └── black-dashboard.scss
-├── Documentation
-│   └── documentation.html
-├── github-assets
-│   └── react.svg
-├── public
-│   └── manifest.json
-├── pages
-    ├── index.tsx
-    ├── _document.tsx
-    ├── _app.tsx
-    ├── admin
-    │   └── Dashboard.tsx
-    │   └── Icons.tsx
-    │   └── Map.tsx
-    │   └── Notifications.tsx
-    │   └── Rtl.tsx
-    │   └── TableList.tsx
-    │   └── Typography.tsx
-    │   └── UserProfile.tsx
-├── components
-    ├── FixedPlugin
-    │   └── FixedPlugin.js
-    ├── Footer
-    │   └── Footer.js
-    ├── Navbars
-    │   ├── AdminNavbar.js
-    │   └── RTLNavbar.js
-    └── Sidebar
-        └── Sidebar.js
-    ├── layouts
-    │   ├── Admin
-    │   │   └── Admin.js
-    │   └── RTL
-    │       └── RTL.js
-└── variables
-    └── charts.js
+knowledge-base/
+├── frontend/
+│   ├── components/
+│   │   └── BaseConocimientos/
+│   │       ├── Actions/          # Botones y acciones
+│   │       ├── ChatbotWidget/    # Widget de chat IA
+│   │       ├── Content/          # Vistas de contenido
+│   │       ├── Details/          # Panel de detalles
+│   │       ├── Files/            # Gestión de archivos
+│   │       ├── Folders/          # Gestión de carpetas
+│   │       ├── Header/           # Encabezados
+│   │       ├── Modals/           # Modales
+│   │       ├── Navigation/       # Navegación
+│   │       ├── Search/           # Búsqueda
+│   │       └── Themes/           # Gestión de temas
+│   ├── hooks/                    # Custom hooks
+│   ├── services/                 # Servicios API
+│   └── styles/                   # Estilos globales
+│
+└── backend/
+    ├── controller/               # Controladores
+    ├── model/                    # Modelos MongoDB
+    ├── routes/                   # Rutas API
+    ├── services/                 # Servicios (vectores, embeddings)
+    └── python-service/           # Servicio Python de embeddings
 ```
 
-## Browser Support
+## 🔧 Instalación
 
-At present, we officially aim to support the last two versions of the following browsers:
+### Requisitos Previos
+- Node.js 16+
+- MongoDB 5+
+- PostgreSQL 14+ con extensión pgvector
+- Python 3.9+
+- AWS S3 configurado
 
-<img src="https://s3.amazonaws.com/creativetim_bucket/github/browser/chrome.png" width="64" height="64"> <img src="https://s3.amazonaws.com/creativetim_bucket/github/browser/firefox.png" width="64" height="64"> <img src="https://s3.amazonaws.com/creativetim_bucket/github/browser/edge.png" width="64" height="64"> <img src="https://s3.amazonaws.com/creativetim_bucket/github/browser/safari.png" width="64" height="64"> <img src="https://s3.amazonaws.com/creativetim_bucket/github/browser/opera.png" width="64" height="64">
+### 1. Clonar el repositorio
+```bash
+git clone <repository-url>
+cd knowledge-base
+```
 
-## Resources
+### 2. Backend (Node.js)
+```bash
+cd backend
+npm install
 
-- Demo: https://demos.creative-tim.com/black-dashboard-nextjs/#/dashboard
-- Download Page: https://github.com/majhoolsoft/black-dashboard-nextjs
-- License Agreement: https://www.creative-tim.com/license
-- Support: https://www.creative-tim.com/contact-us
-- Issues: [Github Issues Page](https://github.com/creativetimofficial/black-dashboard-react/issues)
+# Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus credenciales
+```
 
-## Reporting Issues
+### 3. Servicio Python (Embeddings)
+```bash
+cd backend/python-service
+pip install -r requirements.txt
+```
 
-We use GitHub Issues as the official bug tracker for the Black Dashboard React. Here are some advices for our users that want to report an issue:
+### 4. Frontend
+```bash
+cd frontend
+npm install
+```
 
-1. Make sure that you are using the latest version of the Black Dashboard React. Check the CHANGELOG from your dashboard on our [website](https://www.creative-tim.com/).
-2. Providing us reproducible steps for the issue will shorten the time it takes for it to be fixed.
-3. Some issues may be browser specific, so specifying in what browser you encountered the issue might help.
+### 5. Base de Datos PostgreSQL
+```sql
+-- Crear base de datos
+CREATE DATABASE knowledge_base;
 
-## Technical Support or Questions
+-- Habilitar extensión pgvector
+CREATE EXTENSION vector;
 
-If you have questions or need help integrating the product please [contact us](https://www.creative-tim.com/contact-us) instead of opening an issue.
+-- Tablas se crean automáticamente al iniciar
+```
 
-## Licensing
+## ▶️ Ejecutar el Proyecto
 
-- Copyright 2022 Creative Tim (https://www.creative-tim.com)
-- Licensed under MIT (https://github.com/creativetimofficial/black-dashboard-react/blob/master/LICENSE.md)
+### Desarrollo
 
-## Useful Links
+**Backend:**
+```bash
+cd backend
+npm run dev
+```
 
-More products from Creative Tim: <https://www.creative-tim.com/products>
+**Servicio Python:**
+```bash
+cd backend/python-service
+python main.py
+```
 
-Tutorials: <https://www.youtube.com/channel/UCVyTG4sCw-rOvB9oHkzZD1w>
+**Frontend:**
+```bash
+cd frontend
+npm run dev
+```
 
-Freebies: <https://www.creative-tim.com/products>
+Acceder a: `http://localhost:3000`
 
-Affiliate Program (earn money): <https://www.creative-tim.com/affiliates/new>
+## 🗄️ Modelos de Datos
 
-Social Media:
+### MongoDB
 
-Twitter: <https://twitter.com/CreativeTim>
+**Carpetas (Folders)**
+- Estructura jerárquica
+- Soft delete con `is_deleted`
+- Relación con carpeta padre
 
-Facebook: <https://www.facebook.com/CreativeTim>
+**Temas (Topics)**
+- Título, descripción, prioridad
+- Permisos: `area_id[]`, `puesto_id[]`
+- Autor: `author_topic_id`
+- Estado: `is_draft`, `is_deleted`
+- Archivos adjuntos: `files_attachment_id[]`
+- Modelos IA: `modelo_id[]`
+- Keywords para búsqueda
 
-Dribbble: <https://dribbble.com/creativetim>
+**Archivos (Files)**
+- Metadata del archivo
+- Ruta S3: `s3_path`
+- Tipo de archivo: `type_file`
+- Soft delete: `is_deleted`
 
-Google+: <https://plus.google.com/+CreativetimPage>
+### PostgreSQL
 
-Instagram: <https://instagram.com/creativetimofficial>
+**tema_embeddings**
+- Vectores de texto de temas
+- Dimensión: 384 (MiniLM)
+- Índice HNSW para búsqueda rápida
+
+**archivo_embeddings**
+- Vectores de contenido de archivos
+- Extracción de texto PDF, DOCX, XLSX
+- Chunks de ~300 palabras
+
+## 🤖 Chatbot SIA
+
+### Flujo de Funcionamiento
+
+1. **Usuario hace pregunta** → Frontend envía a backend
+2. **Backend genera embedding** → Llama a Python service
+3. **Búsqueda vectorial** → PostgreSQL encuentra contenido similar
+4. **Construcción de contexto** → Recopila chunks relevantes
+5. **Generación de respuesta** → DeepSeek API con contexto
+6. **Respuesta al usuario** → Con referencias a temas relacionados
+
+### Configuración de Modelos
+
+Los administradores pueden crear múltiples modelos de IA con:
+- Nombre personalizado
+- Instrucciones específicas (prompt)
+- Secciones temáticas asociadas
+
+## 🔐 Sistema de Permisos
+
+### Lógica de Visibilidad
+
+**Temas:**
+- ✅ Visible si: `(esAutor) OR (área coincide AND puesto coincide AND !is_draft)`
+- ❌ Oculto si: es borrador de otro usuario o no cumple área/puesto
+
+**Archivos:**
+- **Sueltos** (no en temas): Visibles para todos
+- **Adjuntos a temas**: Heredan permisos del tema
+
+## 🗑️ Sistema de Papelera
+
+- **Soft Delete**: Marca como `is_deleted: true`
+- **Archivos adjuntos**: Se marcan automáticamente al borrar tema
+- **Embeddings**: Se marcan como eliminados en PostgreSQL
+- **Restauración**: Revierte todos los cambios
+- **Eliminación permanente**: Borra físicamente de MongoDB y PostgreSQL
+
+## 🌟 Características Avanzadas
+
+### Búsqueda Semántica
+- Usa sentence-transformers (paraphrase-multilingual-MiniLM-L12-v2)
+- Búsqueda por similitud coseno
+- Threshold configurable de relevancia
+
+### Gestión de Embeddings
+- Generación automática al crear/editar temas
+- Actualización incremental de chunks
+- Eliminación en cascada
+
+### Historial y Auditoría
+- Fechas de creación y modificación
+- Tracking de autores
+- Métricas de similitud en búsquedas
+
+## 📝 Variables de Entorno
+```env
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/knowledge_base
+
+# PostgreSQL
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=knowledge_base
+POSTGRES_USER=usuario
+POSTGRES_PASSWORD=password
+
+# AWS S3
+AWS_ACCESS_KEY_ID=tu_access_key
+AWS_SECRET_ACCESS_KEY=tu_secret_key
+AWS_REGION=us-east-1
+AWS_BUCKET_NAME=knowledge-base-files
+
+# Python Service
+EMBEDDING_SERVICE_URL=http://localhost:8000
+
+# DeepSeek API
+DEEPSEEK_API_KEY=tu_api_key
+DEEPSEEK_API_URL=https://api.deepseek.com/v1
+```
+
+## 🐛 Troubleshooting
+
+**Problema: Archivos no se ven después de borrar tema**
+- ✅ Verificar que el modelo Archivo tenga campo `is_deleted`
+- ✅ Verificar que getAllFilesFolders filtre por `is_deleted: false`
+
+**Problema: Chatbot no responde**
+- ✅ Verificar que el servicio Python esté corriendo
+- ✅ Verificar conexión a PostgreSQL con pgvector
+- ✅ Verificar API key de DeepSeek
+
+**Problema: Permisos no funcionan**
+- ✅ Verificar que usuario tenga `area` y `puesto` asignados
+- ✅ Verificar conversión a números en comparaciones
+
+## 👥 Contribuir
+
+1. Fork el proyecto
+2. Crea tu feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push al branch (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📄 Licencia
+
+Este proyecto es privado y confidencial.
+
+## 🙏 Agradecimientos
+
+- Anthropic Claude por asistencia en desarrollo
+- Sentence Transformers por el modelo de embeddings
+- DeepSeek por el API de generación de respuestas
+
+---
+
+**Desarrollado para gestión inteligente del conocimiento empresarial**
