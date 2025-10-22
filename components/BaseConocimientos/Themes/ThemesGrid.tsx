@@ -93,6 +93,9 @@ if (themes.length === 0 && !loading) {
             onThemeDoubleClick={onThemeDoubleClick}
             onMenuAction={onThemeMenuAction}
             onToggleFavorite={onToggleThemeFavorite}
+            isTrashView={isTrashView}           // ✅ AGREGAR
+            selectedItems={selectedItems}       // ✅ AGREGAR
+            onItemSelect={onItemSelect}         // ✅ AGREGAR
           />
         ))}
       </div>

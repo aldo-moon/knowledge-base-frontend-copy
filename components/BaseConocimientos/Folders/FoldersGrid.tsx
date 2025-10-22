@@ -35,7 +35,10 @@ export const FoldersGrid: React.FC<FoldersGridProps> = ({
   onFolderSelect,
   onFolderDoubleClick,
   onFolderMenuAction,
-  onToggleFolderFavorite 
+  onToggleFolderFavorite,
+    isTrashView = false,        // ✅ AGREGAR
+  selectedItems,              // ✅ AGREGAR
+  onItemSelect               // ✅ AGREGAR
 }) => {
 
   // Mostrar skeletons mientras carga
@@ -79,6 +82,9 @@ if (folders.length === 0 && !loading) {
             onDoubleClick={onFolderDoubleClick || (() => {})}
             onMenuAction={onFolderMenuAction}
             onToggleFavorite={onToggleFolderFavorite}
+            isTrashView={isTrashView}           // ✅ AGREGAR
+            selectedItems={selectedItems}       // ✅ AGREGAR
+            onItemSelect={onItemSelect}         // ✅ AGREGAR
           />
         ))}
       </div>

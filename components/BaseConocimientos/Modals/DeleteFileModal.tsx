@@ -25,7 +25,7 @@ const DeleteFileModal: React.FC<DeleteFileModalProps> = ({
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalBody}>
           <p className={styles.deleteMessage}>
-            ¿Estás seguro de eliminar el archivo "{fileToDelete?.file_name}"?
+            ¿Estás seguro de mover a la papelera el archivo "{fileToDelete?.file_name}"?
           </p>
         </div>
         

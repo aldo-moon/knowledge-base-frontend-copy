@@ -1,6 +1,6 @@
 // components/BaseConocimientos/Folders/FolderCard.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { Folder, MoreHorizontal, Star, Edit, Trash } from 'lucide-react';
+import { Folder, MoreHorizontal, Star, Edit, Trash, RotateCcw, Trash2 } from 'lucide-react';
 import styles from '../../../styles/base-conocimientos.module.css';
 
 interface Folder {
@@ -26,6 +26,9 @@ interface FolderCardProps {
   onMenuAction: (action: string, folder: Folder) => void;
   isFavorite?: boolean;
   onToggleFavorite?: (folderId: string) => void;
+  isTrashView?: boolean; 
+  selectedItems?: Set<string>; 
+  onItemSelect?: (itemId: string) => void; 
 }
 
 export const FolderCard: React.FC<FolderCardProps> = ({
@@ -35,15 +38,23 @@ export const FolderCard: React.FC<FolderCardProps> = ({
   onDoubleClick,
   onMenuAction,
   isFavorite = false,
-  onToggleFavorite
+  onToggleFavorite,
+  isTrashView = false, 
+  selectedItems, 
+  onItemSelect 
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const menuOptions: MenuOption[] = [
-    { icon: Edit, label: 'Cambiar nombre', action: 'rename' },
-    { icon: Trash, label: 'Eliminar', action: 'delete' }
-  ];
+const menuOptions: MenuOption[] = isTrashView 
+  ? [
+      { icon: RotateCcw, label: 'Restaurar', action: 'restore' },
+      { icon: Trash2, label: 'Eliminar permanentemente', action: 'delete' }
+    ]
+  : [
+      { icon: Edit, label: 'Cambiar nombre', action: 'rename' },
+      { icon: Trash, label: 'Eliminar', action: 'delete' }
+    ];
 
   // Cerrar menú cuando se hace clic fuera
   useEffect(() => {
@@ -72,20 +83,24 @@ export const FolderCard: React.FC<FolderCardProps> = ({
     setIsMenuOpen(false);
   };
 
-  const handleCardClick = () => {
+const handleCardClick = () => {
+  if (isTrashView && onItemSelect) {
+    onItemSelect(folder._id);
+  } else {
     onSelect(folder);
-  };
+  }
+};
 
   const handleCardDoubleClick = () => {
     onDoubleClick(folder);
   };
 
   return (
-    <div
-      className={styles.folderCard}
-      onClick={handleCardClick}
-      onDoubleClick={handleCardDoubleClick}
-    >
+      <div
+        className={`${styles.folderCard} ${isTrashView && selectedItems?.has(folder._id) ? styles.selected : ''}`}
+        onClick={handleCardClick}
+        onDoubleClick={handleCardDoubleClick}
+      >
       <div className={styles.folderCardHeader}>
         <div className={styles.folderInfo}>
           <Folder className={styles.folderIcon} size={24} />
@@ -118,22 +133,21 @@ export const FolderCard: React.FC<FolderCardProps> = ({
             )}
           </div>
           
-         <button 
-            className={styles.folderStarButton}
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log('Star clicked, onToggleFavorite exists:', !!onToggleFavorite);
-              console.log('Folder ID:', folder._id);
-              onToggleFavorite?.(folder._id);
-            }}
-          >
-            <Star 
-              size={18} 
-              className={styles.folderStarIcon}
-              fill={isFavorite ? "#fbbf24" : "none"}
-              color={isFavorite ? "#fbbf24" : "#8b8d98"}
-            />
-          </button>
+          {!isTrashView && (
+            <button 
+              className={styles.folderStarButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite?.(folder._id);
+              }}
+            >
+              <Star 
+                size={16} 
+                fill={isFavorite ? "#fbbf24" : "none"}
+                color={isFavorite ? "#fbbf24" : "#8b8d98"}
+              />
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -294,12 +294,6 @@ DEEPSEEK_API_URL=https://api.deepseek.com/v1
 
 Este proyecto es privado y confidencial.
 
-## 🙏 Agradecimientos
-
-- Anthropic Claude por asistencia en desarrollo
-- Sentence Transformers por el modelo de embeddings
-- DeepSeek por el API de generación de respuestas
-
 ---
 
 **Desarrollado para gestión inteligente del conocimiento empresarial**

@@ -28,7 +28,7 @@ const DeleteThemeModal: React.FC<DeleteThemeModalProps> = ({
             ¿Deseas mover el tema "{themeToDelete?.title_name}" a la papelera?
           </p>
           <p className={styles.deleteMessage1}>
-              Incluye 76 elementos que se eliminarán definitivamente <br/> después de 30 días.
+              Se eliminarán definitivamente <br/> después de 30 días.
           </p>
         </div>
         

@@ -1,6 +1,6 @@
 // components/BaseConocimientos/Themes/ThemeCard.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreHorizontal, Star, Edit, Trash, FolderOpen } from 'lucide-react';
+import { MoreHorizontal, Star, Edit, Trash, FolderOpen, RotateCcw, Trash2 } from 'lucide-react';
 import styles from '../../../styles/base-conocimientos.module.css';
 
 interface Theme {
@@ -27,6 +27,9 @@ interface ThemeCardProps {
   isFavorite?: boolean;
   onToggleFavorite?: (themeId: string) => void;
   isDraft?: boolean; // ✅ Nueva prop
+    isTrashView?: boolean; // ✅ AGREGAR
+  selectedItems?: Set<string>; // ✅ AGREGAR  
+  onItemSelect?: (itemId: string) => void; // ✅ AGREGAR
  
 }
 
@@ -37,14 +40,23 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   onMenuAction,
   isFavorite = false,
   onToggleFavorite,
-  isDraft = false 
+  isDraft = false,
+    isTrashView = false, // ✅ AGREGAR
+  selectedItems, // ✅ AGREGAR
+  onItemSelect // ✅ AGREGAR
 
 }) => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
- const menuOptions: MenuOption[] = [
+const menuOptions: MenuOption[] = isTrashView
+  ? [
+      { icon: RotateCcw, label: 'Restaurar', action: 'restore' },
+      { icon: Trash2, label: 'Eliminar permanentemente', action: 'delete' }
+    ]
+  : 
+    [
   { icon: Edit, label: 'Cambiar nombre', action: 'rename' },
   { icon: FolderOpen, label: 'Cambiar ubicación', action: 'move' }, // ✅ Nueva opción
   { icon: Trash, label: 'Eliminar', action: 'delete' }
@@ -80,7 +92,11 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   };
 
   const handleCardClick = () => {
-    onSelect(theme);
+    if (isTrashView && onItemSelect) {
+      onItemSelect(theme._id);
+    } else {
+      onSelect(theme);
+    }
   };
 
   const handleCardDoubleClick = () => {
@@ -91,9 +107,9 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
 
     return (
       <div
-      className={`${styles.themeCard} ${isDraft ? styles.draftTheme : ''}`} // ✅ Aplicar clase condicional
+        className={`${styles.themeCard} ${isDraft ? styles.draftTheme : ''} ${isTrashView && selectedItems?.has(theme._id) ? styles.selected : ''}`}
         onClick={handleCardClick}
-        onDoubleClick={handleCardDoubleClick}  
+        onDoubleClick={handleCardDoubleClick}
       >
         <div className={styles.themeContent}>
           <div className={styles.themeIconContainer}>
@@ -128,19 +144,19 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
               )}
             </div>
             
-            <button className={styles.themeStarButton}
-            onClick={(e) => {
-                e.stopPropagation();
-                console.log('Star clicked, onToggleFavorite exists:', !!onToggleFavorite);
-                console.log('Tema ID:', theme._id);
-                onToggleFavorite?.(theme._id);
-              }}>
-              <Star 
-                size={16} 
-                fill={isFavorite ? "#fbbf24" : "none"}
-                color={isFavorite ? "#fbbf24" : "#8b8d98"}
-              />
-            </button>
+            {!isTrashView && (
+              <button className={styles.themeStarButton}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleFavorite?.(theme._id);
+                }}>
+                <Star 
+                  size={16} 
+                  fill={isFavorite ? "#fbbf24" : "none"}
+                  color={isFavorite ? "#fbbf24" : "#8b8d98"}
+                />
+              </button>
+            )}
           </div>
         </div>
       </div>

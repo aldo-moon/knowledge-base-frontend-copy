@@ -1,6 +1,6 @@
 // components/BaseConocimientos/Themes/ThemeForm.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, X, FileImage, FileText, FileVideo, Music, Archive, File, Check, ChevronDown, Loader  } from 'lucide-react';
+import { Upload, X, FileImage, FileText, FileVideo, Music, Archive, AlertTriangle, File, Check, ChevronDown, Loader  } from 'lucide-react';
 import styles from './../../../styles/base-conocimientos.module.css';
 import { areaService } from '../../../services/areaService';
 import { puestoService } from '../../../services/puestoService';
@@ -24,6 +24,7 @@ interface ThemeFormData {
   position: string[];  
   files: globalThis.File[];
   uploadedFiles: { id: string; name: string }[];
+  uploadMode: 'device' | 'folder'; // ✅ AGREGAR ESTA LÍNEA
   tags: string[];  
   currentTag: string;
   aiModel: string[];  
@@ -120,10 +121,12 @@ const [loadingModelos, setLoadingModelos] = useState(false);
 const [loadingSecciones, setLoadingSecciones] = useState(false);
 const [isModelosDropdownOpen, setIsModelosDropdownOpen] = useState(false);
 const [isSeccionesDropdownOpen, setIsSeccionesDropdownOpen] = useState(false);
+const [fileToDelete, setFileToDelete] = useState<{ id: string; name: string } | null>(null);
 const modelosDropdownRef = useRef<HTMLDivElement>(null);
 const seccionesDropdownRef = useRef<HTMLDivElement>(null);
 const [seccionesAgrupadas, setSeccionesAgrupadas] = useState<SeccionesAgrupadas>({});
-
+const [folderFiles, setFolderFiles] = useState<any[]>([]);
+const [loadingFolderFiles, setLoadingFolderFiles] = useState(false);
   const [selectedAllAreas, setSelectedAllAreas] = useState<string[]>([]); // Areas donde se seleccionó "Todos"
   const isAllAreaSelected = (areaPuestos: PuestosResponse): boolean => {
   return selectedAllAreas.includes(areaPuestos.nombre_area);
@@ -148,6 +151,7 @@ const [formData, setFormData] = useState<ThemeFormData>({
   position: isEditMode ? (Array.isArray(themeToEdit?.puesto_id) ? themeToEdit.puesto_id : [themeToEdit?.puesto_id || '']) : [],
   files: [],
   uploadedFiles: [],
+  uploadMode: 'device', // ✅ AGREGAR ESTA LÍNEA
   tags: isEditMode ? (themeToEdit?.keywords || []) : [],
   currentTag: '',
   aiModel: isEditMode && themeToEdit?.modelo_id 
@@ -994,7 +998,24 @@ const processFiles = async (files: File[]) => {
   }
 };
 
+const loadFolderFiles = async (folderId: string) => {
+  try {
+    setLoadingFolderFiles(true);
+    const files = await archivoService.getArchivosByFolderId(folderId);
+    setFolderFiles(files);
+  } catch (error) {
+    console.error('Error cargando archivos del folder:', error);
+    setFolderFiles([]);
+  } finally {
+    setLoadingFolderFiles(false);
+  }
+};
 
+useEffect(() => {
+  if (isEditMode && themeToEdit?.folder_id) {
+    loadFolderFiles(themeToEdit.folder_id);
+  }
+}, [isEditMode, themeToEdit]);
 
   return (
     <div className={styles.topicFormContent}>
@@ -1143,12 +1164,49 @@ const processFiles = async (files: File[]) => {
 
         {/* Archivos */}
         <div className={styles.formGroup}>
-          <label className={styles.formLabel}>
-            <u>Archivos</u>
-            <span className={styles.multimediaTag}>Multimedia</span>
-          </label>
-          
+          <label className={styles.formLabel}>Multimedia</label>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              background: '#1e1e2f',
+              borderRadius: '14px',
+              overflow: 'hidden',
+              cursor: 'pointer',
+              userSelect: 'none',
+              fontSize: '0.744rem',
+              justifyContent: 'space_between',
+            }}
+          >
+            <div
+              onClick={() => setFormData(prev => ({ ...prev, uploadMode: 'device' }))}
+              style={{
+                background: formData.uploadMode === 'device' ? '#6262bf' : 'transparent',
+                color: formData.uploadMode === 'device' ? 'white' : '#ffffffff',
+                padding: '0.3rem 0.6rem',
+                transition: '0.3s',
+                fontWeight: '500',
+              }}
+            >
+              Subir archivos
+            </div>
+            <div
+              onClick={() => setFormData(prev => ({ ...prev, uploadMode: 'folder' }))}
+              style={{
+                background: formData.uploadMode === 'folder' ? '#6262bf' : 'transparent',
+                color: formData.uploadMode === 'folder' ? 'white' : '#ffffffff',
+                padding: '0.3rem 0.6rem',
+                transition: '0.3s',
+                fontWeight: '500',
+              }}
+            >
+              Archivos de carpeta y tema
+            </div>
+          </div>
+        
           {/* Área de upload */}
+          {formData.uploadMode === 'device' ? (
+
           <div 
             className={`${styles.fileUploadArea} ${dragCounter > 0 ? styles.dragging : ''}`}
             onDragEnter={handleDragEnter}
@@ -1204,6 +1262,70 @@ const processFiles = async (files: File[]) => {
               )}
             </label>
           </div>
+          ) : (
+  /* NUEVA SECCIÓN: Archivos de la carpeta */
+  <div style={{
+    background: '#1e1e2f',
+    border: '2px solid #6262bf',
+    borderRadius: '0.5rem',
+    padding: '1rem',
+    maxHeight: '300px',
+    overflowY: 'auto'
+  }}>
+    {loadingFolderFiles ? (
+      <div style={{ textAlign: 'center', color: '#6262bf' }}>
+        <Loader size={24} className={styles.spinningIcon} />
+        <p>Cargando archivos...</p>
+      </div>
+    ) : folderFiles.length === 0 ? (
+      <p style={{ color: '#9ca3af', textAlign: 'center' }}>
+        No hay archivos en esta carpeta
+      </p>
+    ) : (
+      folderFiles.map((file) => {
+        const isSelected = formData.uploadedFiles.some(f => f.id === file._id);
+        return (
+          <div
+            key={file._id}
+            onClick={() => {
+              if (isSelected) {
+                // Remover
+                setFormData(prev => ({
+                  ...prev,
+                  uploadedFiles: prev.uploadedFiles.filter(f => f.id !== file._id)
+                }));
+              } else {
+                // Agregar
+                setFormData(prev => ({
+                  ...prev,
+                  uploadedFiles: [...prev.uploadedFiles, { id: file._id, name: file.file_name }]
+                }));
+              }
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.75rem',
+              background: isSelected ? 'rgba(98, 98, 191, 0.2)' : '#27293d',
+              borderRadius: '0.5rem',
+              marginBottom: '0.5rem',
+              cursor: 'pointer',
+              border: isSelected ? '2px solid #6262bf' : '2px solid transparent',
+              transition: 'all 0.2s'
+            }}
+          >
+            <FileText size={20} color="#6262bf" />
+            <span style={{ flex: 1, color: 'white', fontSize: '0.875rem' }}>
+              {file.file_name}
+            </span>
+            {isSelected && <Check size={18} color="#6262bf" />}
+          </div>
+        );
+      })
+    )}
+  </div>
+)}
 
           {/* Lista de archivos subidos */}
           {formData.uploadedFiles.length > 0 && (
@@ -1241,18 +1363,18 @@ const processFiles = async (files: File[]) => {
                     {file.name}
                   </span>
                   <button
-                    type="button"
-                    onClick={() => removeUploadedFile(file.id)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#6b7280',
-                      cursor: 'pointer',
-                      padding: '2px'
-                    }}
-                  >
-                    <X size={14} />
-                  </button>
+                  type="button"
+                  onClick={() => setFileToDelete({ id: file.id, name: file.name })}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#6b7280',
+                    cursor: 'pointer',
+                    padding: '2px'
+                  }}
+                >
+                  <X size={14} />
+                </button>
                 </div>
               ))}
             </div>
@@ -1534,6 +1656,79 @@ const processFiles = async (files: File[]) => {
           )}
         </div>
       </form>
+
+      {/* Modal de confirmación para eliminar archivo */}
+{fileToDelete && (
+  <div style={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000
+  }}>
+    <div style={{
+      background: '#27293d',
+      border: '2px solid #6262bf',
+      borderRadius: '1rem',
+      padding: '1rem',
+      maxWidth: '550px',
+      width: '90%'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', justifyContent: 'center', flexDirection: 'column' }}>
+        <AlertTriangle size={44} color="#ef4444" />
+        <h3 style={{ margin: 0, color: '#facd01', fontSize: '1.2rem' }}>
+          ¿Eliminar archivo?
+        </h3>
+      </div>
+      
+<p style={{ color: '#cbd5e1', marginBottom: '2rem', fontSize: '0.9rem', textAlign: 'center' }}>
+    ¿Estás seguro de que deseas eliminar <strong>"{fileToDelete.name}"</strong>?
+    <br />
+    Esta acción no se puede deshacer.
+</p>
+      
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+        <button
+          onClick={() => setFileToDelete(null)}
+          style={{
+            padding: '0.5rem 1rem',
+            background: '#27293d',
+            border: '1px solid #3b3f5f',
+            borderRadius: '0.5rem',
+            color: '#9ca3af',
+            cursor: 'pointer',
+            fontSize: '0.875rem'
+          }}
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={() => {
+            removeUploadedFile(fileToDelete.id);
+            setFileToDelete(null);
+          }}
+          style={{
+            padding: '0.5rem 1rem',
+            background: '#ef4444',
+            border: 'none',
+            borderRadius: '0.5rem',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: '500'
+          }}
+        >
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };

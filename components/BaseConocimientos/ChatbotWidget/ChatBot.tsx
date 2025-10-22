@@ -6,6 +6,8 @@ import styles from './ChatbotWidget.module.css';
 import { chatbotService } from '../../../services/chatbotService';
 import chatbotAnimation from '../../../public/Animations/Animation - 1748036348670.json';
 import headerAnimation from '../../../public/Animations/Animation - 1748036609476.json';
+import ReactMarkdown from 'react-markdown';
+
 
 interface Message {
   id: number;
@@ -114,6 +116,7 @@ const ChatbotWidget = () => {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <div className={styles.widgetContainer}>
@@ -149,21 +152,25 @@ const ChatbotWidget = () => {
       ) : (
         <div className={styles.chatWindow}>
           <div className={styles.header}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '40px'}}>
               <Lottie 
                 animationData={headerAnimation}
                 loop={true}
-                style={{ width: 90, height: 90 }}
+                style={{ width: '75px', height: '75px', border: '3px solid', borderRadius: '90px' }}
               />
-              <span>Agente SIA</span>
+              <img src="/knowledge/Agente_SIA.png" style={{ width: '45%' , height: '45%' }} />
             </div>
-            <button onClick={() => setIsOpen(false)}><X size={20} /></button>
+            <button style={{padding: '10px 0 0 0'}}onClick={() => setIsOpen(false)}><X size={20} /> </button>
           </div>
           
-          <div className={styles.messages}>
-            {messages.map(msg => (
-              <div key={msg.id} className={styles[msg.sender]}>
-                <div>{msg.text}</div>
+<div className={styles.messages}>
+  {messages.map(msg => (
+    <div key={msg.id} className={styles[msg.sender]}>
+      {msg.sender === 'bot' ? (
+        <ReactMarkdown>{msg.text}</ReactMarkdown>
+      ) : (
+        <div>{msg.text}</div>
+      )}
                 {msg.temas && msg.temas.length > 0 && (
                   <div className={styles.temasRelacionados}>
                     <small>Temas relacionados:</small>

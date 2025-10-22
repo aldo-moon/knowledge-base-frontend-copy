@@ -86,6 +86,9 @@ if (files.length === 0 && !loading) {
               onDoubleClick={onFileDoubleClick}
               onMenuAction={onFileMenuAction}
               onToggleFavorite={onToggleFileFavorite}
+              isTrashView={isTrashView}           
+              selectedItems={selectedItems}       
+              onItemSelect={onItemSelect}         
             />
           );
         })}

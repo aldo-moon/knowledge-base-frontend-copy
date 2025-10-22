@@ -1,6 +1,6 @@
 // components/BaseConocimientos/Files/FileCard.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreHorizontal, Star, Edit, Trash, CirclePlay, FileText, Film, Music, Archive, Code, Image as ImageIcon  } from 'lucide-react';
+import { MoreHorizontal, Star, Edit, Trash, CirclePlay, RotateCcw, Trash2, FileText, Film, Music, Archive, Code, Image as ImageIcon  } from 'lucide-react';
 import styles from '../../../styles/base-conocimientos.module.css';
 import { archivoService } from '../../../services/archivoService';
 
@@ -27,6 +27,9 @@ interface FileCardProps {
   onMenuAction?: (action: string, file: File) => void;
   isFavorite?: boolean;
   onToggleFavorite?: (fileId: string) => void;
+    isTrashView?: boolean; // ✅ AGREGAR
+  selectedItems?: Set<string>; // ✅ AGREGAR
+  onItemSelect?: (itemId: string) => void; // ✅ AGREGAR
 }
 
 export const FileCard: React.FC<FileCardProps> = ({
@@ -35,7 +38,10 @@ export const FileCard: React.FC<FileCardProps> = ({
   onDoubleClick,
   onMenuAction,
   isFavorite = false,
-  onToggleFavorite
+  onToggleFavorite,
+    isTrashView = false, // ✅ AGREGAR
+  selectedItems, // ✅ AGREGAR
+  onItemSelect // ✅ AGREGAR
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -62,10 +68,15 @@ useEffect(() => {
   loadFileData();
 }, [file._id]);
 
-  const menuOptions: MenuOption[] = [
-    { icon: Edit, label: 'Cambiar nombre', action: 'rename' },
-    { icon: Trash, label: 'Eliminar', action: 'delete' }
-  ];
+const menuOptions: MenuOption[] = isTrashView 
+  ? [
+      { icon: RotateCcw, label: 'Restaurar', action: 'restore' },
+      { icon: Trash2, label: 'Eliminar permanentemente', action: 'delete' }
+    ]
+  : [
+      { icon: Edit, label: 'Cambiar nombre', action: 'rename' },
+      { icon: Trash, label: 'Eliminar', action: 'delete' }
+    ];
 
   const getFileType = (fileName: string, mimeType?: string) => {
   const extension = fileName.split('.').pop()?.toLowerCase() || '';
@@ -168,9 +179,13 @@ case 'video':
     setIsMenuOpen(false);
   };
 
-  const handleCardClick = () => {
-  onSelect(file); 
-  };
+const handleCardClick = () => {
+  if (isTrashView && onItemSelect) {
+    onItemSelect(file._id);
+  } else {
+    onSelect(file);
+  }
+};
 
   const handleCardDoubleClick = () => {
     if (onDoubleClick) {
@@ -180,10 +195,10 @@ case 'video':
 
   return (
     <div
-      className={styles.themeCard}
-      onClick={handleCardClick}
-      onDoubleClick={handleCardDoubleClick}
-    >
+    className={`${styles.themeCard} ${isTrashView && selectedItems?.has(file._id) ? styles.selected : ''}`}
+    onClick={handleCardClick}
+    onDoubleClick={handleCardDoubleClick}
+  >
       <div className={styles.themeContent}>
         <div className={styles.themeIcon1Container}>
   {renderPreview()}
@@ -217,19 +232,21 @@ case 'video':
             )}
           </div>
           
-          <button 
-            className={styles.themeStarButton}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite?.(file._id);
-            }}
-          >
-            <Star 
-              size={16} 
-              fill={isFavorite ? "#fbbf24" : "none"}
-              color={isFavorite ? "#fbbf24" : "#8b8d98"}
-            />
-          </button>
+          {!isTrashView && (
+            <button 
+              className={styles.themeStarButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite?.(file._id);
+              }}
+            >
+              <Star 
+                size={16} 
+                fill={isFavorite ? "#fbbf24" : "none"}
+                color={isFavorite ? "#fbbf24" : "#8b8d98"}
+              />
+            </button>
+          )}
         </div>
       </div>
     </div>

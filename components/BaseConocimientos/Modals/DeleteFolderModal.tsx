@@ -28,7 +28,7 @@ const DeleteFolderModal: React.FC<DeleteFolderModalProps> = ({
             ¿Deseas mover la carpeta "{folderToDelete?.folder_name}" a la papelera?
             </p>
             <p className={styles.deleteMessage1}>
-              Incluye 76 elementos que se eliminarán definitivamente <br/> después de 30 días.
+              Se eliminarán definitivamente <br/> después de 30 días.
           </p>
         </div>
         

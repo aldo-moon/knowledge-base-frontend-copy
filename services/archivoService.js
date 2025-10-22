@@ -273,4 +273,15 @@ export const archivoService = {
   }
 },
 
+  // Obtener archivos de una carpeta
+  getArchivosByFolderId: async (folderId) => {
+    try {
+      const response = await api.get(`/archivos/content/${folderId}`);
+      return response.data.content || [];
+    } catch (error) {
+      console.error("❌ Error obteniendo archivos de carpeta:", error);
+      throw error;
+    }
+  }
+
 };

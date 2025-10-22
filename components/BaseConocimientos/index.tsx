@@ -1625,28 +1625,29 @@ const handleRenameFile = async (newName: string) => {
 };
 
 const handleDeleteFile = async () => {
-  // Verificar que fileToDelete no sea null
   if (!fileToDelete) return;
 
   try {
-    console.log('🗑️ Eliminando archivo:', fileToDelete.file_name);
+    console.log('🗑️ Moviendo archivo a papelera:', fileToDelete.file_name);
     
-    await archivoService.deleteArchivoById(fileToDelete._id);
+    // ✅ CAMBIO: Usar moveToTrash en lugar de deleteArchivoById
+    await papeleraService.moveFileToTrash(fileToDelete._id);
 
-    // ✅ Ahora TypeScript sabe que fileToDelete no es null
     setFiles(files.filter(file => file._id !== fileToDelete._id));
     
     setIsDeleteFileModalOpen(false);
     setFileToDelete(null);
     
-    // Recargar datos si es necesario
     await loadCarpetas();
     await refreshUserData();
     
+    console.log('✅ Archivo movido a papelera');
+    
   } catch (error) {
-    console.error('❌ Error eliminando archivo:', error);
+    console.error('❌ Error moviendo archivo a papelera:', error);
   }
 };
+
 
 const handleCancelRenameFile = () => {
   setIsRenameFileModalOpen(false);
@@ -1890,6 +1891,92 @@ const handleThemeDetailBack = async () => {
     router.replace('/', undefined, { shallow: true });
   }
 };
+
+
+
+
+
+
+
+
+
+
+// Restaurar un elemento individual
+const handleRestoreItem = async (papeleraId: string, type: string) => {
+  try {
+    console.log('♻️ Restaurando:', papeleraId, type);
+    await papeleraService.restoreFromTrash(papeleraId);
+    
+    // Recargar papelera
+    await loadTrashContent();
+    
+    console.log('✅ Elemento restaurado');
+  } catch (error) {
+    console.error('❌ Error al restaurar:', error);
+  }
+};
+
+// Eliminar permanentemente un elemento
+const handlePermanentDelete = async (papeleraId: string, type: string) => {
+  try {
+    console.log('🗑️ Eliminando permanentemente:', papeleraId, type);
+    await papeleraService.permanentDelete(papeleraId);
+    
+    // Recargar papelera
+    await loadTrashContent();
+    
+    console.log('✅ Elemento eliminado permanentemente');
+  } catch (error) {
+    console.error('❌ Error al eliminar permanentemente:', error);
+  }
+};
+
+// Vaciar papelera completa
+const handleEmptyTrash = async () => {
+  try {
+    console.log('🗑️ Vaciando papelera completa');
+    await papeleraService.emptyTrash(CURRENT_USER_ID);
+    
+    // Recargar papelera
+    await loadTrashContent();
+    
+    console.log('✅ Papelera vaciada');
+  } catch (error) {
+    console.error('❌ Error al vaciar papelera:', error);
+  }
+};
+
+// Restaurar múltiples elementos
+const handleRestoreSelected = async (papeleraIds: string[]) => {
+  try {
+    console.log('♻️ Restaurando múltiples:', papeleraIds);
+    await papeleraService.restoreMultiple(papeleraIds);
+    
+    // Recargar papelera
+    await loadTrashContent();
+    
+    console.log('✅ Elementos restaurados');
+  } catch (error) {
+    console.error('❌ Error al restaurar múltiples:', error);
+  }
+};
+
+// Eliminar múltiples elementos permanentemente
+const handleDeleteSelected = async (papeleraIds: string[]) => {
+  try {
+    console.log('🗑️ Eliminando múltiples permanentemente:', papeleraIds);
+    await papeleraService.permanentDeleteMultiple(papeleraIds);
+    
+    // Recargar papelera
+    await loadTrashContent();
+    
+    console.log('✅ Elementos eliminados permanentemente');
+  } catch (error) {
+    console.error('❌ Error al eliminar múltiples:', error);
+  }
+};
+
+
   // ============= RENDER =============
 
   return (
@@ -1981,11 +2068,11 @@ const handleThemeDetailBack = async () => {
               viewingThemeId={currentThemeId}
               onThemeDetailBack={handleThemeDetailBack}
               onThemeDelete={handleThemeDeleteFromDetail}
-              onRestoreItem={() => {}}
-              onPermanentDelete={() => {}}
-              onEmptyTrash={() => {}}
-              onRestoreSelected={() => {}}
-              onDeleteSelected={() => {}}
+              onRestoreItem={handleRestoreItem}
+              onPermanentDelete={handlePermanentDelete}
+              onEmptyTrash={handleEmptyTrash}
+              onRestoreSelected={handleRestoreSelected}
+              onDeleteSelected={handleDeleteSelected}
               trashContent={trashContent}
               trashContentLoading={trashContentLoading}
               trashContentError={trashContentError}
